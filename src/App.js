@@ -1,10 +1,13 @@
 import React, { Component,  PropTypes} from 'react'
 
 import ToriOwnership from '../build/contracts/ToriOwnership.json'
+import ToriAccessoriesOwnership from '../build/contracts/ToriAccessoriesOwnership.json'
 import getWeb3 from './utils/getWeb3'
 
+import MyToriDisplay from './MyToriDisplay.js'
+import Inventory from './Inventory.js'
+import OtherToriDisplay from './OtherToriDisplay.js'
 import Trade from './Trade.js'
-import Display from './Display.js'
 
 import './css/oswald.css'
 import './css/open-sans.css'
@@ -15,6 +18,7 @@ class App extends Component {
 
   static childContextTypes = {
     toriToken: PropTypes.object,
+    accToken: PropTypes.object,
     userAccount: PropTypes.string,
   }
 
@@ -31,6 +35,7 @@ class App extends Component {
   getChildContext() {
     return {
       toriToken: this.state.toriTokenInstance,
+      accToken: this.state.accessoriesTokenInstance,
       userAccount: this.state.userAccount,
     };
   }
@@ -46,7 +51,7 @@ class App extends Component {
       })
 
       // Instantiate contract once web3 provided.
-      this.instantiateContract()
+      this.instantiateContract();
     })
     .catch(() => {
       console.log('Error finding web3.')
@@ -61,17 +66,25 @@ class App extends Component {
      * state management library, but for convenience I've placed them here.
      */
 
-    const contract = require('truffle-contract')
-    const toriToken = contract(ToriOwnership)
-    toriToken.setProvider(this.state.web3.currentProvider)
+    const contract = require('truffle-contract');
+    const toriToken = contract(ToriOwnership);
+    const accToken = contract(ToriAccessoriesOwnership);
+    toriToken.setProvider(this.state.web3.currentProvider);
+    accToken.setProvider(this.state.web3.currentProvider);
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
       this.setState({userAccount: accounts[0]});
 
+      // Tori Token
       toriToken.deployed().then((instance) => {
         this.setState({toriTokenInstance: instance})
-      })
+      });
+
+      // Tori Accessories
+      accToken.deployed().then((instance) => {
+        this.setState({accessoriesTokenInstance: instance})
+      });
     })
   }
 
@@ -81,24 +94,27 @@ class App extends Component {
 
   renderSwitch() {
     switch(this.state.mode) {
+      case 1:
+          return <Inventory />;
+      case 2:
+          return <OtherToriDisplay />;
       case 3:
           return <Trade />;
       default:
-        return <Display/>;
+        return <MyToriDisplay/>;
     }
   }
 
   render() {
-    console.log(this.state.toriTokenInstance);
+    // console.log(this.state.toriTokenInstance);
     let currentDisplay = this.renderSwitch();
     return (
       <div className="App">
         <nav className="navbar pure-menu pure-menu-horizontal">
-            <a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
+            <a href="#" className="pure-menu-heading pure-menu-link">Cribtori</a>
         </nav>
 
         <main className="container">
-          <h1>Criptori</h1>
           <div className="tabs">
             <button onClick={(e) => this.switchDisplay(0, e)} >My Toris</button>
             <button onClick={(e) => this.switchDisplay(1, e)} >Inventories</button>

@@ -26,19 +26,34 @@ contract ToriAccessories {
   event NewAccessories(address indexed _address, uint256 accIdx);
 
 
-  function _generateRandomAccessories(string quiz) private view returns (Accessories) {
+  /* DEV USE */
+  function ToriAccessories() {
+    // Generate some Toris for the owner.
+    uint n = 3;
+    for (uint i = 0; i < n; i++) {
+      Accessories memory newAcc = _generateRandomAccessories("sample", msg.sender);
+      // Push to the book keeping array.
+      uint256 id = accessories.push(newAcc) - 1;
+      accIndexToAddr[id] = msg.sender;
+      addrToAccCount[msg.sender] += 1;
+    }
+  }
+
+
+
+  function _generateRandomAccessories(string _quiz, address _owner) private view returns (Accessories) {
     // TODO: implement a more detailed Accessories generation.
-    uint256 generatedRandomness = uint(keccak256(now, msg.sender, quiz));
+    uint256 generatedRandomness = uint(keccak256(now, _owner, _quiz));
     uint32 variety = uint32(generatedRandomness % VARIETY_LIMIT);
     uint32 rarity = uint32(generatedRandomness % RARITY_LIMIT);
     uint32 space = uint32(generatedRandomness % SPACE_LIMIT);
     return Accessories(variety, rarity, space);
   }
 
-  function generateNewAccessories(string quiz) public returns (bool success) {
+  function generateNewAccessories(string _quiz) public returns (bool success) {
     // Generate three new toris.
     require (addrToAccCount[msg.sender] == 0);
-    Accessories memory newAcc = _generateRandomAccessories(quiz);
+    Accessories memory newAcc = _generateRandomAccessories(_quiz, msg.sender);
     // Push to the book keeping array.
     uint256 id = accessories.push(newAcc) - 1;
     accIndexToAddr[id] = msg.sender;

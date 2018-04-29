@@ -1,8 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 
-import { retrieveToriCount, retrieveToriInfo } from './utils.js'
-
-class Trade extends Component {
+class OtherToriDisplay extends Component {
 
   static contextTypes = {
     toriToken: PropTypes.object,
@@ -18,10 +16,10 @@ class Trade extends Component {
   render() {
     return (
       <div className="Trade">
-        <h4>Trade TBA</h4>
+        <h4>Other Tori Display TBA</h4>
       </div>
     );
   }
 }
 
-export default Trade
+export default OtherToriDisplay

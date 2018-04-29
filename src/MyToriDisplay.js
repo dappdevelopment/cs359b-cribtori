@@ -3,12 +3,15 @@ import React, { Component, PropTypes } from 'react'
 import {
   retrieveToriCount,
   retrieveToriInfo,
-  retrieveToriIndexes
+  retrieveToriIndexes,
+  generateNewTori,
+  generateNewAccessories
 } from './utils.js'
 
-class Display extends Component {
+class MyToriDisplay extends Component {
   static contextTypes = {
     toriToken: PropTypes.object,
+    accToken: PropTypes.object,
     userAccount: PropTypes.string
   }
 
@@ -33,21 +36,18 @@ class Display extends Component {
   }
 
   refreshToriDisplay() {
-    retrieveToriIndexes(this.context.toriToken)
+    retrieveToriIndexes(this.context.toriToken, this.context.userAccount)
     .then(
       (toriIds) => {
         toriIds = toriIds.map((id) => {return id.c[0]})
-        console.log('Tori IDs: ', toriIds);
         this.setState({toriDisplay: []});
 
         toriIds.map(id => {
           retrieveToriInfo(this.context.toriToken, id).then((result) => {
             result = result.map((item) => {return item.c[0]});
-            console.log(result);
             this.setState({
               toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))
             });
-            console.log(this.state.toriDisplay);
           });
         });
       }
@@ -55,24 +55,40 @@ class Display extends Component {
   }
 
   generateInitToris(e) {
-    this.context.toriToken.generateNewTori("test", "test", { from: this.context.userAccount })
-        .then((result) => {
-          console.log(result);
-        })
-        // .on("receipt", refreshToriDisplay)
-        // .then(retrieveToriCount)
-        // .catch(console.error);
+    generateNewTori(this.context.toriToken, "test", "test", this.context.userAccount)
+    .then((result) => {
+      console.log('After generating new tori:', result);
+      // Generate new accessories.
+      generateNewAccessories(this.context.accToken, "test", this.context.userAccount)
+      .then((result) => {
+        console.log('After generating new accessories:', result);
+      })
+    })
+    // .on("receipt", refreshToriDisplay)
+    // .then(retrieveToriCount)
+    // .catch(console.error);
   }
 
   constructToriDisplay(result) {
-    let toriId = result[0]
-    let toriDna = result[1]
+    // (_toriId, tori.dna, tori.proficiency, tori.personality, tori.readyTime)
+    let toriId = result[0];
+    let toriDna = result[1];
+    let toriProficiency = result[2];
+    let toriPersonality = result[3];
+    let toriReadyTime = result[4];
+
     let imgNum = parseInt(toriDna) % 4 + 1;
-    let imgName = 'img/tori' + imgNum + '.png';
+    let imgName = 'mockimg/tori' + imgNum + '.png';
     return (
       <div key={toriId} className="toribox">
         <h3>Tori ID: {toriId} </h3>
         <img src={imgName} />
+        <div className="tori-details">
+          <span><label>DNA:</label> {toriDna} </span>
+          <span><label>Proficiency:</label> {toriProficiency} </span>
+          <span><label>Personality:</label> {toriPersonality} </span>
+          <span><label>Ready Time:</label> {toriReadyTime} </span>
+        </div>
       </div>
     );
   }
@@ -91,4 +107,4 @@ class Display extends Component {
   }
 }
 
-export default Display
+export default MyToriDisplay
