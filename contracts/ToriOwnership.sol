@@ -49,8 +49,8 @@ contract ToriOwnership is ToriToken, ERC721 {
     emit Transfer(_from, _to, _tokenId);
   }
 
-  function transferFrom(address _to, uint256 _tokenId) external payable onlyOwnerOf(_tokenId) {
-    _transfer(msg.sender, _to, _tokenId);
+  function transferFrom(address _from, address _to, uint256 _tokenId) external payable onlyOwnerOf(_tokenId) {
+    _transfer(_from, _to, _tokenId);
   }
 
   function approve(address _to, uint256 _tokenId) external payable onlyOwnerOf(_tokenId) {
