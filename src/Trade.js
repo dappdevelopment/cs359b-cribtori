@@ -1,20 +1,18 @@
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 
 import { retrieveToriCount, retrieveToriInfo } from './utils.js'
 
 class Trade extends Component {
+
+  static contextTypes = {
+    toriToken: PropTypes.object,
+  }
+
   constructor(props) {
     super(props)
 
-    this.state = {
-      web3: this.props.web3,
-      toriFactoryInstance: this.props.toriTokenInstance,
-    }
-
-  }
-
-  componentWillMount() {
-
+    this.state = {};
+    // this.context.toriToken
   }
 
   render() {

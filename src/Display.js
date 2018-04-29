@@ -1,14 +1,21 @@
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 
-import { retrieveToriCount, retrieveToriInfo } from './utils.js'
+import {
+  retrieveToriCount,
+  retrieveToriInfo,
+  retrieveToriIndexes
+} from './utils.js'
 
 class Display extends Component {
+  static contextTypes = {
+    toriToken: PropTypes.object,
+    userAccount: PropTypes.string
+  }
+
   constructor(props) {
     super(props)
 
     this.state = {
-      web3: this.props.web3,
-      toriFactoryInstance: this.props.toriFactoryInstance,
       toriDisplay: [],
     }
 
@@ -16,9 +23,8 @@ class Display extends Component {
   }
 
   componentDidMount() {
-    retrieveToriCount(this.state.toriTokenInstance)
+    retrieveToriCount(this.context.toriToken)
     .then((result) => {
-      console.log('hello');
       this.setState({isNewUser: result.c[0] === 0})
       if (result.c[0] > 0) {
         this.refreshToriDisplay();
@@ -27,17 +33,20 @@ class Display extends Component {
   }
 
   refreshToriDisplay() {
-    this.state.toriTokenInstance.getToriIds.call().then(
+    retrieveToriIndexes(this.context.toriToken)
+    .then(
       (toriIds) => {
         toriIds = toriIds.map((id) => {return id.c[0]})
         console.log('Tori IDs: ', toriIds);
         this.setState({toriDisplay: []});
 
         toriIds.map(id => {
-          retrieveToriInfo(this.state.toriTokenInstance, id).then((result) => {
+          retrieveToriInfo(this.context.toriToken, id).then((result) => {
             result = result.map((item) => {return item.c[0]});
             console.log(result);
-            this.setState({toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))});
+            this.setState({
+              toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))
+            });
             console.log(this.state.toriDisplay);
           });
         });
@@ -46,7 +55,7 @@ class Display extends Component {
   }
 
   generateInitToris(e) {
-    this.state.toriTokenInstance.generateNewTori({ from: this.state.userAccount })
+    this.context.toriToken.generateNewTori("test", "test", { from: this.context.userAccount })
         .then((result) => {
           console.log(result);
         })
@@ -71,12 +80,12 @@ class Display extends Component {
   render() {
     return (
       <div className="tori-display-container">
-         {this.state.isNewUser &&
-           <button id="retrieve" onClick={this.generateInitToris}>Retrieve starter Toris</button>
-         }
-         <div id="tori-display">
-          {this.state.toriDisplay}
-         </div>
+        {this.state.isNewUser &&
+          <button id="retrieve" onClick={this.generateInitToris}>Retrieve starter Toris</button>
+        }
+        <div id="tori-display">
+         {this.state.toriDisplay}
+        </div>
       </div>
     );
   }
