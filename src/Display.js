@@ -16,7 +16,7 @@ class Display extends Component {
   }
 
   componentDidMount() {
-    retrieveToriCount(this.state.toriFactoryInstance)
+    retrieveToriCount(this.state.toriTokenInstance)
     .then((result) => {
       console.log('hello');
       this.setState({isNewUser: result.c[0] === 0})
@@ -27,14 +27,14 @@ class Display extends Component {
   }
 
   refreshToriDisplay() {
-    this.state.toriFactoryInstance.getToriIds.call().then(
+    this.state.toriTokenInstance.getToriIds.call().then(
       (toriIds) => {
         toriIds = toriIds.map((id) => {return id.c[0]})
         console.log('Tori IDs: ', toriIds);
         this.setState({toriDisplay: []});
 
         toriIds.map(id => {
-          retrieveToriInfo(this.state.toriFactoryInstance, id).then((result) => {
+          retrieveToriInfo(this.state.toriTokenInstance, id).then((result) => {
             result = result.map((item) => {return item.c[0]});
             console.log(result);
             this.setState({toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))});
@@ -46,7 +46,7 @@ class Display extends Component {
   }
 
   generateInitToris(e) {
-    this.state.toriFactoryInstance.generateNewTori({ from: this.state.userAccount })
+    this.state.toriTokenInstance.generateNewTori({ from: this.state.userAccount })
         .then((result) => {
           console.log(result);
         })

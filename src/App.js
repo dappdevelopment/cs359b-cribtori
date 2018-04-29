@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import ToriFactory from '../build/contracts/ToriFactory.json'
+import ToriToken from '../build/contracts/ToriToken.json'
 import getWeb3 from './utils/getWeb3'
 
 import Trade from './Trade.js'
@@ -48,15 +48,15 @@ class App extends Component {
      */
 
     const contract = require('truffle-contract')
-    const toriFactory = contract(ToriFactory)
-    toriFactory.setProvider(this.state.web3.currentProvider)
+    const toriToken = contract(ToriToken)
+    toriToken.setProvider(this.state.web3.currentProvider)
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
       this.setState({userAccount: accounts[0]});
 
       toriFactory.deployed().then((instance) => {
-        this.setState({toriFactoryInstance: instance})
+        this.setState({toriTokenInstance: instance})
       })
     })
   }
@@ -74,7 +74,7 @@ class App extends Component {
   }
 
   render() {
-    console.log(this.state.toriFactoryInstance)
+    console.log(this.state.toriTokenInstance)
     return (
       <div className="App">
         <nav className="navbar pure-menu pure-menu-horizontal">
@@ -88,12 +88,12 @@ class App extends Component {
             <button id="play-switch" onClick={this.switchPlay} >Play</button>
             <button id="display-switch" onClick={this.switchDisplay} >Display</button>
           </div>
-          {this.state.toriFactoryInstance && this.state.mode === 'display' &&
-            <Display toriFactoryInstance={this.state.toriFactoryInstance}
+          {this.state.toriTokenInstance && this.state.mode === 'display' &&
+            <Display toriFactoryInstance={this.state.toriTokenInstance}
                      web3={this.state.web3} />
           }
           {this.state.toriFactoryInstance && this.state.mode === 'trade' &&
-            <Trade toriFactoryInstance={this.state.toriFactoryInstance}
+            <Trade toriFactoryInstance={this.state.toriTokenInstance}
                    web3={this.state.web3} />
           }
         </main>

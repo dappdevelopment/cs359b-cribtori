@@ -1,9 +1,8 @@
 pragma solidity ^0.4.21;
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol';
+/* import 'openzeppelin-solidity/contracts/ownership/Ownable.sol'; */
 
-contract ToriAccessories is ERC721, Ownable {
+contract ToriAccessories {
 
   uint256 private VARIETY_DIGIT = 10;
   uint256 private RARITY_DIGIT = 2;
@@ -78,56 +77,5 @@ contract ToriAccessories is ERC721, Ownable {
 
   function getAllAccessoriesCount() public view returns (uint) {
     return accessories.length;
-  }
-
-
-  /*
-  ERC721 compliant functions
-  */
-  mapping (uint => address) accessoriesApprovals;
-
-  modifier onlyOwnerOf(uint256 _tokenId) {
-    require(accIndexToAddr[_tokenId] == msg.sender);
-    _;
-  }
-
-  function name() public view returns (string _name) {
-    return "Tori Accesories";
-  }
-
-  function symbol() public view returns (string _symbol) {
-    return "TORIACC";
-  }
-
-  function balanceOf(address _owner) public view returns (uint256 _balance) {
-    return addrToAccCount[_owner];
-  }
-
-  function ownerOf(uint256 _tokenId) public view returns (address _owner) {
-    return accIndexToAddr[_tokenId];
-  }
-
-  function _transfer(address _from, address _to, uint256 _tokenId) private {
-    // Modify the counts.
-    addrToAccCount[_to] += 1;
-    addrToAccCount[msg.sender] -= 1;
-
-    accIndexToAddr[_tokenId] = _to;
-    emit Transfer(_from, _to, _tokenId);
-  }
-
-  function transfer(address _to, uint256 _tokenId) public onlyOwnerOf(_tokenId) {
-    _transfer(msg.sender, _to, _tokenId);
-  }
-
-  function approve(address _to, uint256 _tokenId) public onlyOwnerOf(_tokenId) {
-    accessoriesApprovals[_tokenId] = _to;
-    emit Approval(msg.sender, _to, _tokenId);
-  }
-
-  function takeOwnership(uint256 _tokenId) public {
-    require(accessoriesApprovals[_tokenId] == msg.sender);
-    address owner = ownerOf(_tokenId);
-    _transfer(owner, msg.sender, _tokenId);
   }
 }

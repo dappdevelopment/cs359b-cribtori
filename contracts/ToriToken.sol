@@ -1,9 +1,8 @@
 pragma solidity ^0.4.21;
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol';
+/* import 'openzeppelin-solidity/contracts/ownership/Ownable.sol'; */
 
-contract ToriToken is ERC721, Ownable {
+contract ToriToken {
 
   uint256 private DNA_DIGIT = 10;
   uint256 private PROFICIENCY_DIGIT = 2;
@@ -83,56 +82,5 @@ contract ToriToken is ERC721, Ownable {
 
   function getAllToriCount() public view returns (uint) {
     return toris.length;
-  }
-
-
-  /*
-  ERC721 compliant functions
-  */
-  mapping (uint => address) toriApprovals;
-
-  modifier onlyOwnerOf(uint256 _tokenId) {
-    require(toriIndexToAddr[_tokenId] == msg.sender);
-    _;
-  }
-
-  function name() public view returns (string _name) {
-    return "Tori Token";
-  }
-
-  function symbol() public view returns (string _symbol) {
-    return "TORI";
-  }
-
-  function balanceOf(address _owner) public view returns (uint256 _balance) {
-    return addrToToriCount[_owner];
-  }
-
-  function ownerOf(uint256 _tokenId) public view returns (address _owner) {
-    return toriIndexToAddr[_tokenId];
-  }
-
-  function _transfer(address _from, address _to, uint256 _tokenId) private {
-    // Modify the counts.
-    addrToToriCount[_to] += 1;
-    addrToToriCount[msg.sender] -= 1;
-
-    toriIndexToAddr[_tokenId] = _to;
-    emit Transfer(_from, _to, _tokenId);
-  }
-
-  function transfer(address _to, uint256 _tokenId) public onlyOwnerOf(_tokenId) {
-    _transfer(msg.sender, _to, _tokenId);
-  }
-
-  function approve(address _to, uint256 _tokenId) public onlyOwnerOf(_tokenId) {
-    toriApprovals[_tokenId] = _to;
-    emit Approval(msg.sender, _to, _tokenId);
-  }
-
-  function takeOwnership(uint256 _tokenId) public {
-    require(toriApprovals[_tokenId] == msg.sender);
-    address owner = ownerOf(_tokenId);
-    _transfer(owner, msg.sender, _tokenId);
   }
 }

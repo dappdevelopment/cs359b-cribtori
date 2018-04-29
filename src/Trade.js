@@ -8,7 +8,7 @@ class Trade extends Component {
 
     this.state = {
       web3: this.props.web3,
-      toriFactoryInstance: this.props.toriFactoryInstance,
+      toriFactoryInstance: this.props.toriTokenInstance,
     }
 
   }
