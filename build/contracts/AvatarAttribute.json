@@ -1,0 +1,97 @@
+{
+  "contractName": "AvatarAttribute",
+  "abi": [],
+  "bytecode": "0x60606040523415600e57600080fd5b603580601b6000396000f3006060604052600080fd00a165627a7a723058205735d7bedb7d0ad1fc61fde1d9588595c392fa2c31fd3f5cc7b1b489cebbaf860029",
+  "deployedBytecode": "0x6060604052600080fd00a165627a7a723058205735d7bedb7d0ad1fc61fde1d9588595c392fa2c31fd3f5cc7b1b489cebbaf860029",
+  "sourceMap": "26:29:0:-;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "26:29:0:-;;;;;",
+  "source": "pragma solidity ^0.4.21;\n\ncontract AvatarAttribute {\n\n}\n",
+  "sourcePath": "/Users/Cindy/Desktop/cs359b/avatar/contracts/AvatarAttribute.sol",
+  "ast": {
+    "absolutePath": "/Users/Cindy/Desktop/cs359b/avatar/contracts/AvatarAttribute.sol",
+    "exportedSymbols": {
+      "AvatarAttribute": [
+        2
+      ]
+    },
+    "id": 3,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".21"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:0"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 2,
+        "linearizedBaseContracts": [
+          2
+        ],
+        "name": "AvatarAttribute",
+        "nodeType": "ContractDefinition",
+        "nodes": [],
+        "scope": 3,
+        "src": "26:29:0"
+      }
+    ],
+    "src": "0:56:0"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/Cindy/Desktop/cs359b/avatar/contracts/AvatarAttribute.sol",
+    "exportedSymbols": {
+      "AvatarAttribute": [
+        2
+      ]
+    },
+    "id": 3,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".21"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:0"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 2,
+        "linearizedBaseContracts": [
+          2
+        ],
+        "name": "AvatarAttribute",
+        "nodeType": "ContractDefinition",
+        "nodes": [],
+        "scope": 3,
+        "src": "26:29:0"
+      }
+    ],
+    "src": "0:56:0"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.21+commit.dfe3193c.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-04-23T06:18:08.012Z"
+}
