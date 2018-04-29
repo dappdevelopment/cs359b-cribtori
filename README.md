@@ -12,4 +12,4 @@ Cribtori is a blockchain-based game where users own and can interact with their 
 
 ## Istallation intructions
 
-(add simple instructions on how to run the code here)
+TBA
