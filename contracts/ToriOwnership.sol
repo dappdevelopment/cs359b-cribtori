@@ -93,7 +93,7 @@ contract ToriOwnership is ToriToken, ERC721 {
     // TODO: emit event here.
   }
 
-  function buyToriForSale(uint256 _tokenId) external payable {
+  function buyForSale(uint256 _tokenId) external payable {
     require((toriSale[_tokenId] > 0) && (msg.value == toriSale[_tokenId]));
     address _from = toriIndexToAddr[_tokenId];
     _transfer(_from, msg.sender, _tokenId);
@@ -105,7 +105,7 @@ contract ToriOwnership is ToriToken, ERC721 {
     // TODO: emit event here.
   }
 
-  function retrieveAllTorisForSale() public view returns (uint[]) {
+  function retrieveAllForSales() public view returns (uint[]) {
     uint[] memory result = new uint[](toriSaleCount);
     uint idx = 0;
     for (uint i = 0; i < toris.length; i++) {

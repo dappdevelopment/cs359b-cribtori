@@ -1,14 +1,17 @@
 import React, { Component, PropTypes } from 'react'
 
 import {
-  retrieveAccCount,
-  retrieveAccInfo,
-  retrieveAccIndexes
+  retrieveTokenCount,
+  retrieveTokenInfo,
+  retrieveTokenIndexes,
+  postTokenForSale,
+  removeTokenForSale
 } from './utils.js'
 
 class Inventory extends Component {
 
   static contextTypes = {
+    web3: PropTypes.object,
     accToken: PropTypes.object,
     userAccount: PropTypes.string
   }
@@ -22,7 +25,7 @@ class Inventory extends Component {
   }
 
   componentDidMount() {
-    retrieveAccCount(this.context.accToken)
+    retrieveTokenCount(this.context.accToken)
     .then((result) => {
       // TODO: what if user sell all of his items?
       this.setState({isNewUser: result.c[0] === 0})
@@ -33,15 +36,14 @@ class Inventory extends Component {
   }
 
   refreshInventoryDisplay() {
-    retrieveAccIndexes(this.context.accToken, this.context.userAccount)
+    retrieveTokenIndexes(this.context.accToken, this.context.userAccount)
     .then(
       (accIds) => {
         accIds = accIds.map((id) => {return id.c[0]})
         this.setState({inventoryDisplay: []});
 
-        accIds.map(id => {
-          retrieveAccInfo(this.context.accToken, id).then((result) => {
-            result = result.map((item) => {return item.c[0]});
+        accIds.forEach(id => {
+          retrieveTokenInfo(this.context.accToken, id).then((result) => {
             this.setState({
               inventoryDisplay: this.state.inventoryDisplay.concat(this.constructInventoryDisplay(result))
             });
@@ -51,23 +53,48 @@ class Inventory extends Component {
     ).catch(console.error);
   }
 
+
+  postAccForSale(accId, e) {
+    console.log('Posting:', accId);
+    postTokenForSale(this.context.accToken, accId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
+    .then((result) => {
+      console.log('After posting:', result);
+    }).catch(console.error);
+  }
+
+  removeAccForSale(accId, e) {
+    console.log('Revoking:', accId);
+    removeTokenForSale(this.context.accToken, accId, this.context.userAccount)
+    .then((result) => {
+      console.log('After revoking:', result);
+    }).catch(console.error);
+  }
+
+
   constructInventoryDisplay(result) {
     // (_accId, acc.variety, acc.rarity, acc.space)
-    let accId = result[0];
-    let accVariety = result[1];
-    let accRarity = result[2];
-    let accSpace = result[3];
+    let accId = result[0].toNumber();
+    let accVariety = result[1].toNumber();
+    let accRarity = result[2].toNumber();
+    let accSpace = result[3].toNumber();
+    let accSalePrice = result[4].toNumber();
 
     // TODO: implement image mapping.
     let imgName = 'mockimg/acc.png';
     return (
       <div key={accId} className="accbox">
         <h3>Accessory ID: {accId} </h3>
-        <img src={imgName} />
+        <img src={imgName} alt={'Accessory'} />
         <div className="acc-details">
           <span><label>Variety:</label> {accVariety} </span>
           <span><label>Rarity:</label> {accRarity} </span>
           <span><label>Space:</label> {accSpace} </span>
+          <span><label>Is For Sale:</label> {accSalePrice > 0 ? 'True' : 'False'} </span>
+          {accSalePrice > 0 ? (
+            <button onClick={(e) => this.removeAccForSale(accId, e)}>Revoke Sale Post</button>
+          ) : (
+            <button onClick={(e) => this.postAccForSale(accId, e)}>Sell Accessory</button>
+          )}
         </div>
       </div>
     );

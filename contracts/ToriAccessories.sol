@@ -23,6 +23,10 @@ contract ToriAccessories {
   mapping (uint256 => address) accIndexToAddr;
   mapping (address => uint256) addrToAccCount;
 
+  // accId to price (in wei)
+  mapping (uint => uint256) accessoriesSale;
+  uint256 accessoriesSaleCount;
+
   event NewAccessories(address indexed _address, uint256 accIdx);
 
 
@@ -37,6 +41,9 @@ contract ToriAccessories {
       accIndexToAddr[id] = msg.sender;
       addrToAccCount[msg.sender] += 1;
     }
+
+    accessoriesSale[0] = 2300000000000000;
+    accessoriesSaleCount += 1;
   }
 
 
@@ -63,7 +70,7 @@ contract ToriAccessories {
     return true;
   }
 
-  function getAccessoriesIndexes(address _owner) public view returns (uint[]) {
+  function getTokenIndexes(address _owner) public view returns (uint[]) {
     uint size = addrToAccCount[_owner];
     uint[] memory result = new uint[](size);
 
@@ -80,17 +87,18 @@ contract ToriAccessories {
     return result;
   }
 
-  function getAccessoriesInfo(uint256 _accId) public view returns
-                    (uint256 accId, uint256 variety, uint256 rarity, uint32 space) {
+  function getTokenInfo(uint256 _accId) public view returns
+                    (uint256 accId, uint256 variety, uint256 rarity,
+                      uint32 space, uint postingPrice) {
     Accessories memory acc = accessories[_accId];
-    return (_accId, acc.variety, acc.rarity, acc.space);
+    return (_accId, acc.variety, acc.rarity, acc.space, accessoriesSale[_accId]);
   }
 
-  function getAccessoriesCount() public view returns (uint256 accCount) {
+  function getTokenCount() public view returns (uint256 accCount) {
     return addrToAccCount[msg.sender];
   }
 
-  function getAllAccessoriesCount() public view returns (uint) {
+  function getAllTokensCount() public view returns (uint) {
     return accessories.length;
   }
 }

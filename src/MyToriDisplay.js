@@ -1,13 +1,13 @@
 import React, { Component, PropTypes } from 'react'
 
 import {
-  retrieveToriCount,
-  retrieveToriInfo,
-  retrieveToriIndexes,
+  retrieveTokenCount,
+  retrieveTokenInfo,
+  retrieveTokenIndexes,
   generateNewTori,
   generateNewAccessories,
-  postToriForSale,
-  removeToriForSale
+  postTokenForSale,
+  removeTokenForSale
 } from './utils.js'
 
 class MyToriDisplay extends Component {
@@ -29,7 +29,7 @@ class MyToriDisplay extends Component {
   }
 
   componentDidMount() {
-    retrieveToriCount(this.context.toriToken)
+    retrieveTokenCount(this.context.toriToken)
     .then((result) => {
       this.setState({isNewUser: result.c[0] === 0})
       if (result.c[0] > 0) {
@@ -39,14 +39,14 @@ class MyToriDisplay extends Component {
   }
 
   refreshToriDisplay() {
-    retrieveToriIndexes(this.context.toriToken, this.context.userAccount)
+    retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
     .then(
       (toriIds) => {
         toriIds = toriIds.map((id) => {return id.c[0]})
         this.setState({toriDisplay: []});
 
-        toriIds.map(id => {
-          retrieveToriInfo(this.context.toriToken, id).then((result) => {
+        toriIds.forEach(id => {
+          retrieveTokenInfo(this.context.toriToken, id).then((result) => {
             this.setState({
               toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))
             });
@@ -74,7 +74,7 @@ class MyToriDisplay extends Component {
 
   postToriForSale(toriId, e) {
     console.log('Posting:', toriId);
-    postToriForSale(this.context.toriToken, toriId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
+    postTokenForSale(this.context.toriToken, toriId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
     .then((result) => {
       console.log('After posting:', result);
     }).catch(console.error);
@@ -82,7 +82,7 @@ class MyToriDisplay extends Component {
 
   removeToriForSale(toriId, e) {
     console.log('Revoking:', toriId);
-    removeToriForSale(this.context.toriToken, toriId, this.context.userAccount)
+    removeTokenForSale(this.context.toriToken, toriId, this.context.userAccount)
     .then((result) => {
       console.log('After revoking:', result);
     }).catch(console.error);
@@ -98,12 +98,12 @@ class MyToriDisplay extends Component {
     let toriReadyTime = result[4].toNumber();
     let toriSalePrice = result[5].toNumber();
 
-    let imgNum = parseInt(toriDna) % 4 + 1;
+    let imgNum = parseInt(toriDna, 10) % 4 + 1;
     let imgName = 'mockimg/tori' + imgNum + '.png';
     return (
       <div key={toriId} className="toribox">
         <h3>Tori ID: {toriId} </h3>
-        <img src={imgName} />
+        <img src={imgName} alt={'Tori'}/>
         <div className="tori-details">
           <span><label>DNA:</label> {toriDna} </span>
           <span><label>Proficiency:</label> {toriProficiency} </span>
