@@ -72,9 +72,49 @@ contract ToriAccessoriesOwnership is ToriAccessories, ERC721 {
     return false;
   }
 
-
   function supportsInterface(bytes4 interfaceID) external view returns (bool) {
     // TODO
     return false;
+  }
+
+
+  // TODO: make this into an interface.
+  // TODO: add functionality for users to change the sale price.
+  function approveForSale(uint256 _tokenId, uint256 _salePrice) external payable onlyOwnerOf(_tokenId) {
+    require((accessoriesSale[_tokenId] == 0) && (_salePrice > 0));
+    accessoriesSale[_tokenId] = _salePrice;
+    accessoriesSaleCount += 1;
+    // TODO: emit event here.
+  }
+
+  function removeForSale(uint256 _tokenId) external payable onlyOwnerOf(_tokenId) {
+    require(accessoriesSale[_tokenId] > 0);
+    delete accessoriesSale[_tokenId];
+    accessoriesSaleCount -= 1;
+    // TODO: emit event here.
+  }
+
+  function buyForSale(uint256 _tokenId) external payable {
+    require((accessoriesSale[_tokenId] > 0) && (msg.value == accessoriesSale[_tokenId]));
+    address _from = accIndexToAddr[_tokenId];
+    _transfer(_from, msg.sender, _tokenId);
+    // Send the ether.
+    _from.transfer(msg.value);
+    // Delete sale entry.
+    delete accessoriesSale[_tokenId];
+    accessoriesSaleCount -= 1;
+    // TODO: emit event here.
+  }
+
+  function retrieveAllForSales() public view returns (uint[]) {
+    uint[] memory result = new uint[](accessoriesSaleCount);
+    uint idx = 0;
+    for (uint i = 0; i < accessories.length; i++) {
+      if (accessoriesSale[i] > 0) {
+        result[idx] = i;
+        idx += 1;
+      }
+    }
+    return result;
   }
 }

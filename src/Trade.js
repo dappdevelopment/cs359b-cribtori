@@ -1,10 +1,10 @@
 import React, { Component, PropTypes } from 'react'
 
 import {
-  retrieveToriCount,
-  retrieveToriInfo,
-  retrieveAllTorisForSale,
-  buyTori
+  retrieveTokenCount,
+  retrieveTokenInfo,
+  retrieveAllTokensForSale,
+  buyTokenForSale
 } from './utils.js'
 
 class Trade extends Component {
@@ -28,12 +28,12 @@ class Trade extends Component {
   }
 
   refreshDisplay() {
-    retrieveAllTorisForSale(this.context.toriToken)
+    retrieveAllTokensForSale(this.context.toriToken)
     .then((toriIds) => {
       this.setState({toriSaleDisplay: []});
 
       toriIds.map(id => {
-        retrieveToriInfo(this.context.toriToken, id).then((result) => {
+        retrieveTokenInfo(this.context.toriToken, id).then((result) => {
           this.setState({
             toriSaleDisplay: this.state.toriSaleDisplay.concat(this.constructToriSaleDisplay(result))
           });
@@ -44,7 +44,7 @@ class Trade extends Component {
 
   buyToriForSale(toriId, e) {
     console.log('Buying:', toriId);
-    buyTori(this.context.toriToken, toriId, this.context.web3.toWei(1), this.context.userAccount)
+    buyTokenForSale(this.context.toriToken, toriId, this.context.web3.toWei(1), this.context.userAccount)
     .then((result) => {
       console.log('After buying:', result);
       this.refreshDisplay();

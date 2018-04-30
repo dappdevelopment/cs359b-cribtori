@@ -75,7 +75,7 @@ contract ToriToken {
     return true;
   }
 
-  function getToriIndexes(address _owner) public view returns (uint[]) {
+  function getTokenIndexes(address _owner) public view returns (uint[]) {
     uint size = addrToToriCount[_owner];
     uint[] memory result = new uint[](size);
 
@@ -92,7 +92,7 @@ contract ToriToken {
     return result;
   }
 
-  function getToriInfo(uint256 _toriId) public view returns
+  function getTokenInfo(uint256 _toriId) public view returns
                     (uint256 toriId, uint256 toriDna, uint32 proficiency,
                       uint32 personality, uint32 readyTime, uint postingPrice) {
     Tori memory tori = toris[_toriId];
@@ -104,11 +104,11 @@ contract ToriToken {
       toriSale[_toriId]);
   }
 
-  function getToriCount() public view returns (uint256 toriCount) {
+  function getTokenCount() public view returns (uint256 toriCount) {
     return addrToToriCount[msg.sender];
   }
 
-  function getAllToriCount() public view returns (uint) {
+  function getAllTokensCount() public view returns (uint) {
     return toris.length;
   }
 }

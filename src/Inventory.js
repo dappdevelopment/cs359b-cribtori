@@ -1,14 +1,15 @@
 import React, { Component, PropTypes } from 'react'
 
 import {
-  retrieveAccCount,
-  retrieveAccInfo,
-  retrieveAccIndexes
+  retrieveTokenCount,
+  retrieveTokenInfo,
+  retrieveTokenIndexes
 } from './utils.js'
 
 class Inventory extends Component {
 
   static contextTypes = {
+    web3: PropTypes.object,
     accToken: PropTypes.object,
     userAccount: PropTypes.string
   }
@@ -22,7 +23,7 @@ class Inventory extends Component {
   }
 
   componentDidMount() {
-    retrieveAccCount(this.context.accToken)
+    retrieveTokenCount(this.context.accToken)
     .then((result) => {
       // TODO: what if user sell all of his items?
       this.setState({isNewUser: result.c[0] === 0})
@@ -33,14 +34,14 @@ class Inventory extends Component {
   }
 
   refreshInventoryDisplay() {
-    retrieveAccIndexes(this.context.accToken, this.context.userAccount)
+    retrieveTokenIndexes(this.context.accToken, this.context.userAccount)
     .then(
       (accIds) => {
         accIds = accIds.map((id) => {return id.c[0]})
         this.setState({inventoryDisplay: []});
 
         accIds.map(id => {
-          retrieveAccInfo(this.context.accToken, id).then((result) => {
+          retrieveTokenInfo(this.context.accToken, id).then((result) => {
             result = result.map((item) => {return item.c[0]});
             this.setState({
               inventoryDisplay: this.state.inventoryDisplay.concat(this.constructInventoryDisplay(result))
