@@ -17,6 +17,7 @@ import './App.css'
 class App extends Component {
 
   static childContextTypes = {
+    web3: PropTypes.object,
     toriToken: PropTypes.object,
     accToken: PropTypes.object,
     userAccount: PropTypes.string,
@@ -34,6 +35,7 @@ class App extends Component {
 
   getChildContext() {
     return {
+      web3: this.state.web3,
       toriToken: this.state.toriTokenInstance,
       accToken: this.state.accessoriesTokenInstance,
       userAccount: this.state.userAccount,

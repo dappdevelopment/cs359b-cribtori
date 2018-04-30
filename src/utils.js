@@ -41,3 +41,21 @@ export function retrieveAccIndexes(contract, addr) {
 export function generateNewAccessories(contract, quiz, addr) {
   return contract.generateNewAccessories(quiz, { from: addr });
 }
+
+
+/* TORI SALE */
+export function postToriForSale(contract, id, price, addr) {
+  return contract.approveForSale(id, price, {from: addr});
+}
+
+export function removeToriForSale(contract, id, addr) {
+  return contract.removeToriForSale(id, {from: addr});
+}
+
+export function buyTori(contract, id, price, addr) {
+  return contract.buyToriForSale(id, {from: addr, value: price});
+}
+
+export function retrieveAllTorisForSale(contract) {
+  return contract.retrieveAllTorisForSale.call();
+}

@@ -24,6 +24,10 @@ contract ToriToken {
   mapping (uint256 => address) toriIndexToAddr;
   mapping (address => uint256) addrToToriCount;
 
+  // toriId to price (in wei)
+  mapping (uint => uint256) toriSale;
+  uint256 toriSaleCount;
+
   event NewTori(address indexed _address, uint256 toriIdx);
 
 
@@ -38,6 +42,9 @@ contract ToriToken {
       toriIndexToAddr[id] = msg.sender;
       addrToToriCount[msg.sender] += 1;
     }
+
+    toriSale[0] = 1000000000000000;
+    toriSaleCount += 1;
   }
 
 
@@ -87,9 +94,14 @@ contract ToriToken {
 
   function getToriInfo(uint256 _toriId) public view returns
                     (uint256 toriId, uint256 toriDna, uint32 proficiency,
-                      uint32 personality, uint32 readyTime) {
+                      uint32 personality, uint32 readyTime, uint postingPrice) {
     Tori memory tori = toris[_toriId];
-    return (_toriId, tori.dna, tori.proficiency, tori.personality, tori.readyTime);
+    return (_toriId,
+      tori.dna,
+      tori.proficiency,
+      tori.personality,
+      tori.readyTime,
+      toriSale[_toriId]);
   }
 
   function getToriCount() public view returns (uint256 toriCount) {
