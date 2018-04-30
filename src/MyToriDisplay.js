@@ -5,11 +5,13 @@ import {
   retrieveToriInfo,
   retrieveToriIndexes,
   generateNewTori,
-  generateNewAccessories
+  generateNewAccessories,
+  postToriForSale
 } from './utils.js'
 
 class MyToriDisplay extends Component {
   static contextTypes = {
+    web3: PropTypes.object,
     toriToken: PropTypes.object,
     accToken: PropTypes.object,
     userAccount: PropTypes.string
@@ -44,7 +46,6 @@ class MyToriDisplay extends Component {
 
         toriIds.map(id => {
           retrieveToriInfo(this.context.toriToken, id).then((result) => {
-            result = result.map((item) => {return item.c[0]});
             this.setState({
               toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))
             });
@@ -71,17 +72,22 @@ class MyToriDisplay extends Component {
 
 
   postToriForSale(toriId, e) {
-    console.log(toriId);
+    console.log('Posting:', toriId);
+    postToriForSale(this.context.toriToken, toriId, this.context.web3.toWei(1), this.context.userAccount)
+    .then((result) => {
+      console.log('After posting:', result);
+    }).catch(console.error);
   }
 
 
   constructToriDisplay(result) {
     // (_toriId, tori.dna, tori.proficiency, tori.personality, tori.readyTime)
-    let toriId = result[0];
-    let toriDna = result[1];
-    let toriProficiency = result[2];
-    let toriPersonality = result[3];
-    let toriReadyTime = result[4];
+    let toriId = result[0].toNumber();
+    let toriDna = result[1].toNumber();
+    let toriProficiency = result[2].toNumber();
+    let toriPersonality = result[3].toNumber();
+    let toriReadyTime = result[4].toNumber();
+    let toriSalePrice = result[5].toNumber();
 
     let imgNum = parseInt(toriDna) % 4 + 1;
     let imgName = 'mockimg/tori' + imgNum + '.png';
@@ -94,6 +100,7 @@ class MyToriDisplay extends Component {
           <span><label>Proficiency:</label> {toriProficiency} </span>
           <span><label>Personality:</label> {toriPersonality} </span>
           <span><label>Ready Time:</label> {toriReadyTime} </span>
+          <span><label>Is For Sale:</label> {toriSalePrice > 0 ? 'True' : 'False'} </span>
           <button onClick={(e) => this.postToriForSale(toriId, e)}>Sell Tori</button>
         </div>
       </div>

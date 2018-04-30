@@ -10,10 +10,6 @@ contract ToriOwnership is ToriToken, ERC721 {
   */
   mapping (uint => address) toriApprovals;
 
-  // toriId to price (in wei)
-  mapping (uint => uint256) toriSale;
-  uint256 toriSaleCount;
-
   modifier onlyOwnerOf(uint256 _tokenId) {
     require(toriIndexToAddr[_tokenId] == msg.sender);
     _;
