@@ -10,6 +10,10 @@ contract ToriOwnership is ToriToken, ERC721 {
   */
   mapping (uint => address) toriApprovals;
 
+  // toriId to price (in wei)
+  mapping (uint => uint256) toriSale;
+  uint256 toriSaleCount;
+
   modifier onlyOwnerOf(uint256 _tokenId) {
     require(toriIndexToAddr[_tokenId] == msg.sender);
     _;
@@ -72,9 +76,48 @@ contract ToriOwnership is ToriToken, ERC721 {
     return false;
   }
 
-
   function supportsInterface(bytes4 interfaceID) external view returns (bool) {
     // TODO
     return false;
+  }
+
+
+  // TODO: add functionality for users to change the sale price.
+  function approveForSale(uint256 _tokenId, uint256 _salePrice) external payable onlyOwnerOf(_tokenId) {
+    require((toriSale[_tokenId] == 0) && (_salePrice > 0));
+    toriSale[_tokenId] = _salePrice;
+    toriSaleCount += 1;
+    // TODO: emit event here.
+  }
+
+  function removeForSale(uint256 _tokenId) external payable onlyOwnerOf(_tokenId) {
+    require(toriSale[_tokenId] > 0);
+    delete toriSale[_tokenId];
+    toriSaleCount -= 1;
+    // TODO: emit event here.
+  }
+
+  function buyToriForSale(uint256 _tokenId) external payable {
+    require((toriSale[_tokenId] > 0) && (msg.value == toriSale[_tokenId]));
+    address _from = toriIndexToAddr[_tokenId];
+    _transfer(_from, msg.sender, _tokenId);
+    // Send the ether.
+    _from.transfer(msg.value);
+    // Delete sale entry.
+    delete toriSale[_tokenId];
+    toriSaleCount -= 1;
+    // TODO: emit event here.
+  }
+
+  function retrieveAllTorisForSale() public view returns (uint[]) {
+    uint[] memory result = new uint[](toriSaleCount);
+    uint idx = 0;
+    for (uint i = 0; i < toris.length; i++) {
+      if (toriSale[i] > 0) {
+        result[idx] = i;
+        idx += 1;
+      }
+    }
+    return result;
   }
 }

@@ -69,6 +69,12 @@ class MyToriDisplay extends Component {
     // .catch(console.error);
   }
 
+
+  postToriForSale(toriId, e) {
+    console.log(toriId);
+  }
+
+
   constructToriDisplay(result) {
     // (_toriId, tori.dna, tori.proficiency, tori.personality, tori.readyTime)
     let toriId = result[0];
@@ -88,6 +94,7 @@ class MyToriDisplay extends Component {
           <span><label>Proficiency:</label> {toriProficiency} </span>
           <span><label>Personality:</label> {toriPersonality} </span>
           <span><label>Ready Time:</label> {toriReadyTime} </span>
+          <button onClick={(e) => this.postToriForSale(toriId, e)}>Sell Tori</button>
         </div>
       </div>
     );
