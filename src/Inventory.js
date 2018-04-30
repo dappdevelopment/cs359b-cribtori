@@ -25,7 +25,7 @@ class Inventory extends Component {
   }
 
   componentDidMount() {
-    retrieveTokenCount(this.context.accToken)
+    retrieveTokenCount(this.context.accToken, this.context.userAccount)
     .then((result) => {
       // TODO: what if user sell all of his items?
       this.setState({isNewUser: result.c[0] === 0})
@@ -43,7 +43,7 @@ class Inventory extends Component {
         this.setState({inventoryDisplay: []});
 
         accIds.forEach(id => {
-          retrieveTokenInfo(this.context.accToken, id).then((result) => {
+          retrieveTokenInfo(this.context.accToken, id, this.context.userAccount).then((result) => {
             this.setState({
               inventoryDisplay: this.state.inventoryDisplay.concat(this.constructInventoryDisplay(result))
             });

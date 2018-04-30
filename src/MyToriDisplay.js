@@ -29,9 +29,10 @@ class MyToriDisplay extends Component {
   }
 
   componentDidMount() {
-    retrieveTokenCount(this.context.toriToken)
+    retrieveTokenCount(this.context.toriToken, this.context.userAccount)
     .then((result) => {
-      this.setState({isNewUser: result.c[0] === 0})
+      console.log(result.toNumber());
+      this.setState({isNewUser: result.toNumber() === 0})
       if (result.c[0] > 0) {
         this.refreshToriDisplay();
       }
@@ -42,11 +43,11 @@ class MyToriDisplay extends Component {
     retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
     .then(
       (toriIds) => {
-        toriIds = toriIds.map((id) => {return id.c[0]})
+        toriIds = toriIds.map((id) => {return id.c[0]});
         this.setState({toriDisplay: []});
 
         toriIds.forEach(id => {
-          retrieveTokenInfo(this.context.toriToken, id).then((result) => {
+          retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
             this.setState({
               toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))
             });
