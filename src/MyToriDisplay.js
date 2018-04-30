@@ -45,7 +45,7 @@ class MyToriDisplay extends Component {
         toriIds = toriIds.map((id) => {return id.c[0]})
         this.setState({toriDisplay: []});
 
-        toriIds.map(id => {
+        toriIds.forEach(id => {
           retrieveTokenInfo(this.context.toriToken, id).then((result) => {
             this.setState({
               toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))
@@ -98,12 +98,12 @@ class MyToriDisplay extends Component {
     let toriReadyTime = result[4].toNumber();
     let toriSalePrice = result[5].toNumber();
 
-    let imgNum = parseInt(toriDna) % 4 + 1;
+    let imgNum = parseInt(toriDna, 10) % 4 + 1;
     let imgName = 'mockimg/tori' + imgNum + '.png';
     return (
       <div key={toriId} className="toribox">
         <h3>Tori ID: {toriId} </h3>
-        <img src={imgName} />
+        <img src={imgName} alt={'Tori'}/>
         <div className="tori-details">
           <span><label>DNA:</label> {toriDna} </span>
           <span><label>Proficiency:</label> {toriProficiency} </span>
