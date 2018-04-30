@@ -12,4 +12,23 @@ Cribtori is a blockchain-based game where users own and can interact with their 
 
 ## Istallation intructions
 
-TBA
+Requirements:
+* node.js
+* truffle
+* ganache
+
+### Installing dependencies
+```
+npm install
+```
+
+### Migrating contracts
+```
+truffle compile 
+truffle migrate --reset
+```
+
+### Running the web app
+```
+npm start
+```
