@@ -31,12 +31,12 @@ class Trade extends Component {
 
   refreshDisplay() {
     // Toris
-    retrieveAllTokensForSale(this.context.toriToken)
+    retrieveAllTokensForSale(this.context.toriToken, this.context.userAccount)
     .then((toriIds) => {
       this.setState({toriSaleDisplay: []});
 
       toriIds.forEach(id => {
-        retrieveTokenInfo(this.context.toriToken, id).then((result) => {
+        retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
           this.setState({
             toriSaleDisplay: this.state.toriSaleDisplay.concat(this.constructToriSaleDisplay(result))
           });
@@ -44,12 +44,12 @@ class Trade extends Component {
       });
     })
     // Accessories
-    retrieveAllTokensForSale(this.context.accToken)
+    retrieveAllTokensForSale(this.context.accToken, this.context.userAccount)
     .then((accIds) => {
       this.setState({accSaleDisplay: []});
 
       accIds.forEach(id => {
-        retrieveTokenInfo(this.context.accToken, id).then((result) => {
+        retrieveTokenInfo(this.context.accToken, id, this.context.userAccount).then((result) => {
           this.setState({
             accSaleDisplay: this.state.accSaleDisplay.concat(this.constructAccSaleDisplay(result))
           });
@@ -89,7 +89,7 @@ class Trade extends Component {
           <span><label>Personality:</label> {toriPersonality} </span>
           <span><label>Ready Time:</label> {toriReadyTime} </span>
           <span><label>Is For Sale:</label> {toriSalePrice} ETH</span>
-          <button onClick={(e) => this.buyToriSale(toriId, 'tori', e)}>Buy Tori</button>
+          <button onClick={(e) => this.buyForSale(toriId, 'tori', e)}>Buy Tori</button>
         </div>
       </div>
     );

@@ -1,17 +1,17 @@
-export function retrieveTokenInfo(contract, id) {
-  return contract.getTokenInfo.call(id);
+export function retrieveTokenInfo(contract, id, addr) {
+  return contract.getTokenInfo.call(id, {from: addr});
 }
 
-export function retrieveTokenCount(contract) {
-  return contract.getTokenCount.call();
+export function retrieveTokenCount(contract, addr) {
+  return contract.getTokenCount.call({from: addr});
 }
 
-export function retrieveAllToriCount(contract) {
-  return contract.getAllTokensCount.call();
+export function retrieveAllToriCount(contract, addr) {
+  return contract.getAllTokensCount.call({from: addr});
 }
 
 export function retrieveTokenIndexes(contract, addr) {
-  return contract.getTokenIndexes.call(addr);
+  return contract.getTokenIndexes.call({from: addr});
 }
 
 
@@ -36,6 +36,6 @@ export function buyTokenForSale(contract, id, price, addr) {
   return contract.buyForSale(id, {from: addr, value: price});
 }
 
-export function retrieveAllTokensForSale(contract) {
-  return contract.retrieveAllForSales.call();
+export function retrieveAllTokensForSale(contract, addr) {
+  return contract.retrieveAllForSales.call({from: addr});
 }
