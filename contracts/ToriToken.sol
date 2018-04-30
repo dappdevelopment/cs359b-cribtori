@@ -43,7 +43,7 @@ contract ToriToken {
       addrToToriCount[msg.sender] += 1;
     }
 
-    toriSale[0] = 10000;
+    toriSale[0] = 1000000000000000;
     toriSaleCount += 1;
   }
 

@@ -6,7 +6,8 @@ import {
   retrieveToriIndexes,
   generateNewTori,
   generateNewAccessories,
-  postToriForSale
+  postToriForSale,
+  removeToriForSale
 } from './utils.js'
 
 class MyToriDisplay extends Component {
@@ -73,9 +74,17 @@ class MyToriDisplay extends Component {
 
   postToriForSale(toriId, e) {
     console.log('Posting:', toriId);
-    postToriForSale(this.context.toriToken, toriId, this.context.web3.toWei(1), this.context.userAccount)
+    postToriForSale(this.context.toriToken, toriId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
     .then((result) => {
       console.log('After posting:', result);
+    }).catch(console.error);
+  }
+
+  removeToriForSale(toriId, e) {
+    console.log('Revoking:', toriId);
+    removeToriForSale(this.context.toriToken, toriId, this.context.userAccount)
+    .then((result) => {
+      console.log('After revoking:', result);
     }).catch(console.error);
   }
 
@@ -101,7 +110,11 @@ class MyToriDisplay extends Component {
           <span><label>Personality:</label> {toriPersonality} </span>
           <span><label>Ready Time:</label> {toriReadyTime} </span>
           <span><label>Is For Sale:</label> {toriSalePrice > 0 ? 'True' : 'False'} </span>
-          <button onClick={(e) => this.postToriForSale(toriId, e)}>Sell Tori</button>
+          {toriSalePrice > 0 ? (
+            <button onClick={(e) => this.removeToriForSale(toriId, e)}>Revoke Sale Post</button>
+          ) : (
+            <button onClick={(e) => this.postToriForSale(toriId, e)}>Sell Tori</button>
+          )}
         </div>
       </div>
     );
