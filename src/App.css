@@ -82,3 +82,11 @@ code {
 .tori-details span, .accbox img {
   display: block;
 }
+
+
+.tori-details-container .toribox {
+  display: block;
+  margin-left: auto;
+  margin-right:auto;
+  width: 50%;
+}

@@ -80,7 +80,7 @@ class Inventory extends Component {
     let accSalePrice = result[4].toNumber();
 
     // TODO: implement image mapping.
-    let imgName = 'mockimg/acc.png';
+    let imgName = 'mockimg/acc-sample.png';
     return (
       <div key={accId} className="accbox">
         <h3>Accessory ID: {accId} </h3>

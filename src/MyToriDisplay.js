@@ -10,6 +10,8 @@ import {
   removeTokenForSale
 } from './utils.js'
 
+import ToriDetails from './ToriDetails.js'
+
 class MyToriDisplay extends Component {
   static contextTypes = {
     web3: PropTypes.object,
@@ -23,6 +25,8 @@ class MyToriDisplay extends Component {
 
     this.state = {
       toriDisplay: [],
+      currentTori: -1,
+      detailIsShown: false,
     }
 
     this.generateInitToris = this.generateInitToris.bind(this);
@@ -33,7 +37,7 @@ class MyToriDisplay extends Component {
     .then((result) => {
       console.log(result.toNumber());
       this.setState({isNewUser: result.toNumber() === 0})
-      if (result.c[0] > 0) {
+      if (result.toNumber() > 0) {
         this.refreshToriDisplay();
       }
     })
@@ -43,7 +47,7 @@ class MyToriDisplay extends Component {
     retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
     .then(
       (toriIds) => {
-        toriIds = toriIds.map((id) => {return id.c[0]});
+        toriIds = toriIds.map((id) => {return id.toNumber()});
         this.setState({toriDisplay: []});
 
         toriIds.forEach(id => {
@@ -54,7 +58,8 @@ class MyToriDisplay extends Component {
           });
         });
       }
-    ).catch(console.error);
+    )
+    .catch(console.error);
   }
 
   generateInitToris(e) {
@@ -90,6 +95,23 @@ class MyToriDisplay extends Component {
   }
 
 
+  openToriDetails(toriId, e) {
+    console.log("Showing details for:", toriId);
+    this.setState({
+      currentTori: toriId,
+      detailIsShown: true,
+    });
+  }
+
+  closeToriDetails() {
+    console.log("Closing details for:", this.state.currentTori);
+    this.setState({
+      currentTori: -1,
+      detailIsShown: false,
+    });
+  }
+
+
   constructToriDisplay(result) {
     // (_toriId, tori.dna, tori.proficiency, tori.personality, tori.readyTime)
     let toriId = result[0].toNumber();
@@ -99,12 +121,12 @@ class MyToriDisplay extends Component {
     let toriReadyTime = result[4].toNumber();
     let toriSalePrice = result[5].toNumber();
 
-    let imgNum = parseInt(toriDna, 10) % 4 + 1;
-    let imgName = 'mockimg/tori' + imgNum + '.png';
+    // let imgNum = parseInt(toriDna, 10) % 4 + 1;
+    let imgName = 'mockimg/tori-sample.png';
     return (
       <div key={toriId} className="toribox">
         <h3>Tori ID: {toriId} </h3>
-        <img src={imgName} alt={'Tori'}/>
+        <img src={imgName} alt={'Tori'} onClick={(e) => this.openToriDetails(toriId, e)}/>
         <div className="tori-details">
           <span><label>DNA:</label> {toriDna} </span>
           <span><label>Proficiency:</label> {toriProficiency} </span>
@@ -124,11 +146,18 @@ class MyToriDisplay extends Component {
   render() {
     return (
       <div className="tori-display-container">
+        { this.state.detailIsShown &&
+          <button className="back-button" onClick={this.closeToriDetails}>Back</button>
+        }
         {this.state.isNewUser &&
           <button id="retrieve" onClick={this.generateInitToris}>Retrieve starter Toris</button>
         }
         <div id="tori-display">
-         {this.state.toriDisplay}
+          {this.state.detailIsShown ? (
+            <ToriDetails toriId={this.state.currentTori} />
+          ) : (
+            this.state.toriDisplay
+          )}
         </div>
       </div>
     );

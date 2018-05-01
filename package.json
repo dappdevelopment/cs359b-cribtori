@@ -52,7 +52,8 @@
     "dotenv": "^2.0.0",
     "material-ui": "^0.20.0",
     "react": "^15.4.2",
-    "react-dom": "^15.4.2"
+    "react-dom": "^15.4.2",
+    "react-game-kit": "^1.0.6"
   },
   "scripts": {
     "start": "node scripts/start.js",
