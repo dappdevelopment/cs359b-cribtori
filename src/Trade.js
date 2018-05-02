@@ -6,6 +6,18 @@ import {
   buyTokenForSale
 } from './utils.js'
 
+import Typography from 'material-ui/Typography';
+import Grid from 'material-ui/Grid';
+import Card, { CardActions, CardContent, CardMedia, CardHeader } from 'material-ui/Card';
+import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import Button from 'material-ui/Button';
+
+
+const cardStyle = {
+  height: 200
+}
+
+
 class Trade extends Component {
 
   static contextTypes = {
@@ -80,21 +92,33 @@ class Trade extends Component {
     let imgNum = parseInt(toriDna, 10) % 4 + 1;
     let imgName = 'mockimg/tori' + imgNum + '.png';
     return (
-      <div key={toriId} className="toribox">
-        <h3>Tori ID: {toriId} </h3>
-        <img src={imgName} alt={'Tori for sale'} />
-        <div className="tori-details">
-          <span><label>DNA:</label> {toriDna} </span>
-          <span><label>Proficiency:</label> {toriProficiency} </span>
-          <span><label>Personality:</label> {toriPersonality} </span>
-          <span><label>Ready Time:</label> {toriReadyTime} </span>
-          <span><label>Is For Sale:</label> {toriSalePrice} ETH</span>
-          <button onClick={(e) => this.buyForSale(toriId, 'tori', e)}>Buy Tori</button>
-        </div>
-      </div>
+      <Grid key={toriId} item sm={4}>
+        <Card className="toribox">
+          <CardHeader title={'Tori ID: ' + toriId} />
+          <CardMedia
+            image={imgName}
+            title={'Tori for sale'}
+            style={cardStyle}
+            />
+          <CardContent>
+            <List className="tori-details">
+              <ListItem><ListItemText primary="DNA:"/><ListItemText primary={toriDna} /></ListItem>
+              <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={toriProficiency} /></ListItem>
+              <ListItem><ListItemText primary="Personality:"/><ListItemText primary={toriPersonality} /></ListItem>
+              <ListItem><ListItemText primary="Ready Time:"/><ListItemText primary={toriReadyTime} /></ListItem>
+              <ListItem><ListItemText primary="Price:"/><ListItemText primary={toriSalePrice + ' ETH'} /></ListItem>
+            </List>
+          </CardContent>
+          <CardActions>
+            <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(toriId, 'tori', e)}>
+              Buy Tori
+            </Button>
+          </CardActions>
+        </Card>
+      </Grid>
     );
   }
-
+  
 
   constructAccSaleDisplay(result) {
     // (_accId, acc.variety, acc.rarity, acc.space)
@@ -107,31 +131,56 @@ class Trade extends Component {
     // TODO: implement image mapping.
     let imgName = 'mockimg/acc.png';
     return (
-      <div key={accId} className="accbox">
-        <h3>Accessory ID: {accId} </h3>
-        <img src={imgName} alt={'Accessory for sale'} />
-        <div className="acc-details">
-          <span><label>Variety:</label> {accVariety} </span>
-          <span><label>Rarity:</label> {accRarity} </span>
-          <span><label>Space:</label> {accSpace} </span>
-          <span><label>Is For Sale:</label> {accSalePrice} ETH</span>
-          <button onClick={(e) => this.buyForSale(accId, 'acc', e)}>Buy Accessory</button>
-        </div>
-      </div>
+      <Grid key={accId} item sm={4}>
+        <Card className="accbox">
+          <CardHeader title={'Accessory ID: ' + accId} />
+          <CardMedia
+            image={imgName}
+            title={'Accessory for sale'}
+            style={cardStyle}
+            />
+          <CardContent>
+            <List className="acc-details">
+              <ListItem><ListItemText primary="Variety:"/><ListItemText primary={accVariety} /></ListItem>
+              <ListItem><ListItemText primary="Rarity:"/><ListItemText primary={accRarity} /></ListItem>
+              <ListItem><ListItemText primary="Space:"/><ListItemText primary={accSpace} /></ListItem>
+              <ListItem><ListItemText primary="Price:"/><ListItemText primary={accSalePrice + ' ETH'} /></ListItem>
+            </List>
+          </CardContent>
+          <CardActions>
+            <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(accId, 'acc', e)}>
+              Buy Accessory
+            </Button>
+          </CardActions>
+        </Card>
+      </Grid>
     );
   }
+
 
   render() {
     return (
       <div className="Trade">
-        <h4>Toris For Sale</h4>
-        <div id="tori-sale-display">
-         {this.state.toriSaleDisplay}
-        </div>
-        <h4>Accessories For Sale</h4>
-        <div id="acc-sale-display">
-         {this.state.accSaleDisplay}
-        </div>
+        <Typography variant="headline" gutterBottom>
+          Toris For Sale
+        </Typography>
+        <Grid container className="tori-sale-display"
+                        spacing={2}
+                        alignItems={'center'}
+                        direction={'row'}
+                        justify={'center'}>
+          {this.state.toriSaleDisplay}
+        </Grid>
+        <Typography variant="headline" gutterBottom>
+          Accessories For Sale
+        </Typography>
+        <Grid container className="acc-sale-display"
+                        spacing={2}
+                        alignItems={'center'}
+                        direction={'row'}
+                        justify={'center'}>
+          {this.state.accSaleDisplay}
+        </Grid>
       </div>
     );
   }

@@ -69,12 +69,6 @@ code {
 
 
 
-.toribox, .accbox {
-  width: 10%;
-  display: inline-block;
-  margin-right: 10px;
-}
-
 .toribox img, .accbox img {
   width: 100%;
 }

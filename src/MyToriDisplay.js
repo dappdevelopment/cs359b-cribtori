@@ -10,7 +10,19 @@ import {
   removeTokenForSale
 } from './utils.js'
 
+import Grid from 'material-ui/Grid';
+import Card, { CardActions, CardContent, CardMedia, CardHeader } from 'material-ui/Card';
+import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import Button from 'material-ui/Button';
+
+
 import ToriDetails from './ToriDetails.js'
+
+
+const cardStyle = {
+  height: 200
+}
+
 
 class MyToriDisplay extends Component {
   static contextTypes = {
@@ -125,22 +137,30 @@ class MyToriDisplay extends Component {
     // let imgNum = parseInt(toriDna, 10) % 4 + 1;
     let imgName = 'mockimg/tori-sample.png';
     return (
-      <div key={toriId} className="toribox">
-        <h3>Tori ID: {toriId} </h3>
-        <img src={imgName} alt={'Tori'} onClick={(e) => this.openToriDetails(toriId, e)}/>
-        <div className="tori-details">
-          <span><label>DNA:</label> {toriDna} </span>
-          <span><label>Proficiency:</label> {toriProficiency} </span>
-          <span><label>Personality:</label> {toriPersonality} </span>
-          <span><label>Ready Time:</label> {toriReadyTime} </span>
-          <span><label>Is For Sale:</label> {toriSalePrice > 0 ? 'True' : 'False'} </span>
-          {toriSalePrice > 0 ? (
-            <button onClick={(e) => this.removeToriForSale(toriId, e)}>Revoke Sale Post</button>
-          ) : (
-            <button onClick={(e) => this.postToriForSale(toriId, e)}>Sell Tori</button>
-          )}
-        </div>
-      </div>
+      <Grid key={toriId} item sm={4}>
+        <Card className="toribox">
+          <CardHeader title={'Tori ID: ' + toriId} />
+          <CardMedia
+            image={imgName}
+            title={'Tori'}
+            style={cardStyle}
+            />
+          <CardContent>
+            <List className="tori-details">
+              <ListItem><ListItemText primary="DNA:"/><ListItemText primary={toriDna} /></ListItem>
+              <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={toriProficiency} /></ListItem>
+              <ListItem><ListItemText primary="Personality:"/><ListItemText primary={toriPersonality} /></ListItem>
+              <ListItem><ListItemText primary="Ready Time:"/><ListItemText primary={toriReadyTime} /></ListItem>
+              <ListItem><ListItemText primary="Is For Sale:"/><ListItemText primary={toriSalePrice > 0 ? 'True' : 'False'} /></ListItem>
+            </List>
+          </CardContent>
+          <CardActions>
+            <Button variant="raised" color="primary" onClick={(e) => this.openToriDetails(toriId, e)}>
+              Visit Tori
+            </Button>
+          </CardActions>
+        </Card>
+      </Grid>
     );
   }
 
@@ -148,16 +168,26 @@ class MyToriDisplay extends Component {
     return (
       <div className="tori-display-container">
         { this.state.detailIsShown &&
-          <button className="back-button" onClick={this.closeToriDetails}>Back</button>
+          <Button variant="raised" color="primary" className="back-button" onClick={this.closeToriDetails}>
+            Back
+          </Button>
         }
         {this.state.isNewUser &&
-          <button id="retrieve" onClick={this.generateInitToris}>Retrieve starter Toris</button>
+          <Button variant="raised" color="primary" className="retrieve-button" onClick={this.generateInitToris}>
+            Retrieve starter Toris
+          </Button>
         }
         <div id="tori-display">
           {this.state.detailIsShown ? (
             <ToriDetails toriId={this.state.currentTori} />
           ) : (
-            this.state.toriDisplay
+            <Grid container className="tori-details-container"
+                            spacing={2}
+                            alignItems={'center'}
+                            direction={'row'}
+                            justify={'center'}>
+              {this.state.toriDisplay}
+            </Grid>
           )}
         </div>
       </div>

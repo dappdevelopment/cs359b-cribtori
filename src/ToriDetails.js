@@ -3,6 +3,7 @@ import React, { Component, PropTypes } from 'react'
 import Paper from 'material-ui/Paper';
 import { MenuItem, MenuList } from 'material-ui/Menu';
 import Grid from 'material-ui/Grid';
+import Divider from 'material-ui/Divider';
 
 import {
   retrieveTokenInfo,
@@ -119,6 +120,7 @@ class ToriDetails extends Component {
               <MenuItem>Clean</MenuItem>
               <MenuItem>Play</MenuItem>
               <MenuItem>Craft</MenuItem>
+              <Divider />
               <MenuItem>Edit Room</MenuItem>
               {this.state.toriSalePrice > 0 ? (
                 <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriId, e)}>Revoke Sale Post</MenuItem>

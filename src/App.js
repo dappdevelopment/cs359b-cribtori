@@ -17,6 +17,25 @@ import './App.css'
 import '../node_modules/react-grid-layout/css/styles.css'
 import '../node_modules/react-resizable/css/styles.css'
 
+import AppBar from 'material-ui/AppBar';
+import Tabs, { Tab } from 'material-ui/Tabs';
+import Typography from 'material-ui/Typography';
+import Toolbar from 'material-ui/Toolbar';
+
+
+function TabContainer(props) {
+  return (
+    <Typography component="div" style={{ padding: 8 * 3 }}>
+      {props.children}
+    </Typography>
+  );
+}
+
+TabContainer.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+
 class App extends Component {
 
   static childContextTypes = {
@@ -32,8 +51,10 @@ class App extends Component {
     this.state = {
       storageValue: 0,
       web3: null,
-      mode: 2//,
+      mode: 0//,
     }
+
+    this.switchDisplay = this.switchDisplay.bind(this);
   }
 
   getChildContext() {
@@ -93,7 +114,7 @@ class App extends Component {
     })
   }
 
-  switchDisplay(mode, e) {
+  switchDisplay(e, mode) {
     this.setState({mode: mode});
   }
 
@@ -115,22 +136,22 @@ class App extends Component {
     let currentDisplay = this.renderSwitch();
     return (
       <div className="App">
-        <nav className="navbar pure-menu pure-menu-horizontal">
-            <a href="#" className="pure-menu-heading pure-menu-link">Cribtori</a>
-        </nav>
-
-        <main className="container">
-          <div className="tabs">
-            <button onClick={(e) => this.switchDisplay(0, e)} >My Toris</button>
-            <button onClick={(e) => this.switchDisplay(1, e)} >Inventories</button>
-            <button onClick={(e) => this.switchDisplay(2, e)} >Other Toris</button>
-            <button onClick={(e) => this.switchDisplay(3, e)} >Yard Sale</button>
-
-          </div>
+        <AppBar position="static">
+          <Toolbar>
+            <Typography variant="title" color="inherit">
+              Cribtori
+            </Typography>
+          </Toolbar>
+          <Tabs value={this.state.mode} onChange={this.switchDisplay}>
+            <Tab label="My Toris" href="#home" />
+            <Tab label="Inventories" />
+            <Tab label="Other Toris" />
+            <Tab label="Yard Sale" />
+          </Tabs>
+        </AppBar>
           {this.state.toriTokenInstance &&
             currentDisplay
           }
-        </main>
       </div>
     );
   }
