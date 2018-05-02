@@ -90,3 +90,18 @@ code {
   margin-right:auto;
   width: 50%;
 }
+
+
+.tori-room .react-grid-layout {
+  background-image: url('../public/img/floor.png');
+  background-size: repeat;
+  background-size: 80px 80px;
+  height: 400px;
+  width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tori-room .tori img {
+  width: 100%;
+}

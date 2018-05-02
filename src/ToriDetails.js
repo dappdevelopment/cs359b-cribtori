@@ -1,10 +1,21 @@
 import React, { Component, PropTypes } from 'react'
 
+import Paper from 'material-ui/Paper';
+import { MenuItem, MenuList } from 'material-ui/Menu';
+import Grid from 'material-ui/Grid';
+
 import {
   retrieveTokenInfo,
   postTokenForSale,
   removeTokenForSale
 } from './utils.js'
+
+import ToriRoom from './ToriRoom.js'
+
+const style = {
+  display: 'inline-block',
+  margin: '16px 32px 16px 0',
+};
 
 class ToriDetails extends Component {
   static contextTypes = {
@@ -17,7 +28,9 @@ class ToriDetails extends Component {
   constructor(props) {
     super(props)
 
-    this.state = {}
+    this.state = {
+      toriId: -1,
+    }
 
   }
 
@@ -25,7 +38,12 @@ class ToriDetails extends Component {
     console.log('Tori Details for ID: ', this.props.toriId);
     retrieveTokenInfo(this.context.toriToken, this.props.toriId, this.context.userAccount).then((result) => {
       this.setState({
-        toriDisplay: this.constructToriDisplay(result)
+        toriId: result[0].toNumber(),
+        toriDna: result[1].toNumber(),
+        toriProficiency: result[2].toNumber(),
+        toriPersonality: result[3].toNumber(),
+        toriReadyTime: result[4].toNumber(),
+        toriSalePrice: result[5].toNumber(),
       });
     });
   }
@@ -81,16 +99,36 @@ class ToriDetails extends Component {
 
   render() {
     return (
-      <div className="tori-details-container">
-        {this.state.toriDisplay}
-        <div className="tori-action-container">
-          <button>Feed</button>
-          <button>Clean</button>
-          <button>Play</button>
-          <button>Craft</button>
-          <button>Sell</button>
-        </div>
-      </div>
+      <Grid container className="tori-details-container"
+                      spacing={8}
+                      alignItems={'center'}
+                      direction={'row'}
+                      justify={'center'}>
+        <Grid item sm={3}>
+          Details
+        </Grid>
+        <Grid item sm={6}>
+          {this.state.toriId != -1 &&
+            <ToriRoom/>
+          }
+        </Grid>
+        <Grid item sm={3}>
+          <Paper style={style}>
+            <MenuList>
+              <MenuItem>Feed</MenuItem>
+              <MenuItem>Clean</MenuItem>
+              <MenuItem>Play</MenuItem>
+              <MenuItem>Craft</MenuItem>
+              <MenuItem>Edit Room</MenuItem>
+              {this.state.toriSalePrice > 0 ? (
+                <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriId, e)}>Revoke Sale Post</MenuItem>
+              ) : (
+                <MenuItem onClick={(e) => this.postToriForSale(this.state.toriId, e)}>Sell Tori</MenuItem>
+              )}
+            </MenuList>
+          </Paper>
+        </Grid>
+      </Grid>
     );
   }
 }

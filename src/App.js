@@ -14,6 +14,9 @@ import './css/open-sans.css'
 import './css/pure-min.css'
 import './App.css'
 
+import '../node_modules/react-grid-layout/css/styles.css'
+import '../node_modules/react-resizable/css/styles.css'
+
 class App extends Component {
 
   static childContextTypes = {
@@ -29,7 +32,7 @@ class App extends Component {
     this.state = {
       storageValue: 0,
       web3: null,
-      mode: 0,
+      mode: 2//,
     }
   }
 

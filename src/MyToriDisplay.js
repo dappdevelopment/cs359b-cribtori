@@ -30,6 +30,7 @@ class MyToriDisplay extends Component {
     }
 
     this.generateInitToris = this.generateInitToris.bind(this);
+    this.closeToriDetails = this.closeToriDetails.bind(this);
   }
 
   componentDidMount() {
