@@ -69,16 +69,33 @@ code {
 
 
 
-.toribox, .accbox {
-  width: 10%;
-  display: inline-block;
-  margin-right: 10px;
-}
-
 .toribox img, .accbox img {
   width: 100%;
 }
 
 .tori-details span, .accbox img {
   display: block;
+}
+
+
+.tori-details-container .toribox {
+  display: block;
+  margin-left: auto;
+  margin-right:auto;
+  width: 50%;
+}
+
+
+.tori-room .react-grid-layout {
+  background-image: url('../public/img/floor.png');
+  background-size: repeat;
+  background-size: 80px 80px;
+  height: 400px;
+  width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tori-room .tori img {
+  width: 100%;
 }

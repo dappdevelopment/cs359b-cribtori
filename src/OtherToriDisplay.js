@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react'
 
+import ToriRoom from './ToriRoom.js'
+
 class OtherToriDisplay extends Component {
 
   static contextTypes = {
@@ -17,6 +19,7 @@ class OtherToriDisplay extends Component {
     return (
       <div className="Trade">
         <h4>Other Tori Display TBA</h4>
+        <ToriRoom/>
       </div>
     );
   }

@@ -10,6 +10,20 @@ import {
   removeTokenForSale
 } from './utils.js'
 
+import Grid from 'material-ui/Grid';
+import Card, { CardActions, CardContent, CardMedia, CardHeader } from 'material-ui/Card';
+import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import Button from 'material-ui/Button';
+
+
+import ToriDetails from './ToriDetails.js'
+
+
+const cardStyle = {
+  height: 200
+}
+
+
 class MyToriDisplay extends Component {
   static contextTypes = {
     web3: PropTypes.object,
@@ -23,9 +37,12 @@ class MyToriDisplay extends Component {
 
     this.state = {
       toriDisplay: [],
+      currentTori: -1,
+      detailIsShown: false,
     }
 
     this.generateInitToris = this.generateInitToris.bind(this);
+    this.closeToriDetails = this.closeToriDetails.bind(this);
   }
 
   componentDidMount() {
@@ -33,7 +50,7 @@ class MyToriDisplay extends Component {
     .then((result) => {
       console.log(result.toNumber());
       this.setState({isNewUser: result.toNumber() === 0})
-      if (result.c[0] > 0) {
+      if (result.toNumber() > 0) {
         this.refreshToriDisplay();
       }
     })
@@ -43,7 +60,7 @@ class MyToriDisplay extends Component {
     retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
     .then(
       (toriIds) => {
-        toriIds = toriIds.map((id) => {return id.c[0]});
+        toriIds = toriIds.map((id) => {return id.toNumber()});
         this.setState({toriDisplay: []});
 
         toriIds.forEach(id => {
@@ -54,7 +71,8 @@ class MyToriDisplay extends Component {
           });
         });
       }
-    ).catch(console.error);
+    )
+    .catch(console.error);
   }
 
   generateInitToris(e) {
@@ -90,6 +108,23 @@ class MyToriDisplay extends Component {
   }
 
 
+  openToriDetails(toriId, e) {
+    console.log("Showing details for:", toriId);
+    this.setState({
+      currentTori: toriId,
+      detailIsShown: true,
+    });
+  }
+
+  closeToriDetails() {
+    console.log("Closing details for:", this.state.currentTori);
+    this.setState({
+      currentTori: -1,
+      detailIsShown: false,
+    });
+  }
+
+
   constructToriDisplay(result) {
     // (_toriId, tori.dna, tori.proficiency, tori.personality, tori.readyTime)
     let toriId = result[0].toNumber();
@@ -99,36 +134,61 @@ class MyToriDisplay extends Component {
     let toriReadyTime = result[4].toNumber();
     let toriSalePrice = result[5].toNumber();
 
-    let imgNum = parseInt(toriDna, 10) % 4 + 1;
-    let imgName = 'mockimg/tori' + imgNum + '.png';
+    // let imgNum = parseInt(toriDna, 10) % 4 + 1;
+    let imgName = 'mockimg/tori-sample.png';
     return (
-      <div key={toriId} className="toribox">
-        <h3>Tori ID: {toriId} </h3>
-        <img src={imgName} alt={'Tori'}/>
-        <div className="tori-details">
-          <span><label>DNA:</label> {toriDna} </span>
-          <span><label>Proficiency:</label> {toriProficiency} </span>
-          <span><label>Personality:</label> {toriPersonality} </span>
-          <span><label>Ready Time:</label> {toriReadyTime} </span>
-          <span><label>Is For Sale:</label> {toriSalePrice > 0 ? 'True' : 'False'} </span>
-          {toriSalePrice > 0 ? (
-            <button onClick={(e) => this.removeToriForSale(toriId, e)}>Revoke Sale Post</button>
-          ) : (
-            <button onClick={(e) => this.postToriForSale(toriId, e)}>Sell Tori</button>
-          )}
-        </div>
-      </div>
+      <Grid key={toriId} item sm={4}>
+        <Card className="toribox">
+          <CardHeader title={'Tori ID: ' + toriId} />
+          <CardMedia
+            image={imgName}
+            title={'Tori'}
+            style={cardStyle}
+            />
+          <CardContent>
+            <List className="tori-details">
+              <ListItem><ListItemText primary="DNA:"/><ListItemText primary={toriDna} /></ListItem>
+              <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={toriProficiency} /></ListItem>
+              <ListItem><ListItemText primary="Personality:"/><ListItemText primary={toriPersonality} /></ListItem>
+              <ListItem><ListItemText primary="Ready Time:"/><ListItemText primary={toriReadyTime} /></ListItem>
+              <ListItem><ListItemText primary="Is For Sale:"/><ListItemText primary={toriSalePrice > 0 ? 'True' : 'False'} /></ListItem>
+            </List>
+          </CardContent>
+          <CardActions>
+            <Button variant="raised" color="primary" onClick={(e) => this.openToriDetails(toriId, e)}>
+              Visit Tori
+            </Button>
+          </CardActions>
+        </Card>
+      </Grid>
     );
   }
 
   render() {
     return (
       <div className="tori-display-container">
+        { this.state.detailIsShown &&
+          <Button variant="raised" color="primary" className="back-button" onClick={this.closeToriDetails}>
+            Back
+          </Button>
+        }
         {this.state.isNewUser &&
-          <button id="retrieve" onClick={this.generateInitToris}>Retrieve starter Toris</button>
+          <Button variant="raised" color="primary" className="retrieve-button" onClick={this.generateInitToris}>
+            Retrieve starter Toris
+          </Button>
         }
         <div id="tori-display">
-         {this.state.toriDisplay}
+          {this.state.detailIsShown ? (
+            <ToriDetails toriId={this.state.currentTori} />
+          ) : (
+            <Grid container className="tori-details-container"
+                            spacing={2}
+                            alignItems={'center'}
+                            direction={'row'}
+                            justify={'center'}>
+              {this.state.toriDisplay}
+            </Grid>
+          )}
         </div>
       </div>
     );

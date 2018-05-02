@@ -11,7 +11,7 @@ export function retrieveAllToriCount(contract, addr) {
 }
 
 export function retrieveTokenIndexes(contract, addr) {
-  return contract.getTokenIndexes.call({from: addr});
+  return contract.getTokenIndexes.call(addr);
 }
 
 

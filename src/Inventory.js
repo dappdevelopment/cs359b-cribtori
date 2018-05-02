@@ -8,6 +8,19 @@ import {
   removeTokenForSale
 } from './utils.js'
 
+
+import Typography from 'material-ui/Typography';
+import Grid from 'material-ui/Grid';
+import Card, { CardActions, CardContent, CardMedia, CardHeader } from 'material-ui/Card';
+import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import Button from 'material-ui/Button';
+
+
+const cardStyle = {
+  height: 200
+}
+
+
 class Inventory extends Component {
 
   static contextTypes = {
@@ -80,23 +93,37 @@ class Inventory extends Component {
     let accSalePrice = result[4].toNumber();
 
     // TODO: implement image mapping.
-    let imgName = 'mockimg/acc.png';
+    let imgName = 'mockimg/acc-sample.png';
     return (
-      <div key={accId} className="accbox">
-        <h3>Accessory ID: {accId} </h3>
-        <img src={imgName} alt={'Accessory'} />
-        <div className="acc-details">
-          <span><label>Variety:</label> {accVariety} </span>
-          <span><label>Rarity:</label> {accRarity} </span>
-          <span><label>Space:</label> {accSpace} </span>
-          <span><label>Is For Sale:</label> {accSalePrice > 0 ? 'True' : 'False'} </span>
-          {accSalePrice > 0 ? (
-            <button onClick={(e) => this.removeAccForSale(accId, e)}>Revoke Sale Post</button>
-          ) : (
-            <button onClick={(e) => this.postAccForSale(accId, e)}>Sell Accessory</button>
-          )}
-        </div>
-      </div>
+      <Grid key={accId} item sm={4}>
+        <Card className="accbox">
+          <CardHeader title={'Accessory ID: ' + accId} />
+          <CardMedia
+            image={imgName}
+            title={'Accessory'}
+            style={cardStyle}
+            />
+          <CardContent>
+            <List className="acc-details">
+              <ListItem><ListItemText primary="Variety:"/><ListItemText primary={accVariety} /></ListItem>
+              <ListItem><ListItemText primary="Rarity:"/><ListItemText primary={accRarity} /></ListItem>
+              <ListItem><ListItemText primary="Space:"/><ListItemText primary={accSpace} /></ListItem>
+              <ListItem><ListItemText primary="Is For Sale:"/><ListItemText primary={accSalePrice > 0 ? 'True' : 'False'} /></ListItem>
+            </List>
+          </CardContent>
+          <CardActions>
+            {accSalePrice > 0 ? (
+              <Button variant="raised" color="primary" onClick={(e) => this.removeAccForSale(accId, e)}>
+                Revoke Sale Post
+              </Button>
+            ) : (
+              <Button variant="raised" color="primary" onClick={(e) => this.postAccForSale(accId, e)}>
+                Sell Accessory
+              </Button>
+            )}
+          </CardActions>
+        </Card>
+      </Grid>
     );
   }
 
@@ -104,11 +131,17 @@ class Inventory extends Component {
     return (
       <div className="inventory-display-container">
         {this.state.isNewUser ? (
-          <span>Generate your first Tori first!</span>
+          <Typography variant="headline" gutterBottom>
+            Generate your first Tori first!
+          </Typography>
         ) : (
-          <div id="inventory-display">
-           {this.state.inventoryDisplay}
-          </div>
+          <Grid container className="inventory-display"
+                          spacing={2}
+                          alignItems={'center'}
+                          direction={'row'}
+                          justify={'center'}>
+            {this.state.inventoryDisplay}
+          </Grid>
         )}
       </div>
     );
