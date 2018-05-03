@@ -1,22 +1,39 @@
 import React, { Component, PropTypes } from 'react'
 
+import { withStyles } from 'material-ui/styles';
 import Paper from 'material-ui/Paper';
 import { MenuItem, MenuList } from 'material-ui/Menu';
 import Grid from 'material-ui/Grid';
 import Divider from 'material-ui/Divider';
+import Button from 'material-ui/Button';
+import List, { ListItem, ListItemText } from 'material-ui/List';
+import Avatar from 'material-ui/Avatar';
 
 import {
   retrieveTokenInfo,
+  retrieveTokenIndexes,
   postTokenForSale,
   removeTokenForSale
 } from './utils.js'
 
 import ToriRoom from './ToriRoom.js'
 
-const style = {
-  display: 'inline-block',
-  margin: '16px 32px 16px 0',
-};
+const styles = theme => ({
+  menuItem: {
+    '&:focus': {
+      backgroundColor: theme.palette.primary.main,
+      '& $primary, & $icon': {
+        color: theme.palette.common.white,
+      },
+    },
+  },
+  paper: {
+    display: 'inline-block',
+    margin: '16px 32px 16px 0',
+  },
+  primary: {},
+  icon: {},
+});
 
 class ToriDetails extends Component {
   static contextTypes = {
@@ -31,8 +48,19 @@ class ToriDetails extends Component {
 
     this.state = {
       toriId: -1,
+      isEditRoom: false,
+      inventoryItems: [],
+      accSelected: {}
     }
 
+    this.switchEdit = this.switchEdit.bind(this);
+    this.saveEdit = this.saveEdit.bind(this);
+    this.onAccessorySelected = this.onAccessorySelected.bind(this);
+
+    this.feedTori = this.feedTori.bind(this);
+    this.cleanTori = this.cleanTori.bind(this);
+    this.playWithTori = this.playWithTori.bind(this);
+    this.craftAccessory = this.craftAccessory.bind(this);
   }
 
   componentDidMount() {
@@ -45,8 +73,27 @@ class ToriDetails extends Component {
         toriPersonality: result[3].toNumber(),
         toriReadyTime: result[4].toNumber(),
         toriSalePrice: result[5].toNumber(),
+
+        actionPaper: this.constructToriActions(),
       });
     });
+    // Get the inventory list as well.
+    retrieveTokenIndexes(this.context.accToken, this.context.userAccount)
+    .then(
+      (accIds) => {
+        accIds = accIds.map((id) => {return id.c[0]})
+        this.setState({inventoryDisplay: []});
+
+        accIds.forEach(id => {
+          retrieveTokenInfo(this.context.accToken, id, this.context.userAccount).then((result) => {
+            this.setState({
+              inventoryItems: this.state.inventoryItems.concat(this.constructInventoryItem(result))
+            });
+          });
+        });
+      }
+    )
+    .catch(console.error);
   }
 
 
@@ -67,36 +114,79 @@ class ToriDetails extends Component {
   }
 
 
-  constructToriDisplay(result) {
-    // (_toriId, tori.dna, tori.proficiency, tori.personality, tori.readyTime)
-    let toriId = result[0].toNumber();
-    let toriDna = result[1].toNumber();
-    let toriProficiency = result[2].toNumber();
-    let toriPersonality = result[3].toNumber();
-    let toriReadyTime = result[4].toNumber();
-    let toriSalePrice = result[5].toNumber();
+  switchEdit() {
+    this.setState({
+      isEditRoom: !this.state.isEditRoom,
+    });
+  }
 
-    // let imgNum = parseInt(toriDna, 10) % 4 + 1;
-    let imgName = 'mockimg/tori-sample.png';
+  saveEdit() {
+    // TODO: save state to database.
+    this.switchEdit();
+  }
+
+  onAccessorySelected(item, e) {
+    this.setState({
+      accSelected: item,
+    });
+  }
+
+  feedTori() {
+    // TODO:
+    console.log('Feeding tori...');
+  }
+
+  cleanTori() {
+    // TODO:
+    console.log('Cleaning tori\'s room...');
+  }
+
+  playWithTori() {
+    // TODO:
+    console.log('Playing with tori...');
+  }
+
+  craftAccessory() {
+    // TODO:
+    console.log('Crafting accessory...');
+  }
+
+
+  constructToriActions() {
     return (
-      <div key={toriId} className="toribox">
-        <h3>Tori ID: {toriId} </h3>
-        <img src={imgName} alt={'Tori'}/>
-        <div className="tori-details">
-          <span><label>DNA:</label> {toriDna} </span>
-          <span><label>Proficiency:</label> {toriProficiency} </span>
-          <span><label>Personality:</label> {toriPersonality} </span>
-          <span><label>Ready Time:</label> {toriReadyTime} </span>
-          <span><label>Is For Sale:</label> {toriSalePrice > 0 ? 'True' : 'False'} </span>
-          {toriSalePrice > 0 ? (
-            <button onClick={(e) => this.removeToriForSale(toriId, e)}>Revoke Sale Post</button>
+      <Paper className={this.props.classes.paper}>
+        <MenuList>
+          <MenuItem onClick={this.feedTori}>Feed</MenuItem>
+          <MenuItem onClick={this.cleanTori}>Clean</MenuItem>
+          <MenuItem onClick={this.playWithTori}>Play</MenuItem>
+          <MenuItem onClick={this.craftAccessory}>Craft</MenuItem>
+          <Divider />
+          <MenuItem onClick={this.switchEdit}>Edit Room</MenuItem>
+          {this.state.toriSalePrice > 0 ? (
+            <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriId, e)}>Revoke Sale Post</MenuItem>
           ) : (
-            <button onClick={(e) => this.postToriForSale(toriId, e)}>Sell Tori</button>
+            <MenuItem onClick={(e) => this.postToriForSale(this.state.toriId, e)}>Sell Tori</MenuItem>
           )}
-        </div>
-      </div>
+        </MenuList>
+      </Paper>
     );
   }
+
+  constructInventoryItem(result) {
+    let accId = result[0].toNumber();
+    let accSpace = result[3].toNumber();
+    // TODO: implement image mapping.
+    let imgName = 'mockimg/acc-sample.png';
+
+    let item = {key: accId, space: accSpace, img: imgName};
+    return (
+      <MenuItem key={accId} className={this.props.classes.menuItem} onClick={(e) => this.onAccessorySelected(item, e)}>
+        <Avatar alt={"Accessory ID: " + accId} src={imgName} />
+        <ListItemText primary={`Space: ${accSpace}`} />
+      </MenuItem>
+    );
+  }
+
 
   render() {
     return (
@@ -106,33 +196,36 @@ class ToriDetails extends Component {
                       direction={'row'}
                       justify={'center'}>
         <Grid item sm={3}>
-          Details
+          {this.state.isEditRoom ? (
+            <List>
+              {this.state.inventoryItems}
+            </List>
+          ) : (
+            "Details"
+          )}
         </Grid>
         <Grid item sm={6}>
           {this.state.toriId != -1 &&
-            <ToriRoom/>
+            <ToriRoom acc={this.state.accSelected}/>
           }
         </Grid>
         <Grid item sm={3}>
-          <Paper style={style}>
-            <MenuList>
-              <MenuItem>Feed</MenuItem>
-              <MenuItem>Clean</MenuItem>
-              <MenuItem>Play</MenuItem>
-              <MenuItem>Craft</MenuItem>
-              <Divider />
-              <MenuItem>Edit Room</MenuItem>
-              {this.state.toriSalePrice > 0 ? (
-                <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriId, e)}>Revoke Sale Post</MenuItem>
-              ) : (
-                <MenuItem onClick={(e) => this.postToriForSale(this.state.toriId, e)}>Sell Tori</MenuItem>
-              )}
-            </MenuList>
-          </Paper>
+          {this.state.isEditRoom ? (
+            <Paper className={this.props.classes.paper}>
+              <Button variant="raised" color="primary" onClick={this.saveEdit}>
+                Save Room
+              </Button>
+              <Button variant="raised" color="secondary" onClick={this.switchEdit}>
+                Cancel Edit
+              </Button>
+            </Paper>
+          ) : (
+            this.state.actionPaper
+          )}
         </Grid>
       </Grid>
     );
   }
 }
 
-export default ToriDetails
+export default withStyles(styles)(ToriDetails)

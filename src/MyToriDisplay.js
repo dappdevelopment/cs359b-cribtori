@@ -182,7 +182,7 @@ class MyToriDisplay extends Component {
             <ToriDetails toriId={this.state.currentTori} />
           ) : (
             <Grid container className="tori-details-container"
-                            spacing={2}
+                            spacing={8}
                             alignItems={'center'}
                             direction={'row'}
                             justify={'center'}>
