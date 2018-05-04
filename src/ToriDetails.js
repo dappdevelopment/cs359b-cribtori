@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 
+import Typography from 'material-ui/Typography';
 import { withStyles } from 'material-ui/styles';
 import Paper from 'material-ui/Paper';
 import { MenuItem, MenuList } from 'material-ui/Menu';
@@ -69,10 +70,11 @@ class ToriDetails extends Component {
       this.setState({
         toriId: result[0].toNumber(),
         toriDna: result[1].toNumber(),
-        toriProficiency: result[2].toNumber(),
-        toriPersonality: result[3].toNumber(),
-        toriReadyTime: result[4].toNumber(),
-        toriSalePrice: result[5].toNumber(),
+        toriName: result[2],
+        toriProficiency: result[3].toNumber(),
+        toriPersonality: result[4].toNumber(),
+        toriReadyTime: result[5].toNumber(),
+        toriSalePrice: result[6].toNumber(),
 
         actionPaper: this.constructToriActions(),
       });
@@ -195,6 +197,11 @@ class ToriDetails extends Component {
                       alignItems={'center'}
                       direction={'row'}
                       justify={'center'}>
+        <Grid item sm={12}>
+          <Typography variant="headline" gutterBottom>
+            {this.state.toriName}
+          </Typography>
+        </Grid>
         <Grid item sm={3}>
           {this.state.isEditRoom ? (
             <List>

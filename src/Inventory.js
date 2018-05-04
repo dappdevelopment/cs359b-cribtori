@@ -85,10 +85,11 @@ class Inventory extends Component {
 
 
   constructInventoryDisplay(result) {
+    console.log(result);
     // (_accId, acc.variety, acc.rarity, acc.space)
     let accId = result[0].toNumber();
     let accVariety = result[1].toNumber();
-    let accRarity = result[2].toNumber();
+    let accMaterial = result[2].toNumber();
     let accSpace = result[3].toNumber();
     let accSalePrice = result[4].toNumber();
 
@@ -106,7 +107,7 @@ class Inventory extends Component {
           <CardContent>
             <List className="acc-details">
               <ListItem><ListItemText primary="Variety:"/><ListItemText primary={accVariety} /></ListItem>
-              <ListItem><ListItemText primary="Rarity:"/><ListItemText primary={accRarity} /></ListItem>
+              <ListItem><ListItemText primary="Material:"/><ListItemText primary={`${accMaterial}`} /></ListItem>
               <ListItem><ListItemText primary="Space:"/><ListItemText primary={accSpace} /></ListItem>
               <ListItem><ListItemText primary="Is For Sale:"/><ListItemText primary={accSalePrice > 0 ? 'True' : 'False'} /></ListItem>
             </List>
@@ -136,7 +137,7 @@ class Inventory extends Component {
           </Typography>
         ) : (
           <Grid container className="inventory-display"
-                          spacing={2}
+                          spacing={8}
                           alignItems={'center'}
                           direction={'row'}
                           justify={'center'}>

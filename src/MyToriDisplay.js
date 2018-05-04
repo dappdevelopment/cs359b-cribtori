@@ -76,11 +76,11 @@ class MyToriDisplay extends Component {
   }
 
   generateInitToris(e) {
-    generateNewTori(this.context.toriToken, "test", "test", this.context.userAccount)
+    generateNewTori(this.context.toriToken, [0, 1, 0, 0], "test", this.context.userAccount)
     .then((result) => {
       console.log('After generating new tori:', result);
       // Generate new accessories.
-      generateNewAccessories(this.context.accToken, "test", this.context.userAccount)
+      generateNewAccessories(this.context.accToken, this.context.userAccount)
       .then((result) => {
         console.log('After generating new accessories:', result);
       })
@@ -129,17 +129,18 @@ class MyToriDisplay extends Component {
     // (_toriId, tori.dna, tori.proficiency, tori.personality, tori.readyTime)
     let toriId = result[0].toNumber();
     let toriDna = result[1].toNumber();
-    let toriProficiency = result[2].toNumber();
-    let toriPersonality = result[3].toNumber();
-    let toriReadyTime = result[4].toNumber();
-    let toriSalePrice = result[5].toNumber();
+    let toriName = result[2];
+    let toriProficiency = result[3].toNumber();
+    let toriPersonality = result[4].toNumber();
+    let toriReadyTime = result[5].toNumber();
+    let toriSalePrice = result[6].toNumber();
 
     // let imgNum = parseInt(toriDna, 10) % 4 + 1;
     let imgName = 'mockimg/tori-sample.png';
     return (
       <Grid key={toriId} item sm={4}>
         <Card className="toribox">
-          <CardHeader title={'Tori ID: ' + toriId} />
+          <CardHeader title={toriName} />
           <CardMedia
             image={imgName}
             title={'Tori'}
