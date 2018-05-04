@@ -1,5 +1,6 @@
-// var ToriAccessories = artifacts.require("ToriAccessories");
-var ToriAccessoriesOwnership = artifacts.require("ToriAccessoriesOwnership");
+var WoodenCabinet = artifacts.require("WoodenCabinet");
+var WoodenDesk = artifacts.require("WoodenDesk");
 module.exports = function(deployer) {
-    deployer.deploy(ToriAccessoriesOwnership);
+    deployer.deploy(WoodenCabinet);
+    deployer.deploy(WoodenDesk);
 };

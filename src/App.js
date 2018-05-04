@@ -1,7 +1,10 @@
 import React, { Component,  PropTypes} from 'react'
 
 import ToriOwnership from '../build/contracts/ToriOwnership.json'
-import ToriAccessoriesOwnership from '../build/contracts/ToriAccessoriesOwnership.json'
+// Accessories contract
+import WoodenDesk from '../build/contracts/WoodenDesk.json'
+import WoodenCabinet from '../build/contracts/WoodenCabinet.json'
+
 import getWeb3 from './utils/getWeb3'
 
 import MyToriDisplay from './MyToriDisplay.js'
@@ -41,7 +44,7 @@ class App extends Component {
   static childContextTypes = {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
-    accToken: PropTypes.object,
+    accContracts: PropTypes.array,
     userAccount: PropTypes.string,
   }
 
@@ -51,7 +54,8 @@ class App extends Component {
     this.state = {
       storageValue: 0,
       web3: null,
-      mode: 0//,
+      mode: 0,
+      accessoriesTokenInstances: [],
     }
 
     this.switchDisplay = this.switchDisplay.bind(this);
@@ -61,7 +65,7 @@ class App extends Component {
     return {
       web3: this.state.web3,
       toriToken: this.state.toriTokenInstance,
-      accToken: this.state.accessoriesTokenInstance,
+      accContracts: this.state.accessoriesTokenInstances,
       userAccount: this.state.userAccount,
     };
   }
@@ -94,9 +98,12 @@ class App extends Component {
 
     const contract = require('truffle-contract');
     const toriToken = contract(ToriOwnership);
-    const accToken = contract(ToriAccessoriesOwnership);
     toriToken.setProvider(this.state.web3.currentProvider);
-    accToken.setProvider(this.state.web3.currentProvider);
+    // Accessories
+    const wd = contract(WoodenDesk);
+    const wc = contract(WoodenCabinet);
+    let accessories = [wd, wc];
+    accessories.forEach((c) => c.setProvider(this.state.web3.currentProvider));
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
@@ -108,8 +115,12 @@ class App extends Component {
       });
 
       // Tori Accessories
-      accToken.deployed().then((instance) => {
-        this.setState({accessoriesTokenInstance: instance})
+      accessories.forEach((c) => {
+        c.deployed().then((instance) => {
+          this.setState({
+            accessoriesTokenInstances: this.state.accessoriesTokenInstances.concat(instance),
+          });
+        });
       });
     })
   }

@@ -1,10 +1,9 @@
 pragma solidity ^0.4.21;
 
 import './ToriToken.sol';
-import './ERC721.sol';
-/* import 'openzeppelin-solidity/contracts/token/ERC721/ERC721.sol'; */
+import 'openzeppelin-solidity/contracts/token/ERC721/ERC721Basic.sol';
 
-contract ToriOwnership is ToriToken, ERC721 {
+contract ToriOwnership is ToriToken, ERC721Basic {
   /*
   ERC721 compliant functions
   */
@@ -23,19 +22,25 @@ contract ToriOwnership is ToriToken, ERC721 {
     return "TORI";
   }
 
-  function balanceOf(address _owner) external view returns (uint256 _balance) {
+  function balanceOf(address _owner) public view returns (uint256 _balance) {
     return addrToToriCount[_owner];
   }
 
-  function ownerOf(uint256 _tokenId) external view returns (address _owner) {
+  function ownerOf(uint256 _tokenId) public view returns (address _owner) {
     return toriIndexToAddr[_tokenId];
   }
 
-  function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes data) external payable {
+  function safeTransferFrom(address _from, address _to, uint256 _tokenId) public {
     // TODO:
   }
 
-  function safeTransferFrom(address _from, address _to, uint256 _tokenId) external payable {
+  function safeTransferFrom(
+    address _from,
+    address _to,
+    uint256 _tokenId,
+    bytes _data
+  )
+    public {
     // TODO:
   }
 
@@ -49,30 +54,30 @@ contract ToriOwnership is ToriToken, ERC721 {
     emit Transfer(_from, _to, _tokenId);
   }
 
-  function transferFrom(address _from, address _to, uint256 _tokenId) external payable onlyOwnerOf(_tokenId) {
+  function transferFrom(address _from, address _to, uint256 _tokenId) public onlyOwnerOf(_tokenId) {
     _transfer(_from, _to, _tokenId);
   }
 
-  function approve(address _to, uint256 _tokenId) external payable onlyOwnerOf(_tokenId) {
+  function approve(address _to, uint256 _tokenId) public onlyOwnerOf(_tokenId) {
     toriApprovals[_tokenId] = _to;
     emit Approval(msg.sender, _to, _tokenId);
   }
 
-  function setApprovalForAll(address _operator, bool _approved) external {
+  function setApprovalForAll(address _operator, bool _approved) public {
     // TODO
   }
 
-  function getApproved(uint256 _tokenId) external view returns (address) {
+  function getApproved(uint256 _tokenId) public view returns (address _operator) {
     // TODO
     return msg.sender;
   }
 
-  function isApprovedForAll(address _owner, address _operator) external view returns (bool) {
+  function isApprovedForAll(address _owner, address _operator) public view returns (bool) {
     // TODO
     return false;
   }
 
-  function supportsInterface(bytes4 interfaceID) external view returns (bool) {
+  function exists(uint256 _tokenId) public view returns (bool _exists) {
     // TODO
     return false;
   }
@@ -116,4 +121,5 @@ contract ToriOwnership is ToriToken, ERC721 {
     }
     return result;
   }
+
 }

@@ -1,34 +1,36 @@
 import React, { Component, PropTypes } from 'react'
 
-import {
-  retrieveTokenCount,
-  retrieveTokenInfo,
-  retrieveTokenIndexes,
-  generateNewTori,
-  generateNewAccessories,
-  postTokenForSale,
-  removeTokenForSale
-} from './utils.js'
+import * as util from './utils.js'
 
+import { withStyles } from 'material-ui/styles';
 import Grid from 'material-ui/Grid';
 import Card, { CardActions, CardContent, CardMedia, CardHeader } from 'material-ui/Card';
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
 
 
 import ToriDetails from './ToriDetails.js'
 
 
-const cardStyle = {
-  height: 200
-}
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    overflow: 'hidden',
+    backgroundColor: theme.palette.background.paper,
+  },
+  cardMedia: {
+    height: 200
+  }
+});
 
 
 class MyToriDisplay extends Component {
   static contextTypes = {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
-    accToken: PropTypes.object,
+    accContracts: PropTypes.array,
     userAccount: PropTypes.string
   }
 
@@ -46,7 +48,7 @@ class MyToriDisplay extends Component {
   }
 
   componentDidMount() {
-    retrieveTokenCount(this.context.toriToken, this.context.userAccount)
+    util.retrieveTokenCount(this.context.toriToken, this.context.userAccount)
     .then((result) => {
       console.log(result.toNumber());
       this.setState({isNewUser: result.toNumber() === 0})
@@ -57,14 +59,14 @@ class MyToriDisplay extends Component {
   }
 
   refreshToriDisplay() {
-    retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
+    util.retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
     .then(
       (toriIds) => {
         toriIds = toriIds.map((id) => {return id.toNumber()});
         this.setState({toriDisplay: []});
 
         toriIds.forEach(id => {
-          retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
+          util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
             this.setState({
               toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))
             });
@@ -76,24 +78,21 @@ class MyToriDisplay extends Component {
   }
 
   generateInitToris(e) {
-    generateNewTori(this.context.toriToken, [0, 1, 0, 0], "test", this.context.userAccount)
+    util.generateNewTori(this.context.toriToken, [0, 1, 0, 0], "test", this.context.userAccount)
     .then((result) => {
       console.log('After generating new tori:', result);
-      // Generate new accessories.
-      generateNewAccessories(this.context.accToken, this.context.userAccount)
-      .then((result) => {
-        console.log('After generating new accessories:', result);
-      })
+      // TODO: Generate new accessories.
+      // util.generateNewAccessories(this.context.accToken, this.context.userAccount)
+      // .then((result) => {
+      //   console.log('After generating new accessories:', result);
+      // })
     })
-    // .on("receipt", refreshToriDisplay)
-    // .then(retrieveToriCount)
-    // .catch(console.error);
   }
 
 
   postToriForSale(toriId, e) {
     console.log('Posting:', toriId);
-    postTokenForSale(this.context.toriToken, toriId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
+    util.postTokenForSale(this.context.toriToken, toriId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
     .then((result) => {
       console.log('After posting:', result);
     }).catch(console.error);
@@ -101,7 +100,7 @@ class MyToriDisplay extends Component {
 
   removeToriForSale(toriId, e) {
     console.log('Revoking:', toriId);
-    removeTokenForSale(this.context.toriToken, toriId, this.context.userAccount)
+    util.removeTokenForSale(this.context.toriToken, toriId, this.context.userAccount)
     .then((result) => {
       console.log('After revoking:', result);
     }).catch(console.error);
@@ -126,37 +125,32 @@ class MyToriDisplay extends Component {
 
 
   constructToriDisplay(result) {
-    // (_toriId, tori.dna, tori.proficiency, tori.personality, tori.readyTime)
-    let toriId = result[0].toNumber();
-    let toriDna = result[1].toNumber();
-    let toriName = result[2];
-    let toriProficiency = result[3].toNumber();
-    let toriPersonality = result[4].toNumber();
-    let toriReadyTime = result[5].toNumber();
-    let toriSalePrice = result[6].toNumber();
+    let info = util.parseToriResult(result);
+    let proficiency = util.getProficiency(info.proficiency);
+    let personality = util.getPersonality(info.personality);
 
     // let imgNum = parseInt(toriDna, 10) % 4 + 1;
     let imgName = 'mockimg/tori-sample.png';
     return (
-      <Grid key={toriId} item sm={4}>
+      <Grid key={info.id} item sm={4}>
         <Card className="toribox">
-          <CardHeader title={toriName} />
+          <CardHeader title={info.name} />
           <CardMedia
             image={imgName}
             title={'Tori'}
-            style={cardStyle}
+            className={this.props.classes.cardMedia}
             />
           <CardContent>
             <List className="tori-details">
-              <ListItem><ListItemText primary="DNA:"/><ListItemText primary={toriDna} /></ListItem>
-              <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={toriProficiency} /></ListItem>
-              <ListItem><ListItemText primary="Personality:"/><ListItemText primary={toriPersonality} /></ListItem>
-              <ListItem><ListItemText primary="Ready Time:"/><ListItemText primary={toriReadyTime} /></ListItem>
-              <ListItem><ListItemText primary="Is For Sale:"/><ListItemText primary={toriSalePrice > 0 ? 'True' : 'False'} /></ListItem>
+              <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={proficiency} /></ListItem>
+              <ListItem><ListItemText primary="Personality:"/><ListItemText primary={personality} /></ListItem>
+              { info.salePrice > 0 && (
+                  <ListItem><ListItemText primary="For Sale"/></ListItem>
+              )}
             </List>
           </CardContent>
           <CardActions>
-            <Button variant="raised" color="primary" onClick={(e) => this.openToriDetails(toriId, e)}>
+            <Button variant="raised" color="primary" onClick={(e) => this.openToriDetails(info.id, e)}>
               Visit Tori
             </Button>
           </CardActions>
@@ -178,12 +172,12 @@ class MyToriDisplay extends Component {
             Retrieve starter Toris
           </Button>
         }
-        <div id="tori-display">
+        <div id="tori-display" className={this.props.classes.root}>
           {this.state.detailIsShown ? (
             <ToriDetails toriId={this.state.currentTori} />
           ) : (
             <Grid container className="tori-details-container"
-                            spacing={8}
+                            spacing={16}
                             alignItems={'center'}
                             direction={'row'}
                             justify={'center'}>
@@ -196,4 +190,4 @@ class MyToriDisplay extends Component {
   }
 }
 
-export default MyToriDisplay
+export default withStyles(styles)(MyToriDisplay)

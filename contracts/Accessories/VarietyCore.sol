@@ -26,7 +26,7 @@ contract VarietyCore {
     variety = varietyRandomness % VARIETY_LIMIT;
 
     material = uint32((variety % MATERIAL_LIMIT) % MATERIAL_TYPES);
-    space = uint32(((variety % SPACE_LIMIT) / MATERIAL_LIMIT) % SPACE_LIMIT);
+    space = uint32(((variety % SPACE_LIMIT) / MATERIAL_LIMIT) % SPACE_TYPES) + 1;
 
     variety = variety / VARIETY_CUTOFF;
   }

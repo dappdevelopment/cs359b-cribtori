@@ -7,15 +7,10 @@ import { MenuItem, MenuList } from 'material-ui/Menu';
 import Grid from 'material-ui/Grid';
 import Divider from 'material-ui/Divider';
 import Button from 'material-ui/Button';
-import List, { ListItem, ListItemText } from 'material-ui/List';
+import List, { ListItemText } from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
 
-import {
-  retrieveTokenInfo,
-  retrieveTokenIndexes,
-  postTokenForSale,
-  removeTokenForSale
-} from './utils.js'
+import * as util from './utils.js'
 
 import ToriRoom from './ToriRoom.js'
 
@@ -40,7 +35,7 @@ class ToriDetails extends Component {
   static contextTypes = {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
-    accToken: PropTypes.object,
+    accContracts: PropTypes.array,
     userAccount: PropTypes.string
   }
 
@@ -65,43 +60,39 @@ class ToriDetails extends Component {
   }
 
   componentDidMount() {
-    console.log('Tori Details for ID: ', this.props.toriId);
-    retrieveTokenInfo(this.context.toriToken, this.props.toriId, this.context.userAccount).then((result) => {
+    util.retrieveTokenInfo(this.context.toriToken, this.props.toriId, this.context.userAccount).then((result) => {
+      let info = util.parseToriResult(result);
       this.setState({
-        toriId: result[0].toNumber(),
-        toriDna: result[1].toNumber(),
-        toriName: result[2],
-        toriProficiency: result[3].toNumber(),
-        toriPersonality: result[4].toNumber(),
-        toriReadyTime: result[5].toNumber(),
-        toriSalePrice: result[6].toNumber(),
-
+        toriId: info.id,
+        name: info.name,
+        proficiency: info.proficiency,
+        personality: info.personality,
+        salePrice: info.salePrice,
         actionPaper: this.constructToriActions(),
       });
     });
     // Get the inventory list as well.
-    retrieveTokenIndexes(this.context.accToken, this.context.userAccount)
-    .then(
-      (accIds) => {
-        accIds = accIds.map((id) => {return id.c[0]})
-        this.setState({inventoryDisplay: []});
-
-        accIds.forEach(id => {
-          retrieveTokenInfo(this.context.accToken, id, this.context.userAccount).then((result) => {
-            this.setState({
-              inventoryItems: this.state.inventoryItems.concat(this.constructInventoryItem(result))
-            });
+    this.context.accContracts.forEach((contract) => {
+      // Get the info.
+      let info;
+      util.retrieveAllTokenInfo(contract)
+      .then((result) => {
+        info = util.parseAccInfo(result);
+        contract.balanceOf(this.context.userAccount)
+        .then((result) => {
+          info.balance = result.toNumber();
+          this.setState({
+            inventoryItems: this.state.inventoryItems.concat(this.constructInventoryItem(info))
           });
-        });
-      }
-    )
-    .catch(console.error);
+        })
+      });
+    });
   }
 
 
   postToriForSale(toriId, e) {
     console.log('Posting:', toriId);
-    postTokenForSale(this.context.toriToken, toriId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
+    util.postTokenForSale(this.context.toriToken, toriId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
     .then((result) => {
       console.log('After posting:', result);
     }).catch(console.error);
@@ -109,7 +100,7 @@ class ToriDetails extends Component {
 
   removeToriForSale(toriId, e) {
     console.log('Revoking:', toriId);
-    removeTokenForSale(this.context.toriToken, toriId, this.context.userAccount)
+    util.removeTokenForSale(this.context.toriToken, toriId, this.context.userAccount)
     .then((result) => {
       console.log('After revoking:', result);
     }).catch(console.error);
@@ -164,7 +155,7 @@ class ToriDetails extends Component {
           <MenuItem onClick={this.craftAccessory}>Craft</MenuItem>
           <Divider />
           <MenuItem onClick={this.switchEdit}>Edit Room</MenuItem>
-          {this.state.toriSalePrice > 0 ? (
+          {this.state.salePrice > 0 ? (
             <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriId, e)}>Revoke Sale Post</MenuItem>
           ) : (
             <MenuItem onClick={(e) => this.postToriForSale(this.state.toriId, e)}>Sell Tori</MenuItem>
@@ -174,17 +165,18 @@ class ToriDetails extends Component {
     );
   }
 
-  constructInventoryItem(result) {
-    let accId = result[0].toNumber();
-    let accSpace = result[3].toNumber();
+  constructInventoryItem(info) {
     // TODO: implement image mapping.
     let imgName = 'mockimg/acc-sample.png';
 
-    let item = {key: accId, space: accSpace, img: imgName};
+    let item = {key: info.symbol, space: info.space, img: imgName};
     return (
-      <MenuItem key={accId} className={this.props.classes.menuItem} onClick={(e) => this.onAccessorySelected(item, e)}>
-        <Avatar alt={"Accessory ID: " + accId} src={imgName} />
-        <ListItemText primary={`Space: ${accSpace}`} />
+      <MenuItem key={info.symbol} className={this.props.classes.menuItem} onClick={(e) => this.onAccessorySelected(item, e)}>
+        <Avatar alt={info.name} src={imgName} />
+        <Typography variant="caption" gutterBottom>
+          {`x ${info.balance}`}
+        </Typography>
+        <ListItemText primary={`Space: ${info.space}`} />
       </MenuItem>
     );
   }
@@ -199,7 +191,7 @@ class ToriDetails extends Component {
                       justify={'center'}>
         <Grid item sm={12}>
           <Typography variant="headline" gutterBottom>
-            {this.state.toriName}
+            {this.state.name}
           </Typography>
         </Grid>
         <Grid item sm={3}>
@@ -212,7 +204,7 @@ class ToriDetails extends Component {
           )}
         </Grid>
         <Grid item sm={6}>
-          {this.state.toriId != -1 &&
+          {this.state.toriId !== -1 &&
             <ToriRoom acc={this.state.accSelected}/>
           }
         </Grid>

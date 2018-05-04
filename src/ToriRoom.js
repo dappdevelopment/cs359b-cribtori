@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 
 import { withStyles } from 'material-ui/styles';
 import GridList, { GridListTile } from 'material-ui/GridList';
@@ -57,6 +57,7 @@ class ToriRoom extends Component {
           img: 'mockimg/tori-sample.png',
           col: 2,
           row: 2,
+          space: 1,
       },
     ];
 
@@ -75,9 +76,9 @@ class ToriRoom extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps != this.props) {
+    if (prevProps !== this.props) {
       // TODO: check if empty.
-      if (this.props.acc.key != undefined) {
+      if (this.props.acc.key !== undefined) {
         this.onItemSelected();
       }
     }
@@ -117,14 +118,20 @@ class ToriRoom extends Component {
       let y = content.row;
       let img = content.img;
       let key = content.key;
+      let space = content.space;
 
       let c = (
-        <GridListTile key={key} className={this.props.classes.gridTile} cols={1}>
+        <GridListTile key={`${key}_${x}_${y}`} className={this.props.classes.gridTile} cols={space}>
           <img src={img} alt={key} />
         </GridListTile>
       );
 
       cells[y*LIM + x] = c;
+
+      // TODO: how about orientation?
+      if (space > 1) {
+        cells.splice(y*LIM + x + 1, 1);
+      }
     });
 
     return cells;
@@ -151,6 +158,7 @@ class ToriRoom extends Component {
       img: img,
       col: x,
       row: y,
+      space: space,
     };
 
     let layoutIndicator = this.state.layoutIndicator;

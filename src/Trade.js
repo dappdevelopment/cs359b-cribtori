@@ -1,15 +1,11 @@
 import React, { Component, PropTypes } from 'react'
 
-import {
-  retrieveTokenInfo,
-  retrieveAllTokensForSale,
-  buyTokenForSale
-} from './utils.js'
+import * as util from './utils.js'
 
 import Typography from 'material-ui/Typography';
 import Grid from 'material-ui/Grid';
 import Card, { CardActions, CardContent, CardMedia, CardHeader } from 'material-ui/Card';
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
 
 
@@ -43,12 +39,12 @@ class Trade extends Component {
 
   refreshDisplay() {
     // Toris
-    retrieveAllTokensForSale(this.context.toriToken, this.context.userAccount)
+    util.retrieveAllTokensForSale(this.context.toriToken, this.context.userAccount)
     .then((toriIds) => {
       this.setState({toriSaleDisplay: []});
 
       toriIds.forEach(id => {
-        retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
+        util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
           this.setState({
             toriSaleDisplay: this.state.toriSaleDisplay.concat(this.constructToriSaleDisplay(result))
           });
@@ -56,12 +52,12 @@ class Trade extends Component {
       });
     })
     // Accessories
-    retrieveAllTokensForSale(this.context.accToken, this.context.userAccount)
+    util.retrieveAllTokensForSale(this.context.accToken, this.context.userAccount)
     .then((accIds) => {
       this.setState({accSaleDisplay: []});
 
       accIds.forEach(id => {
-        retrieveTokenInfo(this.context.accToken, id, this.context.userAccount).then((result) => {
+        util.retrieveTokenInfo(this.context.accToken, id, this.context.userAccount).then((result) => {
           this.setState({
             accSaleDisplay: this.state.accSaleDisplay.concat(this.constructAccSaleDisplay(result))
           });
@@ -72,29 +68,23 @@ class Trade extends Component {
 
   buyForSale(tokenId, mode, e) {
     let contract = (mode === 'acc') ? this.context.accToken : this.context.toriToken;
-    console.log('Buying:', tokenId, ' with mode: ', mode);
-    buyTokenForSale(contract, tokenId, this.context.web3.toWei(1), this.context.userAccount)
+    util.buyTokenForSale(contract, tokenId, this.context.web3.toWei(1), this.context.userAccount)
     .then((result) => {
-      console.log('After buying:', result);
       this.refreshDisplay();
     }).catch(console.error);
   }
 
   constructToriSaleDisplay(result) {
-    // (_toriId, tori.dna, tori.proficiency, tori.personality, tori.readyTime)
-    let toriId = result[0].toNumber();
-    let toriDna = result[1].toNumber();
-    let toriProficiency = result[2].toNumber();
-    let toriPersonality = result[3].toNumber();
-    let toriReadyTime = result[4].toNumber();
-    let toriSalePrice = this.context.web3.fromWei(result[5].toNumber(), 'ether');
+    let info = util.parseToriResult(result);
+    let proficiency = util.getProficiency(info.proficiency);
+    let personality = util.getPersonality(info.personality);
 
-    let imgNum = parseInt(toriDna, 10) % 4 + 1;
-    let imgName = 'mockimg/tori' + imgNum + '.png';
+    let imgName = 'mockimg/tori-sample.png';
+
     return (
-      <Grid key={toriId} item sm={4}>
+      <Grid key={info.id} item sm={4}>
         <Card className="toribox">
-          <CardHeader title={'Tori ID: ' + toriId} />
+          <CardHeader title={info.name} />
           <CardMedia
             image={imgName}
             title={'Tori for sale'}
@@ -102,15 +92,13 @@ class Trade extends Component {
             />
           <CardContent>
             <List className="tori-details">
-              <ListItem><ListItemText primary="DNA:"/><ListItemText primary={toriDna} /></ListItem>
-              <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={toriProficiency} /></ListItem>
-              <ListItem><ListItemText primary="Personality:"/><ListItemText primary={toriPersonality} /></ListItem>
-              <ListItem><ListItemText primary="Ready Time:"/><ListItemText primary={toriReadyTime} /></ListItem>
-              <ListItem><ListItemText primary="Price:"/><ListItemText primary={toriSalePrice + ' ETH'} /></ListItem>
+              <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={proficiency} /></ListItem>
+              <ListItem><ListItemText primary="Personality:"/><ListItemText primary={personality} /></ListItem>
+              <ListItem><ListItemText primary="Price:"/><ListItemText primary={info.salePrice + ' ETH'} /></ListItem>
             </List>
           </CardContent>
           <CardActions>
-            <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(toriId, 'tori', e)}>
+            <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(info.id, 'tori', e)}>
               Buy Tori
             </Button>
           </CardActions>
@@ -118,22 +106,17 @@ class Trade extends Component {
       </Grid>
     );
   }
-  
+
 
   constructAccSaleDisplay(result) {
-    // (_accId, acc.variety, acc.rarity, acc.space)
-    let accId = result[0].toNumber();
-    let accVariety = result[1].toNumber();
-    let accRarity = result[2].toNumber();
-    let accSpace = result[3].toNumber();
-    let accSalePrice = this.context.web3.fromWei(result[4].toNumber(), 'ether');
+    let info = util.parseAccessoryResult(result);
 
     // TODO: implement image mapping.
-    let imgName = 'mockimg/acc.png';
+    let imgName = 'mockimg/acc-sample.png';
     return (
-      <Grid key={accId} item sm={4}>
+      <Grid key={info.id} item sm={4}>
         <Card className="accbox">
-          <CardHeader title={'Accessory ID: ' + accId} />
+          <CardHeader title={'Accessory ID: ' + info.id} />
           <CardMedia
             image={imgName}
             title={'Accessory for sale'}
@@ -141,14 +124,14 @@ class Trade extends Component {
             />
           <CardContent>
             <List className="acc-details">
-              <ListItem><ListItemText primary="Variety:"/><ListItemText primary={accVariety} /></ListItem>
-              <ListItem><ListItemText primary="Rarity:"/><ListItemText primary={accRarity} /></ListItem>
-              <ListItem><ListItemText primary="Space:"/><ListItemText primary={accSpace} /></ListItem>
-              <ListItem><ListItemText primary="Price:"/><ListItemText primary={accSalePrice + ' ETH'} /></ListItem>
+              <ListItem><ListItemText primary="Variety:"/><ListItemText primary={info.variety} /></ListItem>
+              <ListItem><ListItemText primary="Material:"/><ListItemText primary={`${info.materiall}`} /></ListItem>
+              <ListItem><ListItemText primary="Space:"/><ListItemText primary={info.space} /></ListItem>
+              <ListItem><ListItemText primary="Price:"/><ListItemText primary={info.salePrice + ' ETH'} /></ListItem>
             </List>
           </CardContent>
           <CardActions>
-            <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(accId, 'acc', e)}>
+            <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(info.id, 'acc', e)}>
               Buy Accessory
             </Button>
           </CardActions>
@@ -165,7 +148,7 @@ class Trade extends Component {
           Toris For Sale
         </Typography>
         <Grid container className="tori-sale-display"
-                        spacing={2}
+                        spacing={8}
                         alignItems={'center'}
                         direction={'row'}
                         justify={'center'}>
@@ -175,7 +158,7 @@ class Trade extends Component {
           Accessories For Sale
         </Typography>
         <Grid container className="acc-sale-display"
-                        spacing={2}
+                        spacing={8}
                         alignItems={'center'}
                         direction={'row'}
                         justify={'center'}>
