@@ -1,8 +1,8 @@
 pragma solidity ^0.4.21;
 
-import './ToriAccessories.sol';
+import './AccessoriesToken.sol';
 
-contract WoodenCabinet is ToriAccessories {
+contract WoodenCabinet is AccessoriesToken {
 
   function WoodenCabinet() {
     name = "Wooden Cabinet";

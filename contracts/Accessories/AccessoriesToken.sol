@@ -1,35 +1,100 @@
 pragma solidity ^0.4.21;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import 'openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol';
+import 'openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 
-contract AccessoriesToken is ERC20Basic {
-  using SafeMath for uint256;
+contract AccessoriesToken is StandardToken {
+  string public name;
+  uint8 public decimals;
+  string public symbol;
 
-  uint256 totalSupply_;
-  mapping(address => uint256) balances;
+  uint256 public unitsOneEthCanBuy;
+  uint256 public totalEthInWei;
+  address public fundsWallet;
 
-  function totalSupply() public view returns (uint256) {
-    return totalSupply_;
+  string public variety;
+  string public material;
+  uint32 public space;
+
+  function() payable{
+    totalEthInWei = totalEthInWei + msg.value;
+    uint256 amount = msg.value * unitsOneEthCanBuy;
+    require(balances[fundsWallet] >= amount);
+
+    balances[fundsWallet] = balances[fundsWallet] - amount;
+    balances[msg.sender] = balances[msg.sender] + amount;
+
+    emit Transfer(fundsWallet, msg.sender, amount);
+
+    //Transfer ether to fundsWallet
+    fundsWallet.transfer(msg.value);
   }
 
-  function balanceOf(address _owner) public view returns (uint256) {
-    return balances[_owner];
+  function retrieveAllInfo() public view returns(
+    string _name,
+    string _symbol,
+    string _variety,
+    string _material,
+    uint32 _space) {
+    _name = name;
+    _symbol = symbol;
+    _variety = variety;
+    _material = material;
+    _space = space;
   }
 
-  function transfer(address _to, uint256 _value) public returns (bool) {
-    if (balances[_to] >= _value) {
-      _transfer(msg.sender, _to, _value);
-      return true;
+
+  mapping (address => uint256) pricePerToken;
+  mapping (address => uint256) addrToIndexes;
+  address[] allowanceOwner;
+  uint256 allowedSale;
+
+  function approveForSale(uint256 _value, uint256 _pricePerToken) public returns (bool) {
+    require((balances[msg.sender] >= _value) && (_pricePerToken > 0) && allowance(msg.sender, this) == 0);
+    pricePerToken[msg.sender] = _pricePerToken;
+    allowedSale = allowedSale.add(1);
+
+    if (addrToIndexes[msg.sender] == 0) {
+      uint256 id = allowanceOwner.push(msg.sender);
+      addrToIndexes[msg.sender] = id;
     }
-    return false;
+    return approve(this, _value);
   }
 
-  function _transfer(address _from, address _to, uint256 _value) private {
-    // Modify the counts.
-    balances[_to] += _value;
-    balances[msg.sender] -= _value;
+  // TODO: add decrease and increase Approval
+  function removeForSale() public returns (bool) {
+    uint256 value = allowance(msg.sender, this);
+    require(value != 0);
+    allowedSale = allowedSale.sub(1);
+    return decreaseApproval(this, value);
+  }
 
-    emit Transfer(_from, _to, _value);
+  function buyForSale(address _owner, uint256 _value) public payable {
+    uint256 allowedValue = allowance(_owner, this);
+    uint256 price = pricePerToken[_owner];
+    require((allowedValue >= _value) && (_value > 0) && (msg.value == (_value * price)));
+    // Send the ether.
+    _owner.transfer(msg.value);
+    this.transferFrom(_owner, msg.sender, _value);
+
+    if (allowedValue == _value) {
+      allowedSale = allowedSale.sub(1);
+    }
+  }
+
+  function retrieveAllForSales() public view returns (uint[], uint[]) {
+    uint[] memory values = new uint[](allowedSale);
+    uint[] memory prices = new uint[](allowedSale);
+    uint idx = 0;
+    for (uint i = 0; i < allowanceOwner.length; i++) {
+      address _owner = allowanceOwner[i];
+      uint256 value = allowance(_owner, this);
+      if (value > 0) {
+        values[idx] = value;
+        prices[idx] = pricePerToken[_owner];
+        idx += 1;
+      }
+    }
+    return (values, prices);
   }
 }

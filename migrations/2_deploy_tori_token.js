@@ -1,4 +1,4 @@
-var ToriOwnership = artifacts.require("ToriOwnership");
+var ToriToken = artifacts.require("ToriToken");
 module.exports = function(deployer) {
-  deployer.deploy(ToriOwnership);
+  deployer.deploy(ToriToken);
 };
