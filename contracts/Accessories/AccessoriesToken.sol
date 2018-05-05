@@ -35,12 +35,16 @@ contract AccessoriesToken is StandardToken {
     string _symbol,
     string _variety,
     string _material,
-    uint32 _space) {
+    uint32 _space,
+    uint256 _amount,
+    uint256 _price) {
     _name = name;
     _symbol = symbol;
     _variety = variety;
     _material = material;
     _space = space;
+    _amount = allowance(msg.sender, this);
+    _price = pricePerToken[msg.sender];
   }
 
 
@@ -48,6 +52,7 @@ contract AccessoriesToken is StandardToken {
   mapping (address => uint256) addrToIndexes;
   address[] allowanceOwner;
   uint256 allowedSale;
+
 
   function approveForSale(uint256 _value, uint256 _pricePerToken) public returns (bool) {
     require((balances[msg.sender] >= _value) && (_pricePerToken > 0) && allowance(msg.sender, this) == 0);
@@ -82,9 +87,10 @@ contract AccessoriesToken is StandardToken {
     }
   }
 
-  function retrieveAllForSales() public view returns (uint[], uint[]) {
+  function retrieveAllForSales() public view returns (uint[], uint[], address[]) {
     uint[] memory values = new uint[](allowedSale);
     uint[] memory prices = new uint[](allowedSale);
+    address[] memory owners = new address[](allowedSale);
     uint idx = 0;
     for (uint i = 0; i < allowanceOwner.length; i++) {
       address _owner = allowanceOwner[i];
@@ -92,9 +98,10 @@ contract AccessoriesToken is StandardToken {
       if (value > 0) {
         values[idx] = value;
         prices[idx] = pricePerToken[_owner];
+        owners[idx] = _owner;
         idx += 1;
       }
     }
-    return (values, prices);
+    return (values, prices, owners);
   }
 }

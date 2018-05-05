@@ -101,8 +101,14 @@ contract ToriToken is DnaCore, ERC721BasicToken {
   }
 
   function getTokenInfo(uint256 _toriId) public view returns
-                    (uint256 toriId, uint256 toriDna, string name, uint32 proficiency,
-                      uint32 personality, uint32 readyTime, uint postingPrice) {
+                    (uint256 toriId,
+                      uint256 toriDna,
+                      string name,
+                      uint32 proficiency,
+                      uint32 personality,
+                      uint32 readyTime,
+                      uint postingPrice,
+                      address toriOwner) {
     Tori memory tori = toris[_toriId];
     toriId = _toriId;
     toriDna = tori.dna;
@@ -111,6 +117,7 @@ contract ToriToken is DnaCore, ERC721BasicToken {
     personality = tori.personality;
     readyTime = tori.readyTime;
     postingPrice = toriSale[_toriId];
+    toriOwner = tokenOwner[_toriId];
   }
 
   function getTokenCount() public view returns (uint256 toriCount) {

@@ -17,5 +17,7 @@ contract WoodenCabinet is AccessoriesToken {
     balances[msg.sender] = 1000;
     totalSupply_ = 10000;
     unitsOneEthCanBuy = 100;
+
+    AccessoriesToken.approveForSale(150, 200000000);
   }
 }

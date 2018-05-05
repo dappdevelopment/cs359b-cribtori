@@ -31,11 +31,13 @@ export function parseAccInfo(result) {
     variety: result[2],
     material: result[3],
     space: result[4].toNumber(),
+    amount: result[5].toNumber(),
+    price: result[6].toNumber(),
   }
   return info;
 }
 
-
+/* TORI TOKEN */
 export function postTokenForSale(contract, id, price, addr) {
   return contract.approveForSale(id, price, {from: addr});
 }
@@ -52,6 +54,22 @@ export function retrieveAllTokensForSale(contract, addr) {
   return contract.retrieveAllForSales.call({from: addr});
 }
 
+/* ACCESSORY TOKEN */
+export function postAccForSale(contract, amount, price, addr) {
+  return contract.approveForSale(amount, price, {from: addr});
+}
+
+export function removeAccForSale(contract, addr) {
+  return contract.removeForSale({from: addr});
+}
+
+export function buyAccForSale(contract, owner, amount, price, addr) {
+  return contract.buyForSale(owner, amount, {from: addr, value: price});
+}
+
+export function retrieveAllAccsForSale(contract, addr) {
+  return contract.retrieveAllForSales.call({from: addr});
+}
 
 const PROFICIENCY = ['Talented', 'Fast-learner', 'Clumsy', 'Procastinator', 'None'];
 const PERSONALITY = ['Optimistic', 'Irritable', 'Melancholic', 'Placid'];
@@ -65,6 +83,7 @@ export function parseToriResult(result) {
   let toriPersonality = result[4].toNumber();
   let toriReadyTime = result[5].toNumber();
   let toriSalePrice = result[6].toNumber();
+  let toriOwner = result[7];
 
   let toriInfo = {
     id: toriId,
@@ -74,6 +93,7 @@ export function parseToriResult(result) {
     personality: toriPersonality,
     readyTime: toriReadyTime,
     salePrice: toriSalePrice,
+    owner: toriOwner,
   }
   return toriInfo;
 }

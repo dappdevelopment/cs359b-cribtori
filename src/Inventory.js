@@ -42,50 +42,35 @@ class Inventory extends Component {
         .then((result) => {
           info.balance = result.toNumber();
           this.setState({
-            inventoryDisplay: this.state.inventoryDisplay.concat(this.constructInventoryDisplay(info))
+            inventoryDisplay: this.state.inventoryDisplay.concat(this.constructInventoryDisplay(contract, info))
           });
         })
-      });
+      })
+      .catch(console.error);
     });
   }
 
 
-  postAccForSale(accId, e) {
-    console.log('Posting:', accId);
-    util.postTokenForSale(this.context.accToken, accId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
+  postAccForSale(contract, accId, e) {
+    // TODO: customize price and amount.
+    util.postAccForSale(contract, 1, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
     .then((result) => {
       console.log('After posting:', result);
     }).catch(console.error);
   }
 
-  removeAccForSale(accId, e) {
-    console.log('Revoking:', accId);
-    util.removeTokenForSale(this.context.accToken, accId, this.context.userAccount)
+  removeAccForSale(contract, accId, e) {
+    util.removeAccForSale(contract, this.context.userAccount)
     .then((result) => {
       console.log('After revoking:', result);
     }).catch(console.error);
   }
 
 
-  constructInventoryDisplay(info) {
-    // { info.salePrice > 0 && (
-    //    <ListItem><ListItemText primary="For Sale"/></ListItem>
-    // )}
-    /*
-    <CardActions>
-      {info.salePrice > 0 ? (
-        <Button variant="raised" color="primary" onClick={(e) => this.removeAccForSale(info.id, e)}>
-          Revoke Sale Post
-        </Button>
-      ) : (
-        <Button variant="raised" color="primary" onClick={(e) => this.postAccForSale(info.id, e)}>
-          Sell Accessory
-        </Button>
-      )}
-    </CardActions>
-    */
+  constructInventoryDisplay(contract, info) {
     // TODO: implement image mapping.
     let imgName = 'mockimg/acc-sample.png';
+
     return (
       <Grid key={info.symbol} item sm={4}>
         <Card className="accbox">
@@ -101,8 +86,22 @@ class Inventory extends Component {
               <ListItem><ListItemText primary="Material:"/><ListItemText primary={info.material} /></ListItem>
               <ListItem><ListItemText primary="Space:"/><ListItemText primary={info.space} /></ListItem>
               <ListItem><ListItemText primary="Amount:"/><ListItemText primary={info.balance} /></ListItem>
+              { info.price > 0 && (
+                 <ListItem><ListItemText primary={`${info.amount} For Sale`}/></ListItem>
+              )}
             </List>
           </CardContent>
+          <CardActions>
+            {info.price > 0 ? (
+              <Button variant="raised" color="primary" onClick={(e) => this.removeAccForSale(contract, info.id, e)}>
+                Revoke Sale Post
+              </Button>
+            ) : (
+              <Button variant="raised" color="primary" onClick={(e) => this.postAccForSale(contract, info.id, e)}>
+                Sell Accessory
+              </Button>
+            )}
+          </CardActions>
         </Card>
       </Grid>
     );
