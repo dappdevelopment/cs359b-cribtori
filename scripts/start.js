@@ -6,6 +6,14 @@ process.env.NODE_ENV = 'development';
 // https://github.com/motdotla/dotenv
 require('dotenv').config({silent: true});
 
+// Adding express
+var express = require('express');
+var webpackdevMiddleware = require('webpack-dev-middleware');
+var webpackhotMiddleware = require("webpack-hot-middleware");
+var path = require('path');
+var mysql = require('mysql');
+var bodyParser = require('body-parser');
+
 var chalk = require('chalk');
 var webpack = require('webpack');
 var WebpackDevServer = require('webpack-dev-server');
@@ -21,6 +29,7 @@ var prompt = require('react-dev-utils/prompt');
 var pathExists = require('path-exists');
 var config = require('../config/webpack.config.dev');
 var paths = require('../config/paths');
+
 
 var useYarn = pathExists.sync(paths.yarnLockFile);
 var cli = useYarn ? 'yarn' : 'npm';
@@ -48,6 +57,11 @@ if (isSmokeTest) {
     }
   };
 }
+
+// SQL connection.
+var sqlConfig = require('../config/sql.js');
+var connection = mysql.createConnection(sqlConfig.cred);
+
 
 function setupCompiler(host, port, protocol) {
   // "Compiler" is a low-level interface to Webpack.
@@ -213,52 +227,177 @@ function addMiddleware(devServer) {
 
   // Finally, by now we have certainly resolved the URL.
   // It may be /index.html, so let the dev server try serving it again.
-  devServer.use(devServer.middleware);
+  // devServer.use(devServer.middleware);
 }
 
-function runDevServer(host, port, protocol) {
-  var devServer = new WebpackDevServer(compiler, {
-    // Enable gzip compression of generated files.
-    compress: true,
-    // Silence WebpackDevServer's own logs since they're generally not useful.
-    // It will still show compile warnings and errors with this setting.
-    clientLogLevel: 'none',
-    // By default WebpackDevServer serves physical files from current directory
-    // in addition to all the virtual build products that it serves from memory.
-    // This is confusing because those files won’t automatically be available in
-    // production build folder unless we copy them. However, copying the whole
-    // project directory is dangerous because we may expose sensitive files.
-    // Instead, we establish a convention that only files in `public` directory
-    // get served. Our build script will copy `public` into the `build` folder.
-    // In `index.html`, you can get URL of `public` folder with %PUBLIC_PATH%:
-    // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
-    // In JavaScript code, you can access it with `process.env.PUBLIC_URL`.
-    // Note that we only recommend to use `public` folder as an escape hatch
-    // for files like `favicon.ico`, `manifest.json`, and libraries that are
-    // for some reason broken when imported through Webpack. If you just want to
-    // use an image, put it in `src` and `import` it from JavaScript instead.
-    contentBase: paths.appPublic,
-    // Enable hot reloading server. It will provide /sockjs-node/ endpoint
-    // for the WebpackDevServer client so it can learn when the files were
-    // updated. The WebpackDevServer client is included as an entry point
-    // in the Webpack development configuration. Note that only changes
-    // to CSS are currently hot reloaded. JS changes will refresh the browser.
-    hot: true,
-    // It is important to tell WebpackDevServer to use the same "root" path
-    // as we specified in the config. In development, we always serve from /.
-    publicPath: config.output.publicPath,
-    // WebpackDevServer is noisy by default so we emit custom message instead
-    // by listening to the compiler events with `compiler.plugin` calls above.
-    quiet: true,
-    // Reportedly, this avoids CPU overload on some systems.
-    // https://github.com/facebookincubator/create-react-app/issues/293
-    watchOptions: {
-      ignored: /node_modules/
-    },
-    // Enable HTTPS if the HTTPS environment variable is set to 'true'
-    https: protocol === "https",
-    host: host
+
+function createEndpoints(devServer) {
+  devServer.use(bodyParser.urlencoded({ extended: false }));
+  devServer.use(bodyParser.json());
+
+  devServer.get('/hello', function(req, res) {
+    res.status(200).send('hello world');
   });
+
+  devServer.get('/test/:id', function(req, res) {
+    var id = req.params.id;
+    res.status(200).send(id);
+  });
+
+  devServer.post('/test', function(req, res) {
+    res.status(200).send('hello!');
+  });
+
+  // Retrieving activities.
+  devServer.get('/activity/:id', function(req, res) {
+    var id = req.params.id;
+    var limit = req.query.limit;
+    var query = 'SELECT * from activity where tori_id = ? ORDER BY time DESC';
+    var inserts = [id];
+    if (limit !== undefined) {
+      query = 'SELECT * from activity where tori_id = ? ORDER BY time DESC LIMIT ?';
+      inserts = [id, parseInt(limit)];
+    }
+
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) res.status(400).send({ message: 'invalid tori ID' });
+
+      var results = rows.map((row) => {
+        var data = {
+          tori_id: row.tori_id,
+          timestamp: row.time,
+          activity_type: row.activity_type,
+          description: row.description,
+        }
+        return data;
+      });
+      res.status(200).send(results);
+    })
+  });
+
+  // Posting activities.
+  devServer.post('/activity', function(req, res) {
+    // TODO: activity validation and authentication.
+    var SIX_HOUR = 6 * 60 * 60 * 1000;
+    var PERIOD = (req.activity_type === 'feed') ? 1 : 2;
+
+    var actTime = Date.now();
+
+    if ((req.body.activity_type !== 'feed') && (req.body.activity_type !== 'clean')) {
+      return res.status(400).send({ message: 'activity not recognized' });
+    }
+
+    var query = 'SELECT * from activity WHERE tori_id = ? AND activity_type = ? ORDER BY time DESC LIMIT 1';
+    var inserts = [req.body.id, req.body.activity_type];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) return res.status(400).send({ message: 'activity log failed, Error: ' + err });
+
+      if (rows.length > 0) {
+        var prevTime = new Date(rows[0].time);
+        if (actTime - prevTime < PERIOD * SIX_HOUR) {
+          return res.status(406).send({ message: 'Previous activity occur less than allowed period!'});
+        }
+      }
+
+      query = 'INSERT INTO activity (tori_id, time, activity_type, description) VALUES (?, ?, ?, ?)';
+      inserts = [req.body.id, actTime, req.body.activity_type, req.body.description];
+      query = mysql.format(query, inserts);
+      connection.query(query, function (err, rows, fields) {
+        if (err) return res.status(400).send({ message: 'activity log failed, Error: ' + err });
+        return res.status(200).end();
+      });
+    })
+  });
+
+  // Retrieving room arrangements.
+  devServer.get('/room/:id', function(req, res) {
+    var id = req.params.id;
+    var query = 'SELECT * from arrangement where tori_id = ?';
+    var inserts = [id];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) res.status(400).send({ message: 'invalid tori ID' });
+
+      var data = {
+        tori_id: row[0].tori_id,
+        locations: row[1].locations,
+      }
+      res.status(200).send(data);
+    })
+  });
+
+  // Posting arrangements.
+  devServer.post('/room/', function(req, res) {
+    // TODO: room validation and authentication.
+    var query = 'INSERT INTO arrangement (tori_id, locations) VALUES (?, ?) ON DUPLICATE KEY UPDATE locations = ?';
+    var inserts = [req.body.id, req.body.locations, req.body.locationsn];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) res.status(400).send({ message: 'saving room failed' });
+      res.status(200).end();
+    })
+  });
+}
+
+
+function runDevServer(host, port, protocol) {
+  const devServer = express();
+  devServer.use(webpackdevMiddleware(webpack(config), {
+    // var devServer = new WebpackDevServer(compiler, {
+      // Enable gzip compression of generated files.
+      compress: true,
+      // Silence WebpackDevServer's own logs since they're generally not useful.
+      // It will still show compile warnings and errors with this setting.
+      clientLogLevel: 'none',
+      // By default WebpackDevServer serves physical files from current directory
+      // in addition to all the virtual build products that it serves from memory.
+      // This is confusing because those files won’t automatically be available in
+      // production build folder unless we copy them. However, copying the whole
+      // project directory is dangerous because we may expose sensitive files.
+      // Instead, we establish a convention that only files in `public` directory
+      // get served. Our build script will copy `public` into the `build` folder.
+      // In `index.html`, you can get URL of `public` folder with %PUBLIC_PATH%:
+      // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
+      // In JavaScript code, you can access it with `process.env.PUBLIC_URL`.
+      // Note that we only recommend to use `public` folder as an escape hatch
+      // for files like `favicon.ico`, `manifest.json`, and libraries that are
+      // for some reason broken when imported through Webpack. If you just want to
+      // use an image, put it in `src` and `import` it from JavaScript instead.
+      contentBase: paths.appPublic,
+      // Enable hot reloading server. It will provide /sockjs-node/ endpoint
+      // for the WebpackDevServer client so it can learn when the files were
+      // updated. The WebpackDevServer client is included as an entry point
+      // in the Webpack development configuration. Note that only changes
+      // to CSS are currently hot reloaded. JS changes will refresh the browser.
+      // hot: true,
+      // It is important to tell WebpackDevServer to use the same "root" path
+      // as we specified in the config. In development, we always serve from /.
+      publicPath: config.output.publicPath,
+      // WebpackDevServer is noisy by default so we emit custom message instead
+      // by listening to the compiler events with `compiler.plugin` calls above.
+      quiet: true,
+      // Reportedly, this avoids CPU overload on some systems.
+      // https://github.com/facebookincubator/create-react-app/issues/293
+      watchOptions: {
+        ignored: /node_modules/
+      },
+      // Enable HTTPS if the HTTPS environment variable is set to 'true'
+      https: protocol === "https",
+      host: host
+    })
+  );
+  devServer.use(webpackhotMiddleware(compiler, {
+    heartbeat: 10 * 1000
+  }));
+
+  devServer.get('/favicon.ico', function(req, res) {
+    res.sendFile(path.join(paths.appPublic, '/favicon.ico'));
+  });
+
+  // Defining the endpoints.
+  createEndpoints(devServer);
 
   // Our custom middleware proxies requests to /index.html or a remote API.
   addMiddleware(devServer);
@@ -275,9 +414,9 @@ function runDevServer(host, port, protocol) {
     console.log(chalk.cyan('Starting the development server...'));
     console.log();
 
-    if (isInteractive) {
-      openBrowser(protocol + '://' + host + ':' + port + '/');
-    }
+    // if (isInteractive) {
+    //   openBrowser(protocol + '://' + host + ':' + port + '/');
+    // }
   });
 }
 

@@ -1,28 +1,46 @@
 import React, { Component, PropTypes } from 'react'
 
+import Snackbar from 'material-ui/Snackbar';
+import Typography from 'material-ui/Typography';
+import { withStyles } from 'material-ui/styles';
 import Paper from 'material-ui/Paper';
 import { MenuItem, MenuList } from 'material-ui/Menu';
 import Grid from 'material-ui/Grid';
 import Divider from 'material-ui/Divider';
+import Button from 'material-ui/Button';
+import List, { ListItemText } from 'material-ui/List';
+import Avatar from 'material-ui/Avatar';
 
-import {
-  retrieveTokenInfo,
-  postTokenForSale,
-  removeTokenForSale
-} from './utils.js'
+import * as util from './utils.js'
 
 import ToriRoom from './ToriRoom.js'
+import ToriActivityLogs from './ToriActivityLogs.js'
 
-const style = {
-  display: 'inline-block',
-  margin: '16px 32px 16px 0',
-};
+import AccImg from './mockimg/acc-sample.png'
+
+
+const styles = theme => ({
+  menuItem: {
+    '&:focus': {
+      backgroundColor: theme.palette.primary.main,
+      '& $primary, & $icon': {
+        color: theme.palette.common.white,
+      },
+    },
+  },
+  paper: {
+    display: 'inline-block',
+    margin: '16px 32px 16px 0',
+  },
+  primary: {},
+  icon: {},
+});
 
 class ToriDetails extends Component {
   static contextTypes = {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
-    accToken: PropTypes.object,
+    accContracts: PropTypes.array,
     userAccount: PropTypes.string
   }
 
@@ -31,20 +49,50 @@ class ToriDetails extends Component {
 
     this.state = {
       toriId: -1,
+      isEditRoom: false,
+      inventoryItems: [],
+      accSelected: {},
+      openSnackBar: false,
     }
 
+    this.switchEdit = this.switchEdit.bind(this);
+    this.saveEdit = this.saveEdit.bind(this);
+    this.onAccessorySelected = this.onAccessorySelected.bind(this);
+
+    this.feedTori = this.feedTori.bind(this);
+    this.cleanTori = this.cleanTori.bind(this);
+    this.playWithTori = this.playWithTori.bind(this);
+    this.craftAccessory = this.craftAccessory.bind(this);
+
+    this.handleCloseSnackBar = this.handleCloseSnackBar.bind(this);
   }
 
   componentDidMount() {
-    console.log('Tori Details for ID: ', this.props.toriId);
-    retrieveTokenInfo(this.context.toriToken, this.props.toriId, this.context.userAccount).then((result) => {
+    util.retrieveTokenInfo(this.context.toriToken, this.props.toriId, this.context.userAccount).then((result) => {
+      let info = util.parseToriResult(result);
       this.setState({
-        toriId: result[0].toNumber(),
-        toriDna: result[1].toNumber(),
-        toriProficiency: result[2].toNumber(),
-        toriPersonality: result[3].toNumber(),
-        toriReadyTime: result[4].toNumber(),
-        toriSalePrice: result[5].toNumber(),
+        toriId: info.id,
+        name: info.name,
+        proficiency: info.proficiency,
+        personality: info.personality,
+        salePrice: info.salePrice,
+        actionPaper: this.constructToriActions(),
+      });
+    });
+    // Get the inventory list as well.
+    this.context.accContracts.forEach((contract) => {
+      // Get the info.
+      let info;
+      util.retrieveAllTokenInfo(contract)
+      .then((result) => {
+        info = util.parseAccInfo(result);
+        contract.balanceOf(this.context.userAccount)
+        .then((result) => {
+          info.balance = result.toNumber();
+          this.setState({
+            inventoryItems: this.state.inventoryItems.concat(this.constructInventoryItem(info))
+          });
+        })
       });
     });
   }
@@ -52,7 +100,7 @@ class ToriDetails extends Component {
 
   postToriForSale(toriId, e) {
     console.log('Posting:', toriId);
-    postTokenForSale(this.context.toriToken, toriId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
+    util.postTokenForSale(this.context.toriToken, toriId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
     .then((result) => {
       console.log('After posting:', result);
     }).catch(console.error);
@@ -60,43 +108,147 @@ class ToriDetails extends Component {
 
   removeToriForSale(toriId, e) {
     console.log('Revoking:', toriId);
-    removeTokenForSale(this.context.toriToken, toriId, this.context.userAccount)
+    util.removeTokenForSale(this.context.toriToken, toriId, this.context.userAccount)
     .then((result) => {
       console.log('After revoking:', result);
     }).catch(console.error);
   }
 
 
-  constructToriDisplay(result) {
-    // (_toriId, tori.dna, tori.proficiency, tori.personality, tori.readyTime)
-    let toriId = result[0].toNumber();
-    let toriDna = result[1].toNumber();
-    let toriProficiency = result[2].toNumber();
-    let toriPersonality = result[3].toNumber();
-    let toriReadyTime = result[4].toNumber();
-    let toriSalePrice = result[5].toNumber();
+  switchEdit() {
+    this.setState({
+      isEditRoom: !this.state.isEditRoom,
+    });
+  }
 
-    // let imgNum = parseInt(toriDna, 10) % 4 + 1;
-    let imgName = 'mockimg/tori-sample.png';
+  saveEdit() {
+    // TODO: save state to database.
+    this.switchEdit();
+  }
+
+  onAccessorySelected(item, e) {
+    this.setState({
+      accSelected: item,
+    });
+  }
+
+  feedTori() {
+    // Construct the POST body.
+    let data = {
+      id: this.state.toriId,
+      activity_type: 'feed',
+      description: '',
+    };
+    fetch('/activity', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data),
+    })
+    .then(function(response) {
+      return response.status;
+    })
+    .then(function(status) {
+      let message = 'Yum! ' + this.state.name + ' is full!';
+      if (status === 406) {
+        message = this.state.name + ' has been recently fed!';
+      } else if (status === 400) {
+        message = 'Feeding ' + this.state.name + ' failed, try again later';
+      }
+      this.setState({
+        openSnackBar: true,
+        snackBarMessage: message,
+      });
+    }.bind(this))
+    .catch(console.err);
+  }
+
+  cleanTori() {
+    // Construct the POST body.
+    let data = {
+      id: this.state.toriId,
+      activity_type: 'clean',
+      description: '',
+    };
+    fetch('/activity', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data),
+    })
+    .then(function(response) {
+      return response.status;
+    })
+    .then(function(status) {
+      let message = this.state.name + '\'s room is clean!';
+      if (status === 406) {
+        message = this.state.name + '\'s is still clean!';
+      } else if (status === 400) {
+        message = 'Cleaning ' + this.state.name + '\'s room failed, try again later';
+      }
+      this.setState({
+        openSnackBar: true,
+        snackBarMessage: message,
+      });
+    }.bind(this))
+    .catch(console.err);
+  }
+
+  playWithTori() {
+    // TODO:
+    console.log('Playing with tori...');
+  }
+
+  craftAccessory() {
+    // TODO:
+    console.log('Crafting accessory...');
+  }
+
+
+  constructToriActions() {
     return (
-      <div key={toriId} className="toribox">
-        <h3>Tori ID: {toriId} </h3>
-        <img src={imgName} alt={'Tori'}/>
-        <div className="tori-details">
-          <span><label>DNA:</label> {toriDna} </span>
-          <span><label>Proficiency:</label> {toriProficiency} </span>
-          <span><label>Personality:</label> {toriPersonality} </span>
-          <span><label>Ready Time:</label> {toriReadyTime} </span>
-          <span><label>Is For Sale:</label> {toriSalePrice > 0 ? 'True' : 'False'} </span>
-          {toriSalePrice > 0 ? (
-            <button onClick={(e) => this.removeToriForSale(toriId, e)}>Revoke Sale Post</button>
+      <Paper className={this.props.classes.paper}>
+        <MenuList>
+          <MenuItem onClick={this.feedTori}>Feed</MenuItem>
+          <MenuItem onClick={this.cleanTori}>Clean</MenuItem>
+          <MenuItem onClick={this.playWithTori}>Play</MenuItem>
+          <MenuItem onClick={this.craftAccessory}>Craft</MenuItem>
+          <Divider />
+          <MenuItem onClick={this.switchEdit}>Edit Room</MenuItem>
+          {this.state.salePrice > 0 ? (
+            <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriId, e)}>Revoke Sale Post</MenuItem>
           ) : (
-            <button onClick={(e) => this.postToriForSale(toriId, e)}>Sell Tori</button>
+            <MenuItem onClick={(e) => this.postToriForSale(this.state.toriId, e)}>Sell Tori</MenuItem>
           )}
-        </div>
-      </div>
+        </MenuList>
+      </Paper>
     );
   }
+
+  constructInventoryItem(info) {
+    // TODO: implement image mapping.
+    let imgName = AccImg;
+
+    let item = {key: info.symbol, space: info.space, img: imgName};
+    return (
+      <MenuItem key={info.symbol} className={this.props.classes.menuItem} onClick={(e) => this.onAccessorySelected(item, e)}>
+        <Avatar alt={info.name} src={imgName} />
+        <Typography variant="caption" gutterBottom>
+          {`x ${info.balance}`}
+        </Typography>
+        <ListItemText primary={`Space: ${info.space}`} />
+      </MenuItem>
+    );
+  }
+
+  handleCloseSnackBar() {
+    this.setState({
+      openSnackBar: false,
+    });
+  }
+
 
   render() {
     return (
@@ -105,34 +257,51 @@ class ToriDetails extends Component {
                       alignItems={'center'}
                       direction={'row'}
                       justify={'center'}>
+        <Grid item sm={12}>
+          <Typography variant="headline" gutterBottom>
+            {this.state.name}
+          </Typography>
+        </Grid>
         <Grid item sm={3}>
-          Details
+          {this.state.isEditRoom ? (
+            <List>
+              {this.state.inventoryItems}
+            </List>
+          ) : (
+            <ToriActivityLogs toriId={this.state.toriId} name={this.state.name} />
+          )}
         </Grid>
         <Grid item sm={6}>
-          {this.state.toriId != -1 &&
-            <ToriRoom/>
+          {this.state.toriId !== -1 &&
+            <ToriRoom acc={this.state.accSelected}/>
           }
         </Grid>
         <Grid item sm={3}>
-          <Paper style={style}>
-            <MenuList>
-              <MenuItem>Feed</MenuItem>
-              <MenuItem>Clean</MenuItem>
-              <MenuItem>Play</MenuItem>
-              <MenuItem>Craft</MenuItem>
-              <Divider />
-              <MenuItem>Edit Room</MenuItem>
-              {this.state.toriSalePrice > 0 ? (
-                <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriId, e)}>Revoke Sale Post</MenuItem>
-              ) : (
-                <MenuItem onClick={(e) => this.postToriForSale(this.state.toriId, e)}>Sell Tori</MenuItem>
-              )}
-            </MenuList>
-          </Paper>
+          {this.state.isEditRoom ? (
+            <Paper className={this.props.classes.paper}>
+              <Button variant="raised" color="primary" onClick={this.saveEdit}>
+                Save Room
+              </Button>
+              <Button variant="raised" color="secondary" onClick={this.switchEdit}>
+                Cancel Edit
+              </Button>
+            </Paper>
+          ) : (
+            this.state.actionPaper
+          )}
         </Grid>
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={this.state.openSnackBar}
+          onClose={this.handleCloseSnackBar}
+          SnackbarContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">{this.state.snackBarMessage}</span>}
+        />
       </Grid>
     );
   }
 }
 
-export default ToriDetails
+export default withStyles(styles)(ToriDetails)

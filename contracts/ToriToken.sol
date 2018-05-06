@@ -1,28 +1,20 @@
 pragma solidity ^0.4.21;
 
-/* import 'openzeppelin-solidity/contracts/ownership/Ownable.sol'; */
+import './DnaCore.sol';
+import 'openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
 
-contract ToriToken {
 
-  uint256 private DNA_DIGIT = 10;
-  uint256 private PROFICIENCY_DIGIT = 2;
-  uint256 private PERSONALITY_DIGIT = 2;
-
-  uint256 private DNA_LIMIT = 10**DNA_DIGIT;
-  uint256 private PROFICIENCY_LIMIT = 10**PROFICIENCY_DIGIT;
-  uint256 private PERSONALITY_LIMIT = 10**PERSONALITY_DIGIT;
+contract ToriToken is DnaCore, ERC721BasicToken {
 
   struct Tori {
     uint256 dna;
+    string name;
     uint32 proficiency;
     uint32 personality;
     uint32 readyTime;
   }
 
   Tori[] toris;
-
-  mapping (uint256 => address) toriIndexToAddr;
-  mapping (address => uint256) addrToToriCount;
 
   // toriId to price (in wei)
   mapping (uint => uint256) toriSale;
@@ -34,17 +26,34 @@ contract ToriToken {
   /* DEV USE */
   function ToriToken() {
     // Generate some Toris for the owner.
-    uint n = 3;
-    for (uint i = 0; i < n; i++) {
-      Tori memory newTori = _generateRandomTori("sample", "sample", msg.sender);
-      // Push to the book keeping array.
-      uint256 id = toris.push(newTori) - 1;
-      toriIndexToAddr[id] = msg.sender;
-      addrToToriCount[msg.sender] += 1;
-    }
+
+    // 1.
+    uint8[] memory testQuiz = new uint8[](4);
+    testQuiz[0] = 0;
+    testQuiz[1] = 0;
+    testQuiz[2] = 0;
+    testQuiz[3] = 0;
+    Tori memory newTori = _generateRandomTori(testQuiz, "Toto", msg.sender);
+    uint256 id = toris.push(newTori) - 1;
+    tokenOwner[id] = msg.sender;
+    ownedTokensCount[msg.sender] = ownedTokensCount[msg.sender].add(1);
+    // 2.
+    testQuiz[1] = 1;
+    newTori = _generateRandomTori(testQuiz, "Riri", msg.sender);
+    id = toris.push(newTori) - 1;
+    tokenOwner[id] = msg.sender;
+    ownedTokensCount[msg.sender] = ownedTokensCount[msg.sender].add(1);
+
+    // 3.
+    testQuiz[0] = 1;
+    testQuiz[3] = 1;
+    newTori = _generateRandomTori(testQuiz, "Rito", msg.sender);
+    id = toris.push(newTori) - 1;
+    tokenOwner[id] = msg.sender;
+    ownedTokensCount[msg.sender] = ownedTokensCount[msg.sender].add(1);
 
     toriSale[0] = 1000000000000000;
-    toriSaleCount += 1;
+    toriSaleCount = toriSaleCount.add(1);
   }
 
 
@@ -53,35 +62,34 @@ contract ToriToken {
   *   Generate random dna, personality, and proficiency level from
   *   the given quiz & sender address.
   */
-  function _generateRandomTori(string _quiz, string _name, address _owner) private view returns (Tori) {
-    // TODO: implement a more detailed Tori generation.
-    uint256 generatedRandomness = uint(keccak256(now, _owner, _quiz, _name));
-    uint256 dna = generatedRandomness % DNA_LIMIT;
-    uint32 proficiency = uint32(generatedRandomness % PROFICIENCY_LIMIT);
-    uint32 personality = uint32(generatedRandomness % PERSONALITY_LIMIT);
-    return Tori(dna, proficiency, personality, uint32(now));
+  function _generateRandomTori(uint8[] _quizzes, string _name, address _owner) private view returns (Tori) {
+    uint256 dna;
+    uint32 proficiency;
+    uint32 personality;
+    (dna, proficiency, personality) = _generateRandomTraits(_quizzes, _name, _owner);
+    return Tori(dna, _name, proficiency, personality, uint32(now));
   }
 
-  function generateNewTori(string _quiz, string _name) public returns (bool success) {
+  function generateNewTori(uint8[] _quizzes, string _name) public returns (bool success) {
     // Generate three new toris.
-    require (addrToToriCount[msg.sender] == 0);
-    Tori memory newTori = _generateRandomTori(_quiz, _name, msg.sender);
+    require (ownedTokensCount[msg.sender] == 0);
+    Tori memory newTori = _generateRandomTori(_quizzes, _name, msg.sender);
     // Push to the book keeping array.
     uint256 id = toris.push(newTori) - 1;
-    toriIndexToAddr[id] = msg.sender;
-    addrToToriCount[msg.sender] += 1;
+    tokenOwner[id] = msg.sender;
+    ownedTokensCount[msg.sender] = ownedTokensCount[msg.sender].add(1);
 
     emit NewTori(msg.sender, id);
     return true;
   }
 
   function getTokenIndexes(address _owner) public view returns (uint[]) {
-    uint size = addrToToriCount[_owner];
+    uint size = ownedTokensCount[_owner];
     uint[] memory result = new uint[](size);
 
     uint idx = 0;
     for (uint i = 0; i < toris.length; i++) {
-      if (toriIndexToAddr[i] == _owner) {
+      if (tokenOwner[i] == _owner) {
         result[idx] = i;
         idx++;
       }
@@ -93,22 +101,73 @@ contract ToriToken {
   }
 
   function getTokenInfo(uint256 _toriId) public view returns
-                    (uint256 toriId, uint256 toriDna, uint32 proficiency,
-                      uint32 personality, uint32 readyTime, uint postingPrice) {
+                    (uint256 toriId,
+                      uint256 toriDna,
+                      string name,
+                      uint32 proficiency,
+                      uint32 personality,
+                      uint32 readyTime,
+                      uint postingPrice,
+                      address toriOwner) {
     Tori memory tori = toris[_toriId];
-    return (_toriId,
-      tori.dna,
-      tori.proficiency,
-      tori.personality,
-      tori.readyTime,
-      toriSale[_toriId]);
+    toriId = _toriId;
+    toriDna = tori.dna;
+    name = tori.name;
+    proficiency = tori.proficiency;
+    personality = tori.personality;
+    readyTime = tori.readyTime;
+    postingPrice = toriSale[_toriId];
+    toriOwner = tokenOwner[_toriId];
   }
 
   function getTokenCount() public view returns (uint256 toriCount) {
-    return addrToToriCount[msg.sender];
+    return ownedTokensCount[msg.sender];
   }
 
   function getAllTokensCount() public view returns (uint) {
     return toris.length;
+  }
+
+
+  // TODO: add functionality for users to change the sale price.
+  function approveForSale(uint256 _tokenId, uint256 _salePrice) public onlyOwnerOf(_tokenId) {
+    require((toriSale[_tokenId] == 0) && (_salePrice > 0));
+    toriSale[_tokenId] = _salePrice;
+    toriSaleCount = toriSaleCount.add(1);
+
+    approve(this, _tokenId);
+  }
+
+  function removeForSale(uint256 _tokenId) public onlyOwnerOf(_tokenId) {
+    require(toriSale[_tokenId] > 0);
+    delete toriSale[_tokenId];
+    toriSaleCount = toriSaleCount.sub(1);
+
+    clearApproval(msg.sender, _tokenId);
+  }
+
+  function buyForSale(uint256 _tokenId) public payable {
+    // TODO: does msg.value needs to be exactly equal?
+    require((toriSale[_tokenId] > 0) && (msg.value == toriSale[_tokenId]));
+    address _from = ownerOf(_tokenId);
+    // Send the ether.
+    _from.transfer(msg.value);
+    // We want to call this from this contract.
+    this.safeTransferFrom(_from, msg.sender, _tokenId);
+    // Delete sale entry.
+    delete toriSale[_tokenId];
+    toriSaleCount = toriSaleCount.sub(1);
+  }
+
+  function retrieveAllForSales() public view returns (uint[]) {
+    uint[] memory result = new uint[](toriSaleCount);
+    uint idx = 0;
+    for (uint i = 0; i < toris.length; i++) {
+      if (toriSale[i] > 0) {
+        result[idx] = i;
+        idx += 1;
+      }
+    }
+    return result;
   }
 }

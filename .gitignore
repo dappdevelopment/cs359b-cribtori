@@ -58,4 +58,7 @@ typings/
 .env
 
 # Mock imgs
-public/mockimg/
+src/mockimg/
+
+# SQL cred.
+config/sql.js
