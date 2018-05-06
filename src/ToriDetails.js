@@ -14,6 +14,7 @@ import Avatar from 'material-ui/Avatar';
 import * as util from './utils.js'
 
 import ToriRoom from './ToriRoom.js'
+import ToriActivityLogs from './ToriActivityLogs.js'
 
 import AccImg from './mockimg/acc-sample.png'
 
@@ -267,7 +268,7 @@ class ToriDetails extends Component {
               {this.state.inventoryItems}
             </List>
           ) : (
-            "Details"
+            <ToriActivityLogs toriId={this.state.toriId} name={this.state.name} />
           )}
         </Grid>
         <Grid item sm={6}>

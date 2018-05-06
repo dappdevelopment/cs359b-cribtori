@@ -251,8 +251,14 @@ function createEndpoints(devServer) {
   // Retrieving activities.
   devServer.get('/activity/:id', function(req, res) {
     var id = req.params.id;
+    var limit = req.query.limit;
     var query = 'SELECT * from activity where tori_id = ? ORDER BY time DESC';
     var inserts = [id];
+    if (limit !== undefined) {
+      query = 'SELECT * from activity where tori_id = ? ORDER BY time DESC LIMIT ?';
+      inserts = [id, parseInt(limit)];
+    }
+
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
       if (err) res.status(400).send({ message: 'invalid tori ID' });
