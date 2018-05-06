@@ -318,21 +318,24 @@ function createEndpoints(devServer) {
     var inserts = [id];
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
-      if (err) res.status(400).send({ message: 'invalid tori ID' });
-
-      var data = {
-        tori_id: row[0].tori_id,
-        locations: row[1].locations,
+      if (err) return res.status(400).send({ message: 'invalid tori ID' });
+      
+      if (rows.length > 0) {
+        var data = {
+          tori_id: rows[0].tori_id,
+          locations: rows[0].locations,
+        }
+        return res.status(200).send(data);
       }
-      res.status(200).send(data);
+      return res.status(200).send({});
     })
   });
 
   // Posting arrangements.
-  devServer.post('/room/', function(req, res) {
+  devServer.post('/room', function(req, res) {
     // TODO: room validation and authentication.
     var query = 'INSERT INTO arrangement (tori_id, locations) VALUES (?, ?) ON DUPLICATE KEY UPDATE locations = ?';
-    var inserts = [req.body.id, req.body.locations, req.body.locationsn];
+    var inserts = [req.body.id, req.body.locations, req.body.locations];
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
       if (err) res.status(400).send({ message: 'saving room failed' });

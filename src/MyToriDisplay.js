@@ -64,9 +64,23 @@ class MyToriDisplay extends Component {
     .then(
       (toriIds) => {
         toriIds = toriIds.map((id) => {return id.toNumber()});
-        this.setState({toriDisplay: []});
+        this.setState({
+          toriDisplay: [],
+          usedInventories: [],
+        });
 
         toriIds.forEach(id => {
+          util.retrieveRoomLayout(id)
+          .then(function(result) {
+            if (result.tori_id !== undefined) {
+              // Parse locations
+              let locations = JSON.parse(result.locations);
+              // TODO
+              console.log(locations);
+            }
+          })
+          .catch(console.error)
+
           util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
             this.setState({
               toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))

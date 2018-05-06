@@ -53,11 +53,14 @@ class ToriDetails extends Component {
       inventoryItems: [],
       accSelected: {},
       openSnackBar: false,
+      newRoomLayout: [],
+      roomLayout: [],
     }
 
     this.switchEdit = this.switchEdit.bind(this);
     this.saveEdit = this.saveEdit.bind(this);
     this.onAccessorySelected = this.onAccessorySelected.bind(this);
+    this.onItemPlaced = this.onItemPlaced.bind(this);
 
     this.feedTori = this.feedTori.bind(this);
     this.cleanTori = this.cleanTori.bind(this);
@@ -79,7 +82,18 @@ class ToriDetails extends Component {
         actionPaper: this.constructToriActions(),
       });
     });
+
+    // Fetch the room layout.
+    util.retrieveRoomLayout(this.props.toriId)
+    .then((result) => {
+      this.setState({
+          roomLayout: JSON.parse(result.locations),
+      });
+    })
+    .catch(console.error);
+
     // Get the inventory list as well.
+    let inventoryList = [];
     this.context.accContracts.forEach((contract) => {
       // Get the info.
       let info;
@@ -96,6 +110,8 @@ class ToriDetails extends Component {
       });
     });
   }
+
+
 
 
   postToriForSale(toriId, e) {
@@ -118,11 +134,47 @@ class ToriDetails extends Component {
   switchEdit() {
     this.setState({
       isEditRoom: !this.state.isEditRoom,
+      newRoomLayout: [],
+      accSelected: {
+        refresh: this.state.isEditRoom
+      },
     });
   }
 
   saveEdit() {
-    // TODO: save state to database.
+    let layout = this.state.newRoomLayout;
+    if (this.state.roomLayout !== this.state.newRoomLayout) {
+      this.setState({
+        roomLayout: this.state.newRoomLayout,
+        newRoomLayout: [],
+      });
+
+      let data = {
+        id: this.state.toriId,
+        locations: JSON.stringify(layout),
+      }
+      fetch('/room', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
+      })
+      .then(function(response) {
+        return response.status;
+      })
+      .then(function(status) {
+        let message = 'New room layout saved!';
+        if (status !== 200) {
+          message = 'Failed in saving room layout. Please try again layer.'
+        }
+        this.setState({
+          openSnackBar: true,
+          snackBarMessage: message,
+        });
+      }.bind(this))
+      .catch(console.err);
+    }
     this.switchEdit();
   }
 
@@ -130,6 +182,26 @@ class ToriDetails extends Component {
     this.setState({
       accSelected: item,
     });
+  }
+
+  onItemPlaced(layout) {
+    // Filter the layout, only include key, col, row, space.
+    // Filter tori as well.
+    layout = layout.filter((l) => l.key !== 'tori');
+    console.log('Item is placed!', layout);
+    // TODO: remove this filter.
+    layout = layout.map((l) => {
+      return {
+        key: l.key,
+        c: l.c,
+        r: l.r,
+        s: l.s
+      }
+    });
+    this.setState({
+      newRoomLayout: layout,
+      accSelected: {},
+    })
   }
 
   feedTori() {
@@ -273,7 +345,7 @@ class ToriDetails extends Component {
         </Grid>
         <Grid item sm={6}>
           {this.state.toriId !== -1 &&
-            <ToriRoom acc={this.state.accSelected}/>
+            <ToriRoom acc={this.state.accSelected} onItemPlaced={this.onItemPlaced} layout={this.state.roomLayout}/>
           }
         </Grid>
         <Grid item sm={3}>
