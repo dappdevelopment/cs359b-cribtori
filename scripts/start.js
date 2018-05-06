@@ -235,10 +235,23 @@ function createEndpoints(devServer) {
   devServer.use(bodyParser.urlencoded({ extended: false }));
   devServer.use(bodyParser.json());
 
+  devServer.get('/hello', function(req, res) {
+    res.status(200).send('hello world');
+  });
+
+  devServer.get('/test/:id', function(req, res) {
+    var id = req.params.id;
+    res.status(200).send(id);
+  });
+
+  devServer.post('/test', function(req, res) {
+    res.status(200).send('hello!');
+  });
+
   // Retrieving activities.
   devServer.get('/activity/:id', function(req, res) {
     var id = req.params.id;
-    var query = 'SELECT * from activity where tori_id = ?';
+    var query = 'SELECT * from activity where tori_id = ? ORDER BY time DESC';
     var inserts = [id];
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
@@ -247,7 +260,7 @@ function createEndpoints(devServer) {
       var results = rows.map((row) => {
         var data = {
           tori_id: row.tori_id,
-          timestamp: row.timestamp,
+          timestamp: row.time,
           activity_type: row.activity_type,
           description: row.description,
         }
@@ -258,14 +271,37 @@ function createEndpoints(devServer) {
   });
 
   // Posting activities.
-  devServer.post('/activity/', function(req, res) {
+  devServer.post('/activity', function(req, res) {
     // TODO: activity validation and authentication.
-    var query = 'INSERT INTO activity (tori_id, timestamp, activity_type, description) VALUES (?, ?, ?, ?)';
-    var inserts = [req.body.id, req.body.timestamp, req.body.activity_type, req.body.description];
+    var SIX_HOUR = 6 * 60 * 60 * 1000;
+    var PERIOD = (req.activity_type === 'feed') ? 1 : 2;
+
+    var actTime = Date.now();
+
+    if ((req.body.activity_type !== 'feed') && (req.body.activity_type !== 'clean')) {
+      return res.status(400).send({ message: 'activity not recognized' });
+    }
+
+    var query = 'SELECT * from activity WHERE tori_id = ? AND activity_type = ? ORDER BY time DESC LIMIT 1';
+    var inserts = [req.body.id, req.body.activity_type];
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
-      if (err) res.status(400).send({ message: 'activity log failed' });
-      res.status(200).end();
+      if (err) return res.status(400).send({ message: 'activity log failed, Error: ' + err });
+
+      if (rows.length > 0) {
+        var prevTime = new Date(rows[0].time);
+        if (actTime - prevTime < PERIOD * SIX_HOUR) {
+          return res.status(406).send({ message: 'Previous activity occur less than allowed period!'});
+        }
+      }
+
+      query = 'INSERT INTO activity (tori_id, time, activity_type, description) VALUES (?, ?, ?, ?)';
+      inserts = [req.body.id, actTime, req.body.activity_type, req.body.description];
+      query = mysql.format(query, inserts);
+      connection.query(query, function (err, rows, fields) {
+        if (err) return res.status(400).send({ message: 'activity log failed, Error: ' + err });
+        return res.status(200).end();
+      });
     })
   });
 
@@ -347,18 +383,18 @@ function runDevServer(host, port, protocol) {
     })
   );
   devServer.use(webpackhotMiddleware(compiler, {
-       heartbeat: 10 * 1000
+    heartbeat: 10 * 1000
   }));
 
   devServer.get('/favicon.ico', function(req, res) {
     res.sendFile(path.join(paths.appPublic, '/favicon.ico'));
   });
 
-  // Our custom middleware proxies requests to /index.html or a remote API.
-  addMiddleware(devServer);
-
   // Defining the endpoints.
   createEndpoints(devServer);
+
+  // Our custom middleware proxies requests to /index.html or a remote API.
+  addMiddleware(devServer);
 
   // Launch WebpackDevServer.
   devServer.listen(port, (err, result) => {

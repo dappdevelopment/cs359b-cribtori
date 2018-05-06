@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 
+import Snackbar from 'material-ui/Snackbar';
 import Typography from 'material-ui/Typography';
 import { withStyles } from 'material-ui/styles';
 import Paper from 'material-ui/Paper';
@@ -49,7 +50,8 @@ class ToriDetails extends Component {
       toriId: -1,
       isEditRoom: false,
       inventoryItems: [],
-      accSelected: {}
+      accSelected: {},
+      openSnackBar: false,
     }
 
     this.switchEdit = this.switchEdit.bind(this);
@@ -60,6 +62,8 @@ class ToriDetails extends Component {
     this.cleanTori = this.cleanTori.bind(this);
     this.playWithTori = this.playWithTori.bind(this);
     this.craftAccessory = this.craftAccessory.bind(this);
+
+    this.handleCloseSnackBar = this.handleCloseSnackBar.bind(this);
   }
 
   componentDidMount() {
@@ -128,13 +132,67 @@ class ToriDetails extends Component {
   }
 
   feedTori() {
-    // TODO:
-    console.log('Feeding tori...');
+    // Construct the POST body.
+    let data = {
+      id: this.state.toriId,
+      activity_type: 'feed',
+      description: '',
+    };
+    fetch('/activity', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data),
+    })
+    .then(function(response) {
+      return response.status;
+    })
+    .then(function(status) {
+      let message = 'Yum! ' + this.state.name + ' is full!';
+      if (status === 406) {
+        message = this.state.name + ' has been recently fed!';
+      } else if (status === 400) {
+        message = 'Feeding ' + this.state.name + ' failed, try again later';
+      }
+      this.setState({
+        openSnackBar: true,
+        snackBarMessage: message,
+      });
+    }.bind(this))
+    .catch(console.err);
   }
 
   cleanTori() {
-    // TODO:
-    console.log('Cleaning tori\'s room...');
+    // Construct the POST body.
+    let data = {
+      id: this.state.toriId,
+      activity_type: 'clean',
+      description: '',
+    };
+    fetch('/activity', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data),
+    })
+    .then(function(response) {
+      return response.status;
+    })
+    .then(function(status) {
+      let message = this.state.name + '\'s room is clean!';
+      if (status === 406) {
+        message = this.state.name + '\'s is still clean!';
+      } else if (status === 400) {
+        message = 'Cleaning ' + this.state.name + '\'s room failed, try again later';
+      }
+      this.setState({
+        openSnackBar: true,
+        snackBarMessage: message,
+      });
+    }.bind(this))
+    .catch(console.err);
   }
 
   playWithTori() {
@@ -184,6 +242,12 @@ class ToriDetails extends Component {
     );
   }
 
+  handleCloseSnackBar() {
+    this.setState({
+      openSnackBar: false,
+    });
+  }
+
 
   render() {
     return (
@@ -225,6 +289,15 @@ class ToriDetails extends Component {
             this.state.actionPaper
           )}
         </Grid>
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={this.state.openSnackBar}
+          onClose={this.handleCloseSnackBar}
+          SnackbarContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">{this.state.snackBarMessage}</span>}
+        />
       </Grid>
     );
   }

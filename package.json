@@ -45,13 +45,13 @@
     "style-loader": "0.13.1",
     "truffle-contract": "^1.1.8",
     "truffle-solidity-loader": "0.0.8",
-    "url-loader": "0.5.7",
+    "url-loader": "^1.0.1",
     "webpack": "^3.11.0",
     "webpack-dev-middleware": "^2.0.6",
     "webpack-dev-server": "^2.11.2",
     "webpack-hot-middleware": "^2.22.1",
     "webpack-manifest-plugin": "^2.0.2",
-    "whatwg-fetch": "1.0.0"
+    "whatwg-fetch": "^2.0.4"
   },
   "dependencies": {
     "dotenv": "^2.0.0",
@@ -59,7 +59,8 @@
     "material-ui": "^1.0.0-beta.44",
     "mysql": "^2.15.0",
     "react": "^15.4.2",
-    "react-dom": "^15.4.2"
+    "react-dom": "^15.4.2",
+    "request": "^2.85.0"
   },
   "scripts": {
     "start": "node scripts/start.js",
