@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
+import PropTypes from 'prop-types';
 
 import * as util from './utils.js'
 
@@ -35,6 +36,10 @@ class MyToriDisplay extends Component {
     userAccount: PropTypes.string
   }
 
+  static childContextTypes = {
+    toriSiblings: PropTypes.array,
+  }
+
   constructor(props) {
     super(props)
 
@@ -42,10 +47,17 @@ class MyToriDisplay extends Component {
       toriDisplay: [],
       currentTori: -1,
       detailIsShown: false,
+      toriSiblings: [],
     }
 
     this.generateInitToris = this.generateInitToris.bind(this);
     this.closeToriDetails = this.closeToriDetails.bind(this);
+  }
+
+  getChildContext() {
+    return {
+      toriSiblings: this.state.toriSiblings,
+    };
   }
 
   componentDidMount() {
@@ -64,7 +76,11 @@ class MyToriDisplay extends Component {
     .then(
       (toriIds) => {
         toriIds = toriIds.map((id) => {return id.toNumber()});
-        this.setState({toriDisplay: []});
+        this.setState({
+          toriDisplay: [],
+          usedInventories: {},
+          toriSiblings: toriIds,
+        });
 
         toriIds.forEach(id => {
           util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {

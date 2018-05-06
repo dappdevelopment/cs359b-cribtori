@@ -105,3 +105,14 @@ export function getProficiency(i) {
 export function getPersonality(i) {
   return PERSONALITY[i];
 }
+
+
+export function retrieveRoomLayout(id) {
+  return fetch('/room/' + id)
+  .then(function(response) {
+    if (response.ok) {
+      return response.json();
+    }
+    throw response;
+  });
+}

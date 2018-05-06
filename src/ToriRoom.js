@@ -6,6 +6,7 @@ import GridList, { GridListTile } from 'material-ui/GridList';
 // Import Image
 import Floor from './img/floor.png';
 import ToriImg from './mockimg/tori-sample.png';
+import AccImg from './mockimg/acc-sample.png'
 
 const LIM = 5;
 
@@ -44,35 +45,35 @@ class ToriRoom extends Component {
       cells: [],
       isSelecting: false,
       layout: [],
-      layoutIndicator: []
     }
   }
 
   componentDidMount() {
-    // TODO: get info about the layout here.
+    this.constructLayout();
+  }
 
+  constructLayout() {
     // Construct the initial layout.
     let layout = [
       {
           key: 'tori',
           img: ToriImg,
-          col: 2,
-          row: 2,
-          space: 1,
+          c: 2,
+          r: 2,
+          s: 1,
       },
     ];
 
-    let layoutIndicator = [0, 0, 0, 0, 0,
-                           0, 0, 0, 0, 0,
-                           0, 0, 1, 0, 0,
-                           0, 0, 0, 0, 0,
-                           0, 0, 0, 0, 0]
+   this.props.layout.forEach((l) => {
+     // TODO: for now, the images are hardcoded. Need to fix this mapping later.
+     l.img = AccImg;
 
-    // TODO: modify the layoutIndicator based on the retrieved layout.
+     // Modify the layout indicator.
+     layout = layout.concat(l)
+   });
 
     this.setState({
       layout: layout,
-      layoutIndicator: layoutIndicator
     });
   }
 
@@ -81,20 +82,25 @@ class ToriRoom extends Component {
       // TODO: check if empty.
       if (this.props.acc.key !== undefined) {
         this.onItemSelected();
+      } else {
+        // TODO: Reset the layout.
+        if (this.props.acc.refresh || (prevProps.layout.length === 0 && this.props.layout.length > 0)) {
+          this.constructLayout();
+        }
       }
     }
   }
 
   constructCells() {
-    let idx = 0;
     // First, construct all grid with Floor.
-    let cells = this.state.layoutIndicator.map((val) => {
+    let cells = [];
+    for (var idx = 0; idx < LIM * LIM; idx++) {
       let x = idx % LIM;
       let y = Math.floor(idx / LIM);
       let c;
-      if (val === 0 && this.state.isSelecting) {
+      if (this.state.isSelecting) {
         c = (
-          <GridListTile onClick={(e) => this.onTileClick(x, y, e)}
+          <GridListTile onClick={(e) => this.onEmptyTileClick(x, y, e)}
                         key={`cell_${x}_${y}`}
                         className={this.props.classes.gridTile}
                         cols={1}>
@@ -109,29 +115,55 @@ class ToriRoom extends Component {
           </GridListTile>
         )
       }
-      idx += 1;
-      return c;
-    });
+      cells[idx] = c;
+    };
 
     // Second, iterate through layout and reassign cells.
     this.state.layout.forEach((content) => {
-      let x = content.col;
-      let y = content.row;
+      let x = content.c;
+      let y = content.r;
       let img = content.img;
       let key = content.key;
-      let space = content.space;
+      let space = content.s;
 
-      let c = (
-        <GridListTile key={`${key}_${x}_${y}`} className={this.props.classes.gridTile} cols={space}>
-          <img src={img} alt={key} />
-        </GridListTile>
-      );
+      let c;
+      if (key !== 'tori' && !this.state.isSelecting) {
+        c = (
+          <GridListTile key={`${key}_${x}_${y}`} onClick={(e) => this.onFullTileClick(x, y, e)} className={this.props.classes.gridTile} cols={space}>
+            <img src={img} alt={key} />
+          </GridListTile>
+        );
+      } else {
+        c = (
+          <GridListTile key={`${key}_${x}_${y}`} className={this.props.classes.gridTile} cols={space}>
+            <img src={img} alt={key} />
+          </GridListTile>
+        );
+      }
 
-      cells[y*LIM + x] = c;
+      cells = cells.map((oldC) => {
+        let oKey = oldC.key;
+        let temp = oKey.split('_');
+        let oX = parseInt(temp[1], 10);
+        let oY = parseInt(temp[2], 10);
 
-      // TODO: how about orientation?
+        if (oX === x && oY === y) {
+          return c;
+        } else {
+          return oldC;
+        }
+      });
+
+      // TODO: how about orientation? For now only handle horizontal orientation.
       if (space > 1) {
-        cells.splice(y*LIM + x + 1, 1);
+        cells = cells.filter((c) => {
+          let oKey = c.key;
+          let temp = oKey.split('_');
+          let oX = parseInt(temp[1], 10);
+          let oY = parseInt(temp[2], 10);
+
+          return (oY !== y || oX !== x + 1);
+        });
       }
     });
 
@@ -144,33 +176,49 @@ class ToriRoom extends Component {
     })
   }
 
-  onTileClick(x, y, e) {
-    console.log('clicked', x, y)
-    // TODO: Check if valid size.
+  onFullTileClick(x, y, e) {
+    let layout = this.state.layout;
+    layout = layout.filter((l) => {
+      return !(l.c === x && l.r === y);
+    });
 
+    this.setState({
+      layout: layout,
+      isSelecting: false,
+    }, () => this.props.onItemPlaced(layout));
+  }
+
+  onEmptyTileClick(x, y, e) {
     // Update cell.
     let key = this.props.acc.key;
     let space = this.props.acc.space;
     let img = this.props.acc.img;
+    let layout = this.state.layout;
+
+    // TODO: Check if valid size.
+    // TODO: handle different orientation.
+    if (x === LIM - 1 && space > 1) {
+      this.setState({
+        isSelecting: false,
+      }, () => this.props.onItemPlaced(layout));
+      return;
+    }
 
     // TODO: update with size.
     let l = {
       key: key,
       img: img,
-      col: x,
-      row: y,
-      space: space,
+      c: x,
+      r: y,
+      s: space,
     };
 
-    let layoutIndicator = this.state.layoutIndicator;
-    layoutIndicator[y*LIM + x] = 1;
-    let layout = this.state.layout;
+    layout = layout.concat(l);
 
     this.setState({
-      layoutIndicator: layoutIndicator,
-      layout: layout.concat(l),
+      layout: layout,
       isSelecting: false,
-    })
+    }, () => this.props.onItemPlaced(layout));
   }
 
   render() {

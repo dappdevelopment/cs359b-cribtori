@@ -1,6 +1,5 @@
-import React, { Component, PropTypes } from 'react'
-
-import ToriRoom from './ToriRoom.js'
+import React, { Component } from 'react'
+import PropTypes from 'prop-types';
 
 class OtherToriDisplay extends Component {
 
@@ -12,14 +11,12 @@ class OtherToriDisplay extends Component {
     super(props)
 
     this.state = {};
-    // this.context.toriToken
   }
 
   render() {
     return (
       <div className="Trade">
         <h4>Other Tori Display TBA</h4>
-        <ToriRoom/>
       </div>
     );
   }

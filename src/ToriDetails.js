@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
+import PropTypes from 'prop-types';
 
 import Snackbar from 'material-ui/Snackbar';
 import Typography from 'material-ui/Typography';
@@ -41,7 +42,8 @@ class ToriDetails extends Component {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
     accContracts: PropTypes.array,
-    userAccount: PropTypes.string
+    userAccount: PropTypes.string,
+    toriSiblings: PropTypes.array,
   }
 
   constructor(props) {
@@ -53,11 +55,15 @@ class ToriDetails extends Component {
       inventoryItems: [],
       accSelected: {},
       openSnackBar: false,
+      newRoomLayout: [],
+      roomLayout: [],
+      usedInventories: {}
     }
 
     this.switchEdit = this.switchEdit.bind(this);
     this.saveEdit = this.saveEdit.bind(this);
     this.onAccessorySelected = this.onAccessorySelected.bind(this);
+    this.onItemPlaced = this.onItemPlaced.bind(this);
 
     this.feedTori = this.feedTori.bind(this);
     this.cleanTori = this.cleanTori.bind(this);
@@ -79,6 +85,18 @@ class ToriDetails extends Component {
         actionPaper: this.constructToriActions(),
       });
     });
+
+    // Fetch the room layout.
+    util.retrieveRoomLayout(this.props.toriId)
+    .then((result) => {
+      if (result.locations) {
+        this.setState({
+            roomLayout: JSON.parse(result.locations),
+        });
+      }
+    })
+    .catch(console.error);
+
     // Get the inventory list as well.
     this.context.accContracts.forEach((contract) => {
       // Get the info.
@@ -90,12 +108,14 @@ class ToriDetails extends Component {
         .then((result) => {
           info.balance = result.toNumber();
           this.setState({
-            inventoryItems: this.state.inventoryItems.concat(this.constructInventoryItem(info))
+            inventoryItems: this.state.inventoryItems.concat(info)
           });
         })
       });
     });
   }
+
+
 
 
   postToriForSale(toriId, e) {
@@ -116,13 +136,72 @@ class ToriDetails extends Component {
 
 
   switchEdit() {
-    this.setState({
-      isEditRoom: !this.state.isEditRoom,
+    // Fetch all used inventories.
+    let iCounter = {};
+    // Get info about each toris' layout
+    let layoutPromises = this.context.toriSiblings.map((id) => {
+      return util.retrieveRoomLayout(id)
+    });
+    Promise.all(layoutPromises)
+    .then((results) => {
+      results.forEach((res) => {
+        if (res.tori_id !== undefined) {
+          // Parse locations
+          let locations = JSON.parse(res.locations);
+          locations.forEach((l) => {
+            if (iCounter[l.key]) {
+              iCounter[l.key] += 1;
+            } else {
+              iCounter[l.key] = 1;
+            }
+          });
+        }
+      });
+      this.setState({
+        isEditRoom: !this.state.isEditRoom,
+        newRoomLayout: [],
+        accSelected: {
+          refresh: this.state.isEditRoom
+        },
+        usedInventories: iCounter,
+      });
     });
   }
 
   saveEdit() {
-    // TODO: save state to database.
+    let layout = this.state.newRoomLayout;
+    if (this.state.roomLayout !== this.state.newRoomLayout) {
+      this.setState({
+        roomLayout: this.state.newRoomLayout,
+        newRoomLayout: [],
+      });
+
+      let data = {
+        id: this.state.toriId,
+        locations: JSON.stringify(layout),
+      }
+      fetch('/room', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
+      })
+      .then(function(response) {
+        return response.status;
+      })
+      .then(function(status) {
+        let message = 'New room layout saved!';
+        if (status !== 200) {
+          message = 'Failed in saving room layout. Please try again layer.'
+        }
+        this.setState({
+          openSnackBar: true,
+          snackBarMessage: message,
+        });
+      }.bind(this))
+      .catch(console.err);
+    }
     this.switchEdit();
   }
 
@@ -130,6 +209,43 @@ class ToriDetails extends Component {
     this.setState({
       accSelected: item,
     });
+  }
+
+  onItemPlaced(layout) {
+    // Filter the layout, only include key, col, row, space.
+    // Filter tori as well.
+    layout = layout.filter((l) => l.key !== 'tori');
+    // TODO: remove this filter.
+    layout = layout.map((l) => {
+      return {
+        key: l.key,
+        c: l.c,
+        r: l.r,
+        s: l.s
+      }
+    });
+
+    // Update the used inventory list by checking the differences between
+    // the new layout and the old layout.
+    let iCounter = {};
+    this.state.roomLayout.forEach((l) => {
+      if (!(iCounter[l.key])) iCounter[l.key] = 0;
+      iCounter[l.key] -= 1;
+    });
+    layout.forEach((l) => {
+      if (!(iCounter[l.key])) iCounter[l.key] = 0;
+      iCounter[l.key] += 1;
+    });
+    let usedInventories = this.state.usedInventories;
+    Object.keys(iCounter).forEach((symbol) => {
+      if (!(usedInventories[symbol])) usedInventories[symbol] = 0;
+      usedInventories[symbol] += iCounter[symbol];
+    });
+    this.setState({
+      usedInventories: usedInventories,
+      newRoomLayout: layout,
+      accSelected: {},
+    })
   }
 
   feedTori() {
@@ -230,13 +346,17 @@ class ToriDetails extends Component {
   constructInventoryItem(info) {
     // TODO: implement image mapping.
     let imgName = AccImg;
+    let amount = info.balance;
+    if (this.state.usedInventories[info.symbol]) {
+      amount -= this.state.usedInventories[info.symbol];
+    }
 
     let item = {key: info.symbol, space: info.space, img: imgName};
     return (
       <MenuItem key={info.symbol} className={this.props.classes.menuItem} onClick={(e) => this.onAccessorySelected(item, e)}>
         <Avatar alt={info.name} src={imgName} />
         <Typography variant="caption" gutterBottom>
-          {`x ${info.balance}`}
+          {`x ${amount}`}
         </Typography>
         <ListItemText primary={`Space: ${info.space}`} />
       </MenuItem>
@@ -265,7 +385,7 @@ class ToriDetails extends Component {
         <Grid item sm={3}>
           {this.state.isEditRoom ? (
             <List>
-              {this.state.inventoryItems}
+              {this.state.inventoryItems.map((info) => this.constructInventoryItem(info))}
             </List>
           ) : (
             <ToriActivityLogs toriId={this.state.toriId} name={this.state.name} />
@@ -273,7 +393,7 @@ class ToriDetails extends Component {
         </Grid>
         <Grid item sm={6}>
           {this.state.toriId !== -1 &&
-            <ToriRoom acc={this.state.accSelected}/>
+            <ToriRoom acc={this.state.accSelected} onItemPlaced={this.onItemPlaced} layout={this.state.roomLayout}/>
           }
         </Grid>
         <Grid item sm={3}>
