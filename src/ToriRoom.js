@@ -144,8 +144,8 @@ class ToriRoom extends Component {
       cells = cells.map((oldC) => {
         let oKey = oldC.key;
         let temp = oKey.split('_');
-        let oX = parseInt(temp[1]);
-        let oY = parseInt(temp[2]);
+        let oX = parseInt(temp[1], 10);
+        let oY = parseInt(temp[2], 10);
 
         if (oX === x && oY === y) {
           return c;
@@ -159,8 +159,8 @@ class ToriRoom extends Component {
         cells = cells.filter((c) => {
           let oKey = c.key;
           let temp = oKey.split('_');
-          let oX = parseInt(temp[1]);
-          let oY = parseInt(temp[2]);
+          let oX = parseInt(temp[1], 10);
+          let oY = parseInt(temp[2], 10);
 
           return (oY !== y || oX !== x + 1);
         });

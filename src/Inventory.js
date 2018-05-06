@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
+import PropTypes from 'prop-types';
 
 import * as util from './utils.js'
 
@@ -18,6 +19,7 @@ class Inventory extends Component {
 
   static contextTypes = {
     web3: PropTypes.object,
+    toriToken: PropTypes.object,
     accContracts: PropTypes.array,
     userAccount: PropTypes.string
   }
@@ -28,26 +30,61 @@ class Inventory extends Component {
     this.state = {
       inventoryDisplay: [],
       inventoryTypes: [],
+      usedInventories: {},
     };
   }
 
   componentDidMount() {
-    this.context.accContracts.forEach((contract) => {
-      // Get the info.
-      let info;
-      util.retrieveAllTokenInfo(contract)
-      .then((result) => {
-        info = util.parseAccInfo(result);
-        contract.balanceOf(this.context.userAccount)
-        .then((result) => {
-          info.balance = result.toNumber();
+    // Get info on how many inventories have been used.
+    util.retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
+    .then(
+      (toriIds) => {
+        toriIds = toriIds.map((id) => {return id.toNumber()});
+        let iCounter = {};
+        // Get info about each toris' layout
+        let layoutPromises = toriIds.map((id) => {
+          return util.retrieveRoomLayout(id)
+        });
+        Promise.all(layoutPromises)
+        .then((results) => {
+          results.forEach((res) => {
+            if (res.tori_id !== undefined) {
+              // Parse locations
+              let locations = JSON.parse(res.locations);
+              locations.forEach((l) => {
+                if (iCounter[l.key]) {
+                  iCounter[l.key] += 1;
+                } else {
+                  iCounter[l.key] = 1;
+                }
+              });
+            }
+          });
           this.setState({
-            inventoryDisplay: this.state.inventoryDisplay.concat(this.constructInventoryDisplay(contract, info))
+            usedInventories: iCounter,
           });
         })
-      })
-      .catch(console.error);
-    });
+        .then(() => {
+          this.context.accContracts.forEach((contract) => {
+            // Get the info.
+            let info;
+            util.retrieveAllTokenInfo(contract)
+            .then((result) => {
+              info = util.parseAccInfo(result);
+              contract.balanceOf(this.context.userAccount)
+              .then((result) => {
+                info.balance = result.toNumber();
+                this.setState({
+                  inventoryDisplay: this.state.inventoryDisplay.concat(this.constructInventoryDisplay(contract, info))
+                });
+              })
+            })
+            .catch(console.error);
+          });
+        });
+      }
+    )
+    .catch(console.error);
   }
 
 
@@ -86,8 +123,11 @@ class Inventory extends Component {
               <ListItem><ListItemText primary="Material:"/><ListItemText primary={info.material} /></ListItem>
               <ListItem><ListItemText primary="Space:"/><ListItemText primary={info.space} /></ListItem>
               <ListItem><ListItemText primary="Amount:"/><ListItemText primary={info.balance} /></ListItem>
+              { this.state.usedInventories[info.symbol] &&
+                <ListItem><ListItemText primary={`${this.state.usedInventories[info.symbol]} Placed`}/></ListItem>
+              }
               { info.price > 0 && (
-                 <ListItem><ListItemText primary={`${info.amount} For Sale`}/></ListItem>
+                <ListItem><ListItemText primary={`${info.amount} For Sale`}/></ListItem>
               )}
             </List>
           </CardContent>

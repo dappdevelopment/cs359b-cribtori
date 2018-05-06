@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
+import PropTypes from 'prop-types';
 
 import Snackbar from 'material-ui/Snackbar';
 import Typography from 'material-ui/Typography';
@@ -97,7 +98,6 @@ class ToriDetails extends Component {
     .catch(console.error);
 
     // Get the inventory list as well.
-    let inventoryList = [];
     this.context.accContracts.forEach((contract) => {
       // Get the info.
       let info;
