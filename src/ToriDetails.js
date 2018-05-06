@@ -322,23 +322,33 @@ class ToriDetails extends Component {
     console.log('Crafting accessory...');
   }
 
+  visitTori() {
+    console.log('Visit Tori');
+  }
+
 
   constructToriActions() {
     return (
       <Paper className={this.props.classes.paper}>
-        <MenuList>
-          <MenuItem onClick={this.feedTori}>Feed</MenuItem>
-          <MenuItem onClick={this.cleanTori}>Clean</MenuItem>
-          <MenuItem onClick={this.playWithTori}>Play</MenuItem>
-          <MenuItem onClick={this.craftAccessory}>Craft</MenuItem>
-          <Divider />
-          <MenuItem onClick={this.switchEdit}>Edit Room</MenuItem>
-          {this.state.salePrice > 0 ? (
-            <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriId, e)}>Revoke Sale Post</MenuItem>
-          ) : (
-            <MenuItem onClick={(e) => this.postToriForSale(this.state.toriId, e)}>Sell Tori</MenuItem>
-          )}
-        </MenuList>
+        { this.props.isOther ? (
+          <MenuList>
+            <MenuItem onClick={this.visitTori}>Visit</MenuItem>
+          </MenuList>
+        ) : (
+          <MenuList>
+            <MenuItem onClick={this.feedTori}>Feed</MenuItem>
+            <MenuItem onClick={this.cleanTori}>Clean</MenuItem>
+            <MenuItem onClick={this.playWithTori}>Play</MenuItem>
+            <MenuItem onClick={this.craftAccessory}>Craft</MenuItem>
+            <Divider />
+            <MenuItem onClick={this.switchEdit}>Edit Room</MenuItem>
+            {this.state.salePrice > 0 ? (
+              <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriId, e)}>Revoke Sale Post</MenuItem>
+            ) : (
+              <MenuItem onClick={(e) => this.postToriForSale(this.state.toriId, e)}>Sell Tori</MenuItem>
+            )}
+          </MenuList>
+        )}
       </Paper>
     );
   }
@@ -371,6 +381,16 @@ class ToriDetails extends Component {
 
 
   render() {
+    let leftCol;
+    if (this.state.isEditRoom) {
+      leftCol = (<List>
+        {this.state.inventoryItems.map((info) => this.constructInventoryItem(info))}
+      </List>);
+    } else if (!this.props.isOther) {
+      // TODO: handle error thrown in console when switching from other tori details to my tori.
+      leftCol = (<ToriActivityLogs toriId={this.state.toriId} name={this.state.name} /> );
+    }
+
     return (
       <Grid container className="tori-details-container"
                       spacing={8}
@@ -383,13 +403,7 @@ class ToriDetails extends Component {
           </Typography>
         </Grid>
         <Grid item sm={3}>
-          {this.state.isEditRoom ? (
-            <List>
-              {this.state.inventoryItems.map((info) => this.constructInventoryItem(info))}
-            </List>
-          ) : (
-            <ToriActivityLogs toriId={this.state.toriId} name={this.state.name} />
-          )}
+          {!this.props.isOther && leftCol}
         </Grid>
         <Grid item sm={6}>
           {this.state.toriId !== -1 &&

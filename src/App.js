@@ -10,7 +10,6 @@ import getWeb3 from './utils/getWeb3'
 
 import MyToriDisplay from './MyToriDisplay.js'
 import Inventory from './Inventory.js'
-import OtherToriDisplay from './OtherToriDisplay.js'
 import Trade from './Trade.js'
 
 import './css/oswald.css'
@@ -133,11 +132,12 @@ class App extends Component {
       case 1:
           return <Inventory />;
       case 2:
-          return <OtherToriDisplay />;
+          // Other tori display
+          return <MyToriDisplay mode={this.state.mode}/>;
       case 3:
           return <Trade />;
       default:
-        return <MyToriDisplay/>;
+        return <MyToriDisplay mode={this.state.mode}/>;
     }
   }
 

@@ -15,8 +15,8 @@ export function retrieveTokenIndexes(contract, addr) {
 }
 
 
-export function generateNewTori(contract, quiz, name, addr) {
-  return contract.generateNewTori(quiz, name, { from: addr });
+export function generateInitialTori(contract, quiz, name, addr) {
+  return contract.generateInitialTori(quiz, name, { from: addr });
 }
 
 
