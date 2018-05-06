@@ -41,7 +41,8 @@ class ToriDetails extends Component {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
     accContracts: PropTypes.array,
-    userAccount: PropTypes.string
+    userAccount: PropTypes.string,
+    toriSiblings: PropTypes.array,
   }
 
   constructor(props) {
@@ -55,6 +56,7 @@ class ToriDetails extends Component {
       openSnackBar: false,
       newRoomLayout: [],
       roomLayout: [],
+      usedInventories: {}
     }
 
     this.switchEdit = this.switchEdit.bind(this);
@@ -86,9 +88,11 @@ class ToriDetails extends Component {
     // Fetch the room layout.
     util.retrieveRoomLayout(this.props.toriId)
     .then((result) => {
-      this.setState({
-          roomLayout: JSON.parse(result.locations),
-      });
+      if (result.locations) {
+        this.setState({
+            roomLayout: JSON.parse(result.locations),
+        });
+      }
     })
     .catch(console.error);
 
@@ -104,7 +108,7 @@ class ToriDetails extends Component {
         .then((result) => {
           info.balance = result.toNumber();
           this.setState({
-            inventoryItems: this.state.inventoryItems.concat(this.constructInventoryItem(info))
+            inventoryItems: this.state.inventoryItems.concat(info)
           });
         })
       });
@@ -132,12 +136,35 @@ class ToriDetails extends Component {
 
 
   switchEdit() {
-    this.setState({
-      isEditRoom: !this.state.isEditRoom,
-      newRoomLayout: [],
-      accSelected: {
-        refresh: this.state.isEditRoom
-      },
+    // Fetch all used inventories.
+    let iCounter = {};
+    // Get info about each toris' layout
+    let layoutPromises = this.context.toriSiblings.map((id) => {
+      return util.retrieveRoomLayout(id)
+    });
+    Promise.all(layoutPromises)
+    .then((results) => {
+      results.forEach((res) => {
+        if (res.tori_id !== undefined) {
+          // Parse locations
+          let locations = JSON.parse(res.locations);
+          locations.forEach((l) => {
+            if (iCounter[l.key]) {
+              iCounter[l.key] += 1;
+            } else {
+              iCounter[l.key] = 1;
+            }
+          });
+        }
+      });
+      this.setState({
+        isEditRoom: !this.state.isEditRoom,
+        newRoomLayout: [],
+        accSelected: {
+          refresh: this.state.isEditRoom
+        },
+        usedInventories: iCounter,
+      });
     });
   }
 
@@ -188,7 +215,6 @@ class ToriDetails extends Component {
     // Filter the layout, only include key, col, row, space.
     // Filter tori as well.
     layout = layout.filter((l) => l.key !== 'tori');
-    console.log('Item is placed!', layout);
     // TODO: remove this filter.
     layout = layout.map((l) => {
       return {
@@ -198,7 +224,25 @@ class ToriDetails extends Component {
         s: l.s
       }
     });
+
+    // Update the used inventory list by checking the differences between
+    // the new layout and the old layout.
+    let iCounter = {};
+    this.state.roomLayout.forEach((l) => {
+      if (!(iCounter[l.key])) iCounter[l.key] = 0;
+      iCounter[l.key] -= 1;
+    });
+    layout.forEach((l) => {
+      if (!(iCounter[l.key])) iCounter[l.key] = 0;
+      iCounter[l.key] += 1;
+    });
+    let usedInventories = this.state.usedInventories;
+    Object.keys(iCounter).forEach((symbol) => {
+      if (!(usedInventories[symbol])) usedInventories[symbol] = 0;
+      usedInventories[symbol] += iCounter[symbol];
+    });
     this.setState({
+      usedInventories: usedInventories,
       newRoomLayout: layout,
       accSelected: {},
     })
@@ -302,13 +346,17 @@ class ToriDetails extends Component {
   constructInventoryItem(info) {
     // TODO: implement image mapping.
     let imgName = AccImg;
+    let amount = info.balance;
+    if (this.state.usedInventories[info.symbol]) {
+      amount -= this.state.usedInventories[info.symbol];
+    }
 
     let item = {key: info.symbol, space: info.space, img: imgName};
     return (
       <MenuItem key={info.symbol} className={this.props.classes.menuItem} onClick={(e) => this.onAccessorySelected(item, e)}>
         <Avatar alt={info.name} src={imgName} />
         <Typography variant="caption" gutterBottom>
-          {`x ${info.balance}`}
+          {`x ${amount}`}
         </Typography>
         <ListItemText primary={`Space: ${info.space}`} />
       </MenuItem>
@@ -337,7 +385,7 @@ class ToriDetails extends Component {
         <Grid item sm={3}>
           {this.state.isEditRoom ? (
             <List>
-              {this.state.inventoryItems}
+              {this.state.inventoryItems.map((info) => this.constructInventoryItem(info))}
             </List>
           ) : (
             <ToriActivityLogs toriId={this.state.toriId} name={this.state.name} />
