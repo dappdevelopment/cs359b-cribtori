@@ -4,7 +4,8 @@ import { withStyles } from 'material-ui/styles';
 import GridList, { GridListTile } from 'material-ui/GridList';
 
 // Import Image
-import Floor from '../public/img/floor.png';
+import Floor from './img/floor.png';
+import ToriImg from './mockimg/tori-sample.png';
 
 const LIM = 5;
 
@@ -54,7 +55,7 @@ class ToriRoom extends Component {
     let layout = [
       {
           key: 'tori',
-          img: 'mockimg/tori-sample.png',
+          img: ToriImg,
           col: 2,
           row: 2,
           space: 1,

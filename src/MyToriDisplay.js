@@ -11,6 +11,7 @@ import Button from 'material-ui/Button';
 
 import ToriDetails from './ToriDetails.js'
 
+import ToriImg from './mockimg/tori-sample.png'
 
 const styles = theme => ({
   root: {
@@ -130,7 +131,7 @@ class MyToriDisplay extends Component {
     let personality = util.getPersonality(info.personality);
 
     // let imgNum = parseInt(toriDna, 10) % 4 + 1;
-    let imgName = 'mockimg/tori-sample.png';
+    let imgName = ToriImg;
     return (
       <Grid key={info.id} item sm={4}>
         <Card className="toribox">

@@ -1,0 +1,14 @@
+CREATE DATABASE tori;
+
+USE tori;
+
+CREATE TABLE activity ( id int unsigned not null auto_increment,
+                        tori_id int not null,
+                        time timestamp,
+                        activity_type varchar(20),
+                        description varchar(100),
+                        PRIMARY KEY (id) );
+
+CREATE TABLE arrangement ( tori_id int not null,
+                           locations varchar(200),
+                           PRIMARY KEY (tori_id) );

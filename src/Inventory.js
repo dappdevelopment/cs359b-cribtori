@@ -8,11 +8,11 @@ import Card, { CardActions, CardContent, CardMedia, CardHeader } from 'material-
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
 
+import AccImg from './mockimg/acc-sample.png'
 
 const cardStyle = {
   height: 200
 }
-
 
 class Inventory extends Component {
 
@@ -69,7 +69,7 @@ class Inventory extends Component {
 
   constructInventoryDisplay(contract, info) {
     // TODO: implement image mapping.
-    let imgName = 'mockimg/acc-sample.png';
+    let imgName = AccImg;
 
     return (
       <Grid key={info.symbol} item sm={4}>

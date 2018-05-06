@@ -14,6 +14,9 @@ import * as util from './utils.js'
 
 import ToriRoom from './ToriRoom.js'
 
+import AccImg from './mockimg/acc-sample.png'
+
+
 const styles = theme => ({
   menuItem: {
     '&:focus': {
@@ -167,7 +170,7 @@ class ToriDetails extends Component {
 
   constructInventoryItem(info) {
     // TODO: implement image mapping.
-    let imgName = 'mockimg/acc-sample.png';
+    let imgName = AccImg;
 
     let item = {key: info.symbol, space: info.space, img: imgName};
     return (

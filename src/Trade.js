@@ -10,6 +10,9 @@ import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
 
 
+import AccImg from './mockimg/acc-sample.png'
+import ToriImg from './mockimg/tori-sample.png'
+
 const styles = theme => ({
   card: {
     display: 'flex',
@@ -121,7 +124,7 @@ class Trade extends Component {
     let proficiency = util.getProficiency(info.proficiency);
     let personality = util.getPersonality(info.personality);
 
-    let imgName = 'mockimg/tori-sample.png';
+    let imgName = ToriImg;
 
     return (
       <Grid key={info.id} item sm={4}>
@@ -154,7 +157,7 @@ class Trade extends Component {
 
   constructAccSaleDisplay(info) {
     // TODO: implement image mapping.
-    let imgName = 'mockimg/acc-sample.png';
+    let imgName = AccImg;
     let i = 0;
     let offer = info.sales.map((item) => {
       i += 1;

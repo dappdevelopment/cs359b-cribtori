@@ -17,8 +17,6 @@ import './css/open-sans.css'
 import './css/pure-min.css'
 import './App.css'
 
-import '../node_modules/react-grid-layout/css/styles.css'
-import '../node_modules/react-resizable/css/styles.css'
 
 import AppBar from 'material-ui/AppBar';
 import Tabs, { Tab } from 'material-ui/Tabs';
