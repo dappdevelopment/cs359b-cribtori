@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
-import ToriOwnership from '../build/contracts/ToriOwnership.json'
+import ToriToken from '../build/contracts/ToriToken.json'
 // Accessories contract
 import WoodenDesk from '../build/contracts/WoodenDesk.json'
 import WoodenCabinet from '../build/contracts/WoodenCabinet.json'
@@ -10,7 +10,6 @@ import getWeb3 from './utils/getWeb3'
 
 import MyToriDisplay from './MyToriDisplay.js'
 import Inventory from './Inventory.js'
-import OtherToriDisplay from './OtherToriDisplay.js'
 import Trade from './Trade.js'
 
 import './css/oswald.css'
@@ -23,7 +22,6 @@ import AppBar from 'material-ui/AppBar';
 import Tabs, { Tab } from 'material-ui/Tabs';
 import Typography from 'material-ui/Typography';
 import Toolbar from 'material-ui/Toolbar';
-
 
 function TabContainer(props) {
   return (
@@ -96,7 +94,7 @@ class App extends Component {
      */
 
     const contract = require('truffle-contract');
-    const toriToken = contract(ToriOwnership);
+    const toriToken = contract(ToriToken);
     toriToken.setProvider(this.state.web3.currentProvider);
     // Accessories
     const wd = contract(WoodenDesk);
@@ -133,11 +131,12 @@ class App extends Component {
       case 1:
           return <Inventory />;
       case 2:
-          return <OtherToriDisplay />;
+          // Other tori display
+          return <MyToriDisplay mode={this.state.mode}/>;
       case 3:
           return <Trade />;
       default:
-        return <MyToriDisplay/>;
+        return <MyToriDisplay mode={this.state.mode}/>;
     }
   }
 

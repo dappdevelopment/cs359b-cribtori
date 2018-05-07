@@ -2,9 +2,9 @@ pragma solidity ^0.4.21;
 
 import './DnaCore.sol';
 import 'openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
+import 'openzeppelin-solidity/contracts/ownership/Whitelist.sol';
 
-
-contract ToriToken is DnaCore, ERC721BasicToken {
+contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
 
   struct Tori {
     uint256 dna;
@@ -70,7 +70,7 @@ contract ToriToken is DnaCore, ERC721BasicToken {
     return Tori(dna, _name, proficiency, personality, uint32(now));
   }
 
-  function generateNewTori(uint8[] _quizzes, string _name) public returns (bool success) {
+  function generateInitialTori(uint8[] _quizzes, string _name) public returns (bool success) {
     // Generate three new toris.
     require (ownedTokensCount[msg.sender] == 0);
     Tori memory newTori = _generateRandomTori(_quizzes, _name, msg.sender);
@@ -81,6 +81,34 @@ contract ToriToken is DnaCore, ERC721BasicToken {
 
     emit NewTori(msg.sender, id);
     return true;
+  }
+
+  function _generateNewTori(uint256 _dna,
+                            uint32 _proficiency,
+                            uint32 _personality,
+                            string _name,
+                            address _owner) onlyWhitelisted private returns (bool success) {
+    require((_dna / DNA_LIMIT == 0) &&
+            (_proficiency >= 0) &&
+            (_proficiency < PROFICIENCY_THRESHOLD.length) &&
+            (_personality >= 0) &&
+            (_personality < PERSONALITY_THRESHOLD.length));
+    // Generate three new toris.
+    Tori memory newTori = Tori(_dna, _name, _proficiency, _personality, uint32(now));
+    // Push to the book keeping array.
+    uint256 id = toris.push(newTori) - 1;
+    tokenOwner[id] = _owner;
+    ownedTokensCount[_owner] = ownedTokensCount[_owner].add(1);
+    emit NewTori(_owner, id);
+    return true;
+  }
+
+  function generateNewTori(uint256 _dna,
+                            uint32 _proficiency,
+                            uint32 _personality,
+                            string _name,
+                            address _owner) public returns (bool success) {
+    return generateNewTori(_dna, _proficiency, _personality, _name, _owner);
   }
 
   function getTokenIndexes(address _owner) public view returns (uint[]) {
@@ -148,10 +176,16 @@ contract ToriToken is DnaCore, ERC721BasicToken {
 
   function buyForSale(uint256 _tokenId) public payable {
     // TODO: does msg.value needs to be exactly equal?
-    require((toriSale[_tokenId] > 0) && (msg.value == toriSale[_tokenId]));
+    require((toriSale[_tokenId] > 0) && (msg.value >= toriSale[_tokenId]));
     address _from = ownerOf(_tokenId);
     // Send the ether.
-    _from.transfer(msg.value);
+    uint256 excess = msg.value - toriSale[_tokenId];
+    if (excess > 0) {
+      msg.sender.transfer(excess);
+      _from.transfer(toriSale[_tokenId]);
+    } else {
+      _from.transfer(msg.value);
+    }
     // We want to call this from this contract.
     this.safeTransferFrom(_from, msg.sender, _tokenId);
     // Delete sale entry.

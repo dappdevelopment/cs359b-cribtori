@@ -48,6 +48,7 @@ class MyToriDisplay extends Component {
       currentTori: -1,
       detailIsShown: false,
       toriSiblings: [],
+      otherToriDisplay: [],
     }
 
     this.generateInitToris = this.generateInitToris.bind(this);
@@ -64,25 +65,42 @@ class MyToriDisplay extends Component {
     util.retrieveTokenCount(this.context.toriToken, this.context.userAccount)
     .then((result) => {
       console.log(result.toNumber());
-      this.setState({isNewUser: result.toNumber() === 0})
+      this.setState({
+        isNewUser: result.toNumber() === 0,
+        detailIsShown: false
+      })
       if (result.toNumber() > 0) {
         this.refreshToriDisplay();
       }
     })
+    .catch(console.error);
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps !== this.props) {
+      if (this.props.mode !== prevProps.mode) {
+        this.setState({
+          detailIsShown: false,
+        })
+      }
+    }
   }
 
   refreshToriDisplay() {
+    // otherToriDisplay
+    let ownerIds;
     util.retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
     .then(
       (toriIds) => {
-        toriIds = toriIds.map((id) => {return id.toNumber()});
+        ownerIds = toriIds.map((id) => {return id.toNumber()});
         this.setState({
+          otherToriDisplay: [],
           toriDisplay: [],
           usedInventories: {},
           toriSiblings: toriIds,
         });
 
-        toriIds.forEach(id => {
+        ownerIds.forEach(id => {
           util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
             this.setState({
               toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))
@@ -91,11 +109,32 @@ class MyToriDisplay extends Component {
         });
       }
     )
+    .then(() => {
+      util.retrieveAllToriCount(this.context.toriToken, this.context.userAccount)
+      .then((count) => {
+        count = count.toNumber();
+        // TODO: randomly choose which id to include
+        // TODO: remove line below after testing.
+        let otherIds = [0];
+        for (let i = 0; i < count; i++) {
+          if (ownerIds.indexOf(i) === -1) {
+            otherIds.push(i);
+          }
+        }
+        otherIds.forEach((id) => {
+          util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
+            this.setState({
+              otherToriDisplay: this.state.otherToriDisplay.concat(this.constructToriDisplay(result))
+            });
+          });
+        });
+      })
+    })
     .catch(console.error);
   }
 
   generateInitToris(e) {
-    util.generateNewTori(this.context.toriToken, [0, 1, 0, 0], "test", this.context.userAccount)
+    util.generateInitialTori(this.context.toriToken, [0, 1, 0, 0], "test", this.context.userAccount)
     .then((result) => {
       console.log('After generating new tori:', result);
       // TODO: Generate new accessories.
@@ -184,21 +223,25 @@ class MyToriDisplay extends Component {
             Back
           </Button>
         }
-        {this.state.isNewUser &&
+        {this.state.isNewUser && this.props.mode === 0 &&
           <Button variant="raised" color="primary" className="retrieve-button" onClick={this.generateInitToris}>
             Retrieve starter Toris
           </Button>
         }
         <div id="tori-display" className={this.props.classes.root}>
           {this.state.detailIsShown ? (
-            <ToriDetails toriId={this.state.currentTori} />
+            <ToriDetails toriId={this.state.currentTori} isOther={this.props.mode !== 0}/>
           ) : (
             <Grid container className="tori-details-container"
                             spacing={16}
                             alignItems={'center'}
                             direction={'row'}
                             justify={'center'}>
-              {this.state.toriDisplay}
+              {this.props.mode === 0 ?
+                this.state.toriDisplay
+              :
+                this.state.otherToriDisplay
+              }
             </Grid>
           )}
         </div>

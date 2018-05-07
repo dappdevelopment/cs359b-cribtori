@@ -77,9 +77,15 @@ contract AccessoriesToken is StandardToken {
   function buyForSale(address _owner, uint256 _value) public payable {
     uint256 allowedValue = allowance(_owner, this);
     uint256 price = pricePerToken[_owner];
-    require((allowedValue >= _value) && (_value > 0) && (msg.value == (_value * price)));
+    require((allowedValue >= _value) && (_value > 0) && (msg.value >= (_value * price)));
     // Send the ether.
-    _owner.transfer(msg.value);
+    uint256 excess = msg.value - _value * price;
+    if (excess > 0) {
+      msg.sender.transfer(excess);
+      _owner.transfer(_value * price);
+    } else {
+      _owner.transfer(msg.value);
+    }
     this.transferFrom(_owner, msg.sender, _value);
 
     if (allowedValue == _value) {
