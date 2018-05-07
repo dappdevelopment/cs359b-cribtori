@@ -16,6 +16,7 @@ import * as util from './utils.js'
 
 import ToriRoom from './ToriRoom.js'
 import ToriActivityLogs from './ToriActivityLogs.js'
+import TradeDialog from './TradeDialog.js';
 
 import AccImg from './mockimg/acc-sample.png'
 
@@ -57,7 +58,8 @@ class ToriDetails extends Component {
       openSnackBar: false,
       newRoomLayout: [],
       roomLayout: [],
-      usedInventories: {}
+      usedInventories: {},
+      dialogOpen: false,
     }
 
     this.switchEdit = this.switchEdit.bind(this);
@@ -71,6 +73,9 @@ class ToriDetails extends Component {
     this.craftAccessory = this.craftAccessory.bind(this);
 
     this.handleCloseSnackBar = this.handleCloseSnackBar.bind(this);
+
+    this.handleDialogClose = this.handleDialogClose.bind(this);
+    this.handleDialogSubmit = this.handleDialogSubmit.bind(this);
   }
 
   componentDidMount() {
@@ -82,7 +87,6 @@ class ToriDetails extends Component {
         proficiency: info.proficiency,
         personality: info.personality,
         salePrice: info.salePrice,
-        actionPaper: this.constructToriActions(),
       });
     });
 
@@ -116,14 +120,32 @@ class ToriDetails extends Component {
   }
 
 
+  handleDialogClose() {
+    this.setState({
+      dialogOpen: false,
+    })
+  }
 
+  handleDialogSubmit(contract, data) {
+    // TODO: show error message
+    if (data.price === 0) {
+      console.log('Not valid amount or price');
+    } else {
+      util.postTokenForSale(this.context.toriToken, this.state.currentTori, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
+      .then((result) => {
+        console.log('After posting:', result);
+      }).catch(console.error);
+    }
+    this.setState({
+      dialogOpen: false,
+    })
+  }
 
   postToriForSale(toriId, e) {
     console.log('Posting:', toriId);
-    util.postTokenForSale(this.context.toriToken, toriId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
-    .then((result) => {
-      console.log('After posting:', result);
-    }).catch(console.error);
+    this.setState({
+      dialogOpen: true,
+    })
   }
 
   removeToriForSale(toriId, e) {
@@ -421,8 +443,13 @@ class ToriDetails extends Component {
               </Button>
             </Paper>
           ) : (
-            this.state.actionPaper
+            this.constructToriActions()
           )}
+          <TradeDialog open={this.state.dialogOpen}
+                       amountNeeded={false}
+                       contract={this.context.toriToken}
+                       handleClose={this.handleDialogClose}
+                       handleSubmit={this.handleDialogSubmit}/>
         </Grid>
         <Snackbar
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}

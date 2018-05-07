@@ -73,6 +73,7 @@ class MyToriDisplay extends Component {
         this.refreshToriDisplay();
       }
     })
+    .catch(console.error);
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {

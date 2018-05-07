@@ -176,10 +176,16 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
 
   function buyForSale(uint256 _tokenId) public payable {
     // TODO: does msg.value needs to be exactly equal?
-    require((toriSale[_tokenId] > 0) && (msg.value == toriSale[_tokenId]));
+    require((toriSale[_tokenId] > 0) && (msg.value >= toriSale[_tokenId]));
     address _from = ownerOf(_tokenId);
     // Send the ether.
-    _from.transfer(msg.value);
+    uint256 excess = msg.value - toriSale[_tokenId];
+    if (excess > 0) {
+      msg.sender.transfer(excess);
+      _from.transfer(toriSale[_tokenId]);
+    } else {
+      _from.transfer(msg.value);
+    }
     // We want to call this from this contract.
     this.safeTransferFrom(_from, msg.sender, _tokenId);
     // Delete sale entry.

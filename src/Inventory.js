@@ -11,6 +11,8 @@ import Button from 'material-ui/Button';
 
 import AccImg from './mockimg/acc-sample.png'
 
+import TradeDialog from './TradeDialog.js';
+
 const cardStyle = {
   height: 200
 }
@@ -31,7 +33,11 @@ class Inventory extends Component {
       inventoryDisplay: [],
       inventoryTypes: [],
       usedInventories: {},
+      dialogOpen: false,
     };
+
+    this.handleDialogSubmit = this.handleDialogSubmit.bind(this);
+    this.handleDialogClose = this.handleDialogClose.bind(this);
   }
 
   componentDidMount() {
@@ -88,12 +94,32 @@ class Inventory extends Component {
   }
 
 
+  handleDialogClose() {
+    this.setState({
+      dialogOpen: false,
+    })
+  }
+
+  handleDialogSubmit(contract, data) {
+    if (data.price === 0 || data.amount === 0) {
+      // TODO: show error
+      console.log('Not valid amount or price');
+    } else {
+      util.postAccForSale(contract, data.amount, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
+      .then((result) => {
+        console.log('After posting:', result);
+      }).catch(console.error);
+    }
+    this.setState({
+      dialogOpen: false,
+    })
+  }
+
   postAccForSale(contract, accId, e) {
-    // TODO: customize price and amount.
-    util.postAccForSale(contract, 1, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
-    .then((result) => {
-      console.log('After posting:', result);
-    }).catch(console.error);
+    this.setState({
+      dialogOpen: true,
+      currContract: contract
+    })
   }
 
   removeAccForSale(contract, accId, e) {
@@ -163,6 +189,11 @@ class Inventory extends Component {
             {this.state.inventoryDisplay}
           </Grid>
         )}
+        <TradeDialog open={this.state.dialogOpen}
+                     amountNeeded={true}
+                     contract={this.state.currContract}
+                     handleClose={this.handleDialogClose}
+                     handleSubmit={this.handleDialogSubmit}/>
       </div>
     );
   }
