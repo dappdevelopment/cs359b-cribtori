@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
-import * as util from './utils.js'
+import * as util from './utils.js';
+import { assets } from './assets.js'
 
 import { withStyles } from 'material-ui/styles';
 import Typography from 'material-ui/Typography';
@@ -10,8 +11,6 @@ import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
 
-
-import AccImg from './mockimg/acc-sample.png'
 import ToriImg from './mockimg/tori-sample.png'
 
 const styles = theme => ({
@@ -157,8 +156,7 @@ class Trade extends Component {
 
 
   constructAccSaleDisplay(info) {
-    // TODO: implement image mapping.
-    let imgName = AccImg;
+    let imgName = assets.accessories[info.symbol];
     let i = 0;
     let offer = info.sales.map((item) => {
       i += 1;

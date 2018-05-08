@@ -3,10 +3,10 @@ import React, { Component } from 'react'
 import { withStyles } from 'material-ui/styles';
 import GridList, { GridListTile } from 'material-ui/GridList';
 
+import { assets } from './assets.js';
+
 // Import Image
-import Floor from './img/floor.png';
 import ToriImg from './mockimg/tori-sample.png';
-import AccImg from './mockimg/acc-sample.png'
 
 const LIM = 5;
 
@@ -23,7 +23,7 @@ const styles = theme => ({
     height: 400,
   },
   gridTile: {
-    backgroundImage: `url(${Floor})`,
+    backgroundImage: `url(${assets.background.floor[0]})`,
     backgroundSize: 80,
   },
   gridEmpty: {
@@ -65,8 +65,7 @@ class ToriRoom extends Component {
     ];
 
    this.props.layout.forEach((l) => {
-     // TODO: for now, the images are hardcoded. Need to fix this mapping later.
-     l.img = AccImg;
+     l.img = assets.accessories[l.key];
 
      // Modify the layout indicator.
      layout = layout.concat(l)

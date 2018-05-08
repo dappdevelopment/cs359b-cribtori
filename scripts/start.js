@@ -319,7 +319,7 @@ function createEndpoints(devServer) {
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
       if (err) return res.status(400).send({ message: 'invalid tori ID' });
-      
+
       if (rows.length > 0) {
         var data = {
           tori_id: rows[0].tori_id,

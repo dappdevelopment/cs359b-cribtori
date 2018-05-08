@@ -12,13 +12,12 @@ import Button from 'material-ui/Button';
 import List, { ListItemText } from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
 
-import * as util from './utils.js'
+import * as util from './utils.js';
+import { assets } from './assets.js';
 
 import ToriRoom from './ToriRoom.js'
 import ToriActivityLogs from './ToriActivityLogs.js'
 import TradeDialog from './TradeDialog.js';
-
-import AccImg from './mockimg/acc-sample.png'
 
 
 const styles = theme => ({
@@ -376,8 +375,7 @@ class ToriDetails extends Component {
   }
 
   constructInventoryItem(info) {
-    // TODO: implement image mapping.
-    let imgName = AccImg;
+    let imgName = assets.accessories[info.symbol];
     let amount = info.balance;
     if (this.state.usedInventories[info.symbol]) {
       amount -= this.state.usedInventories[info.symbol];

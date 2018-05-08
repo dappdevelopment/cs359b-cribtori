@@ -1,15 +1,14 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
-import * as util from './utils.js'
+import * as util from './utils.js';
+import { assets } from './assets.js';
 
 import Typography from 'material-ui/Typography';
 import Grid from 'material-ui/Grid';
 import Card, { CardActions, CardContent, CardMedia, CardHeader } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
-
-import AccImg from './mockimg/acc-sample.png'
 
 import TradeDialog from './TradeDialog.js';
 
@@ -131,8 +130,9 @@ class Inventory extends Component {
 
 
   constructInventoryDisplay(contract, info) {
+    console.log(assets)
     // TODO: implement image mapping.
-    let imgName = AccImg;
+    let imgName = assets.accessories[info.symbol];
 
     return (
       <Grid key={info.symbol} item sm={4}>
