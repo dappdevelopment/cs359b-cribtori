@@ -3,10 +3,9 @@ import React, { Component } from 'react'
 import { withStyles } from 'material-ui/styles';
 import GridList, { GridListTile } from 'material-ui/GridList';
 
-// Import Image
-import Floor from './img/floor.png';
-import ToriImg from './mockimg/tori-sample.png';
-import AccImg from './mockimg/acc-sample.png'
+import { assets } from './assets.js';
+
+import ToriImage from './ToriImage.js';
 
 const LIM = 5;
 
@@ -19,11 +18,13 @@ const styles = theme => ({
     backgroundColor: theme.palette.background.paper,
   },
   gridList: {
+    minWidth: 400,
+    minHeight: 400,
     width: 400,
-    height: 400,
+    height: 400
   },
   gridTile: {
-    backgroundImage: `url(${Floor})`,
+    backgroundImage: `url(${assets.background.floor[0]})`,
     backgroundSize: 80,
   },
   gridEmpty: {
@@ -45,6 +46,7 @@ class ToriRoom extends Component {
       cells: [],
       isSelecting: false,
       layout: [],
+      isEdit: this.props.edit,
     }
   }
 
@@ -57,20 +59,16 @@ class ToriRoom extends Component {
     let layout = [
       {
           key: 'tori',
-          img: ToriImg,
           c: 2,
           r: 2,
           s: 1,
       },
     ];
 
-   this.props.layout.forEach((l) => {
-     // TODO: for now, the images are hardcoded. Need to fix this mapping later.
-     l.img = AccImg;
-
-     // Modify the layout indicator.
-     layout = layout.concat(l)
-   });
+    this.props.layout.forEach((l) => {
+      // Modify the layout indicator.
+      layout = layout.concat(l)
+    });
 
     this.setState({
       layout: layout,
@@ -78,15 +76,14 @@ class ToriRoom extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps !== this.props) {
-      // TODO: check if empty.
+    if (prevProps !== this.props && this.props.acc) {
       if (this.props.acc.key !== undefined) {
         this.onItemSelected();
-      } else {
-        // TODO: Reset the layout.
-        if (this.props.acc.refresh || (prevProps.layout.length === 0 && this.props.layout.length > 0)) {
-          this.constructLayout();
-        }
+      } else if (prevProps.acc.key) {
+        // We just unselect an item.
+        this.setState({
+          isSelecting: false,
+        }, () => this.constructLayout());
       }
     }
   }
@@ -122,21 +119,32 @@ class ToriRoom extends Component {
     this.state.layout.forEach((content) => {
       let x = content.c;
       let y = content.r;
-      let img = content.img;
       let key = content.key;
       let space = content.s;
 
       let c;
-      if (key !== 'tori' && !this.state.isSelecting) {
+      if (key === 'tori') {
         c = (
-          <GridListTile key={`${key}_${x}_${y}`} onClick={(e) => this.onFullTileClick(x, y, e)} className={this.props.classes.gridTile} cols={space}>
-            <img src={img} alt={key} />
+          <GridListTile key={`${key}_${x}_${y}`}
+                        className={this.props.classes.gridTile} cols={space}>
+            <ToriImage dna={this.props.dna} size={80} />
+          </GridListTile>
+        );
+      } else if (this.state.isEdit && !this.state.isSelecting) {
+        c = (
+          <GridListTile key={`${key}_${x}_${y}`}
+                        onClick={(e) => this.onFullTileClick(x, y, e)}
+                        className={this.props.classes.gridTile}
+                        cols={space}>
+            <img src={assets.accessories[key]} alt={key} />
           </GridListTile>
         );
       } else {
         c = (
-          <GridListTile key={`${key}_${x}_${y}`} className={this.props.classes.gridTile} cols={space}>
-            <img src={img} alt={key} />
+          <GridListTile key={`${key}_${x}_${y}`}
+                        className={this.props.classes.gridTile}
+                        cols={space}>
+            <img src={assets.accessories[key]} alt={key} />
           </GridListTile>
         );
       }
@@ -185,14 +193,13 @@ class ToriRoom extends Component {
     this.setState({
       layout: layout,
       isSelecting: false,
-    }, () => this.props.onItemPlaced(layout));
+    }, () => this.props.onItemPlaced(layout, true));
   }
 
   onEmptyTileClick(x, y, e) {
     // Update cell.
     let key = this.props.acc.key;
     let space = this.props.acc.space;
-    let img = this.props.acc.img;
     let layout = this.state.layout;
 
     // TODO: Check if valid size.
@@ -200,14 +207,13 @@ class ToriRoom extends Component {
     if (x === LIM - 1 && space > 1) {
       this.setState({
         isSelecting: false,
-      }, () => this.props.onItemPlaced(layout));
+      }, () => this.props.onItemPlaced(layout, false));
       return;
     }
 
     // TODO: update with size.
     let l = {
       key: key,
-      img: img,
       c: x,
       r: y,
       s: space,
@@ -218,7 +224,7 @@ class ToriRoom extends Component {
     this.setState({
       layout: layout,
       isSelecting: false,
-    }, () => this.props.onItemPlaced(layout));
+    }, () => this.props.onItemPlaced(layout, true));
   }
 
   render() {

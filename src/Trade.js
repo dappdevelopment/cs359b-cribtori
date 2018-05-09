@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
-import * as util from './utils.js'
+import * as util from './utils.js';
+import { assets } from './assets.js'
 
 import { withStyles } from 'material-ui/styles';
 import Typography from 'material-ui/Typography';
@@ -10,9 +11,7 @@ import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
 
-
-import AccImg from './mockimg/acc-sample.png'
-import ToriImg from './mockimg/tori-sample.png'
+import ToriImage from './ToriImage.js'
 
 const styles = theme => ({
   card: {
@@ -125,31 +124,23 @@ class Trade extends Component {
     let proficiency = util.getProficiency(info.proficiency);
     let personality = util.getPersonality(info.personality);
 
-    let imgName = ToriImg;
-
     return (
       <Grid key={info.id} item sm={4}>
         <Card className="toribox">
-          <CardMedia
-            image={imgName}
-            title={'Tori for sale'}
-            className={this.props.classes.cover}
-            />
-          <div className={this.props.classes.details}>
-            <CardContent className={this.props.classes.content}>
-              <Typography variant="headline">{info.name}</Typography>
-              <List>
-                <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={proficiency} /></ListItem>
-                <ListItem><ListItemText primary="Personality:"/><ListItemText primary={personality} /></ListItem>
-                <ListItem><ListItemText primary="Price:"/><ListItemText primary={this.context.web3.fromWei(info.salePrice, 'ether') + ' ETH'} /></ListItem>
-              </List>
-            </CardContent>
-            <CardActions>
-              <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(this.props.toriToken, info.id, 'tori', e)}>
-                Buy Tori
-              </Button>
-            </CardActions>
-          </div>
+          <CardContent className={this.props.classes.content}>
+            <Typography variant="headline">{info.name}</Typography>
+            <ToriImage dna={info.dna} size={150} />
+            <List>
+              <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={proficiency} /></ListItem>
+              <ListItem><ListItemText primary="Personality:"/><ListItemText primary={personality} /></ListItem>
+              <ListItem><ListItemText primary="Price:"/><ListItemText primary={this.context.web3.fromWei(info.salePrice, 'ether') + ' ETH'} /></ListItem>
+            </List>
+          </CardContent>
+          <CardActions>
+            <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(this.props.toriToken, info.id, 'tori', e)}>
+              Buy Tori
+            </Button>
+          </CardActions>
         </Card>
       </Grid>
     );
@@ -157,8 +148,7 @@ class Trade extends Component {
 
 
   constructAccSaleDisplay(info) {
-    // TODO: implement image mapping.
-    let imgName = AccImg;
+    let imgName = assets.accessories[info.symbol];
     let i = 0;
     let offer = info.sales.map((item) => {
       i += 1;
@@ -204,7 +194,7 @@ class Trade extends Component {
   render() {
     return (
       <div className="Trade">
-        <Typography variant="headline" gutterBottom>
+        <Typography variant="headline" gutterBottom align="center">
           Toris For Sale
         </Typography>
         <Grid container className="tori-sale-display"
@@ -214,7 +204,7 @@ class Trade extends Component {
                         justify={'center'}>
           {this.state.toriSaleDisplay}
         </Grid>
-        <Typography variant="headline" gutterBottom>
+        <Typography variant="headline" gutterBottom align="center">
           Accessories For Sale
         </Typography>
         <Grid container className="acc-sale-display"

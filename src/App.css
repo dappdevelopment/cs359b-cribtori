@@ -70,3 +70,12 @@ code {
 .tori-room img {
   width: 100%;
 }
+
+@keyframes animatedTori {
+  from {
+    top: 0;
+  }
+  to {
+    top: 3px;
+  }
+}

@@ -5,26 +5,22 @@ import * as util from './utils.js'
 
 import { withStyles } from 'material-ui/styles';
 import Grid from 'material-ui/Grid';
-import Card, { CardActions, CardContent, CardMedia, CardHeader } from 'material-ui/Card';
+import Card, { CardActions, CardContent, CardHeader } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
 
-
-import ToriDetails from './ToriDetails.js'
-
-import ToriImg from './mockimg/tori-sample.png'
+import ToriDetailsContainer from './ToriDetailsContainer.js'
+import ToriImage from './ToriImage.js'
 
 const styles = theme => ({
   root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    overflow: 'hidden',
     backgroundColor: theme.palette.background.paper,
+    flexGrow: 1,
   },
-  cardMedia: {
-    height: 200
-  }
+  card: {
+    maxWidth: 275,
+    flexGrow: 1
+  },
 });
 
 
@@ -64,7 +60,6 @@ class MyToriDisplay extends Component {
   componentDidMount() {
     util.retrieveTokenCount(this.context.toriToken, this.context.userAccount)
     .then((result) => {
-      console.log(result.toNumber());
       this.setState({
         isNewUser: result.toNumber() === 0,
         detailIsShown: false
@@ -146,23 +141,6 @@ class MyToriDisplay extends Component {
   }
 
 
-  postToriForSale(toriId, e) {
-    console.log('Posting:', toriId);
-    util.postTokenForSale(this.context.toriToken, toriId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
-    .then((result) => {
-      console.log('After posting:', result);
-    }).catch(console.error);
-  }
-
-  removeToriForSale(toriId, e) {
-    console.log('Revoking:', toriId);
-    util.removeTokenForSale(this.context.toriToken, toriId, this.context.userAccount)
-    .then((result) => {
-      console.log('After revoking:', result);
-    }).catch(console.error);
-  }
-
-
   openToriDetails(toriId, e) {
     console.log("Showing details for:", toriId);
     this.setState({
@@ -185,19 +163,13 @@ class MyToriDisplay extends Component {
     let proficiency = util.getProficiency(info.proficiency);
     let personality = util.getPersonality(info.personality);
 
-    // let imgNum = parseInt(toriDna, 10) % 4 + 1;
-    let imgName = ToriImg;
     return (
-      <Grid key={info.id} item sm={4}>
-        <Card className="toribox">
+      <Grid key={info.id} item xs={4} style={{ flexBasis: 0}}>
+        <Card className={this.props.classes.card}>
           <CardHeader title={info.name} />
-          <CardMedia
-            image={imgName}
-            title={'Tori'}
-            className={this.props.classes.cardMedia}
-            />
           <CardContent>
-            <List className="tori-details">
+            <ToriImage dna={info.dna} size={150} />
+            <List className="tori-details" >
               <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={proficiency} /></ListItem>
               <ListItem><ListItemText primary="Personality:"/><ListItemText primary={personality} /></ListItem>
               { info.salePrice > 0 && (
@@ -228,13 +200,13 @@ class MyToriDisplay extends Component {
             Retrieve starter Toris
           </Button>
         }
-        <div id="tori-display" className={this.props.classes.root}>
+        <div id="tori-display">
           {this.state.detailIsShown ? (
-            <ToriDetails toriId={this.state.currentTori} isOther={this.props.mode !== 0}/>
+            <ToriDetailsContainer toriId={this.state.currentTori} isOther={this.props.mode !== 0}/>
           ) : (
-            <Grid container className="tori-details-container"
+            <Grid container className={this.props.classes.root}
                             spacing={16}
-                            alignItems={'center'}
+                            alignItems={'flex-start'}
                             direction={'row'}
                             justify={'center'}>
               {this.props.mode === 0 ?

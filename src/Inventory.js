@@ -1,21 +1,31 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
-import * as util from './utils.js'
+import * as util from './utils.js';
+import { assets } from './assets.js';
 
+import { withStyles } from 'material-ui/styles';
 import Typography from 'material-ui/Typography';
 import Grid from 'material-ui/Grid';
-import Card, { CardActions, CardContent, CardMedia, CardHeader } from 'material-ui/Card';
+import Card, { CardActions, CardContent, CardHeader } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
 
-import AccImg from './mockimg/acc-sample.png'
-
 import TradeDialog from './TradeDialog.js';
 
-const cardStyle = {
-  height: 200
-}
+const styles = theme => ({
+  root: {
+    backgroundColor: theme.palette.background.paper,
+    flexGrow: 1,
+  },
+  card: {
+    maxWidth: 275,
+    flexGrow: 1
+  },
+  inventoryImg: {
+    width: `100%`,
+  }
+});
 
 class Inventory extends Component {
 
@@ -131,19 +141,14 @@ class Inventory extends Component {
 
 
   constructInventoryDisplay(contract, info) {
-    // TODO: implement image mapping.
-    let imgName = AccImg;
+    let imgName = assets.accessories[info.symbol];
 
     return (
       <Grid key={info.symbol} item sm={4}>
-        <Card className="accbox">
+        <Card className={this.props.classes.card}>
           <CardHeader title={info.name} />
-          <CardMedia
-            image={imgName}
-            title={'Accessory'}
-            style={cardStyle}
-            />
           <CardContent>
+            <img src={imgName} alt={info.name} className={this.props.classes.inventoryImg}/>
             <List className="acc-details">
               <ListItem><ListItemText primary="Variety:"/><ListItemText primary={info.variety} /></ListItem>
               <ListItem><ListItemText primary="Material:"/><ListItemText primary={info.material} /></ListItem>
@@ -181,9 +186,9 @@ class Inventory extends Component {
             Generate your first Tori first!
           </Typography>
         ) : (
-          <Grid container className="inventory-display"
+          <Grid container className={this.props.classes.root}
                           spacing={8}
-                          alignItems={'center'}
+                          alignItems={'flex-start'}
                           direction={'row'}
                           justify={'center'}>
             {this.state.inventoryDisplay}
@@ -200,4 +205,4 @@ class Inventory extends Component {
 
 }
 
-export default Inventory
+export default withStyles(styles)(Inventory)

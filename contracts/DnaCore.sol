@@ -2,7 +2,7 @@ pragma solidity ^0.4.21;
 
 contract DnaCore {
 
-  uint256 private DNA_DIGIT = 22;
+  uint256 private DNA_DIGIT = 23;
   uint256 private PROFICIENCY_DIGIT = 3;
   uint256 private PERSONALITY_DIGIT = 6;
 

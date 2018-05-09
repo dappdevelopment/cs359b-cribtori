@@ -7,7 +7,7 @@ import Dialog, {
   DialogContentText,
   DialogTitle,
 } from 'material-ui/Dialog';
-import { Input, InputAdornment } from 'material-ui/Input';
+import { InputAdornment } from 'material-ui/Input';
 import TextField from 'material-ui/TextField';
 import Button from 'material-ui/Button';
 

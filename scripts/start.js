@@ -282,7 +282,7 @@ function createEndpoints(devServer) {
     var SIX_HOUR = 6 * 60 * 60 * 1000;
     var PERIOD = (req.activity_type === 'feed') ? 1 : 2;
 
-    var actTime = Date.now();
+    var actTime = new Date();
 
     if ((req.body.activity_type !== 'feed') && (req.body.activity_type !== 'clean')) {
       return res.status(400).send({ message: 'activity not recognized' });
@@ -319,7 +319,7 @@ function createEndpoints(devServer) {
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
       if (err) return res.status(400).send({ message: 'invalid tori ID' });
-      
+
       if (rows.length > 0) {
         var data = {
           tori_id: rows[0].tori_id,
@@ -338,7 +338,7 @@ function createEndpoints(devServer) {
     var inserts = [req.body.id, req.body.locations, req.body.locations];
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
-      if (err) res.status(400).send({ message: 'saving room failed' });
+      if (err) res.status(400).send({ message: 'saving room failed, Error: ' + err });
       res.status(200).end();
     })
   });
