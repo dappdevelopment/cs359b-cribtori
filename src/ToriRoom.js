@@ -77,14 +77,14 @@ class ToriRoom extends Component {
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (prevProps !== this.props) {
       // TODO: check if empty.
-      if (this.props.acc.key !== undefined) {
-        this.onItemSelected();
-      } else {
-        // TODO: Reset the layout.
-        if (this.props.acc.refresh || (prevProps.layout.length === 0 && this.props.layout.length > 0)) {
-          this.constructLayout();
-        }
-      }
+      // if (this.props.acc && this.props.acc.key !== undefined) {
+      //   this.onItemSelected();
+      // } else {
+      //   // TODO: Reset the layout.
+      //   if (this.props.acc.refresh || (prevProps.layout.length === 0 && this.props.layout.length > 0)) {
+      //     this.constructLayout();
+      //   }
+      // }
     }
   }
 

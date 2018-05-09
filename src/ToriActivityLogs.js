@@ -47,7 +47,6 @@ class ToriActivityLogs extends Component {
     if (this.state.toriId === this.props.toriId || this.props.toriId === -1 ) {
       return;
     }
-    console.log(this.props.toriId, prevProps, this.props)
     // TODO: get info about the top 7 activities here.
     this.fetchActivityLogs();
 
@@ -59,19 +58,20 @@ class ToriActivityLogs extends Component {
     this.setState({
       toriId: this.props.toriId,
       activityItems: [],
-    })
-    fetch('/activity/' + this.props.toriId + '?limit=5')
-    .then(function(response) {
-      return response.json();
-    })
-    .then(function(result) {
-      result.forEach((data, i) => {
-        this.setState({
-          activityItems: this.state.activityItems.concat(this.constructActivityDisplay(data, i)),
+    }, () => {
+      fetch('/activity/' + this.props.toriId + '?limit=5')
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(result) {
+        result.forEach((data, i) => {
+          this.setState({
+            activityItems: this.state.activityItems.concat(this.constructActivityDisplay(data, i)),
+          });
         });
-      });
-    }.bind(this))
-    .catch(console.err);
+      }.bind(this))
+      .catch(console.err);
+    })
   }
 
   constructActivityDisplay(data, i) {

@@ -282,7 +282,7 @@ function createEndpoints(devServer) {
     var SIX_HOUR = 6 * 60 * 60 * 1000;
     var PERIOD = (req.activity_type === 'feed') ? 1 : 2;
 
-    var actTime = Date.now();
+    var actTime = new Date();
 
     if ((req.body.activity_type !== 'feed') && (req.body.activity_type !== 'clean')) {
       return res.status(400).send({ message: 'activity not recognized' });

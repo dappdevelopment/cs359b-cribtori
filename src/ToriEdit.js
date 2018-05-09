@@ -85,44 +85,6 @@ class ToriEdit extends Component {
     });
   }
 
-
-  handleDialogClose() {
-    this.setState({
-      dialogOpen: false,
-    })
-  }
-
-  handleDialogSubmit(contract, data) {
-    // TODO: show error message
-    if (data.price === 0) {
-      console.log('Not valid amount or price');
-    } else {
-      util.postTokenForSale(this.context.toriToken, this.state.currentTori, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
-      .then((result) => {
-        console.log('After posting:', result);
-      }).catch(console.error);
-    }
-    this.setState({
-      dialogOpen: false,
-    })
-  }
-
-  postToriForSale(toriId, e) {
-    console.log('Posting:', toriId);
-    this.setState({
-      dialogOpen: true,
-    })
-  }
-
-  removeToriForSale(toriId, e) {
-    console.log('Revoking:', toriId);
-    util.removeTokenForSale(this.context.toriToken, toriId, this.context.userAccount)
-    .then((result) => {
-      console.log('After revoking:', result);
-    }).catch(console.error);
-  }
-
-
   switchEdit() {
     // Fetch all used inventories.
     let iCounter = {};
@@ -236,111 +198,6 @@ class ToriEdit extends Component {
     })
   }
 
-  feedTori() {
-    // Construct the POST body.
-    let data = {
-      id: this.state.toriId,
-      activity_type: 'feed',
-      description: '',
-    };
-    fetch('/activity', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data),
-    })
-    .then(function(response) {
-      return response.status;
-    })
-    .then(function(status) {
-      let message = 'Yum! ' + this.state.name + ' is full!';
-      if (status === 406) {
-        message = this.state.name + ' has been recently fed!';
-      } else if (status === 400) {
-        message = 'Feeding ' + this.state.name + ' failed, try again later';
-      }
-      this.setState({
-        openSnackBar: true,
-        snackBarMessage: message,
-      });
-    }.bind(this))
-    .catch(console.err);
-  }
-
-  cleanTori() {
-    // Construct the POST body.
-    let data = {
-      id: this.state.toriId,
-      activity_type: 'clean',
-      description: '',
-    };
-    fetch('/activity', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data),
-    })
-    .then(function(response) {
-      return response.status;
-    })
-    .then(function(status) {
-      let message = this.state.name + '\'s room is clean!';
-      if (status === 406) {
-        message = this.state.name + '\'s is still clean!';
-      } else if (status === 400) {
-        message = 'Cleaning ' + this.state.name + '\'s room failed, try again later';
-      }
-      this.setState({
-        openSnackBar: true,
-        snackBarMessage: message,
-      });
-    }.bind(this))
-    .catch(console.err);
-  }
-
-  playWithTori() {
-    // TODO:
-    console.log('Playing with tori...');
-  }
-
-  craftAccessory() {
-    // TODO:
-    console.log('Crafting accessory...');
-  }
-
-  visitTori() {
-    console.log('Visit Tori');
-  }
-
-
-  constructToriActions() {
-    return (
-      <Paper className={this.props.classes.paper}>
-        { this.props.isOther ? (
-          <MenuList>
-            <MenuItem onClick={this.visitTori}>Visit</MenuItem>
-          </MenuList>
-        ) : (
-          <MenuList>
-            <MenuItem onClick={this.feedTori}>Feed</MenuItem>
-            <MenuItem onClick={this.cleanTori}>Clean</MenuItem>
-            <MenuItem onClick={this.playWithTori}>Play</MenuItem>
-            <MenuItem onClick={this.craftAccessory}>Craft</MenuItem>
-            <Divider />
-            <MenuItem onClick={this.switchEdit}>Edit Room</MenuItem>
-            {this.state.salePrice > 0 ? (
-              <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriId, e)}>Revoke Sale Post</MenuItem>
-            ) : (
-              <MenuItem onClick={(e) => this.postToriForSale(this.state.toriId, e)}>Sell Tori</MenuItem>
-            )}
-          </MenuList>
-        )}
-      </Paper>
-    );
-  }
-
   constructInventoryItem(info) {
     let imgName = assets.accessories[info.symbol];
     let amount = info.balance;
@@ -360,45 +217,29 @@ class ToriEdit extends Component {
     );
   }
 
-  handleCloseSnackBar() {
-    this.setState({
-      openSnackBar: false,
-    });
-  }
-
-
   render() {
-    let leftCol;
-    if (this.state.isEditRoom) {
-      leftCol = (<List>
-        {this.state.inventoryItems.map((info) => this.constructInventoryItem(info))}
-      </List>);
-    } else if (!this.props.isOther) {
-      // TODO: handle error thrown in console when switching from other tori details to my tori.
-      leftCol = (<ToriActivityLogs toriId={this.state.toriId} name={this.state.name} /> );
-    }
+    let tori = this.props.toriInfo;
 
     return (
-      <Grid container className="tori-details-container"
-                      spacing={8}
-                      alignItems={'center'}
-                      direction={'row'}
-                      justify={'center'}>
-        <Grid item sm={12}>
-          <Typography variant="headline" gutterBottom>
-            {this.state.name}
-          </Typography>
-        </Grid>
-        <Grid item sm={3}>
-          {!this.props.isOther && leftCol}
-        </Grid>
-        <Grid item sm={6}>
-          {this.state.toriId !== -1 &&
-            <ToriRoom dna ={this.state.toriDna} acc={this.state.accSelected} onItemPlaced={this.onItemPlaced} layout={this.state.roomLayout}/>
-          }
-        </Grid>
-        <Grid item sm={3}>
-          {this.state.isEditRoom ? (
+      <Grid item sm={12} >
+        <Grid container className="tori-details-container"
+                        spacing={8}
+                        alignItems={'center'}
+                        direction={'row'}
+                        justify={'center'}>
+          <Grid item sm={3}>
+            <List>
+              {this.state.inventoryItems.map((info) => this.constructInventoryItem(info))}
+            </List>
+          </Grid>
+          <Grid item sm={6}>
+            <ToriRoom dna={tori.dna}
+                      acc={this.state.accSelected}
+                      onItemPlaced={this.onItemPlaced}
+                      layout={this.state.roomLayout}
+                      isEdit={true} />
+          </Grid>
+          <Grid item sm={3}>
             <Paper className={this.props.classes.paper}>
               <Button variant="raised" color="primary" onClick={this.saveEdit}>
                 Save Room
@@ -407,24 +248,8 @@ class ToriEdit extends Component {
                 Cancel Edit
               </Button>
             </Paper>
-          ) : (
-            this.constructToriActions()
-          )}
-          <TradeDialog open={this.state.dialogOpen}
-                       amountNeeded={false}
-                       contract={this.context.toriToken}
-                       handleClose={this.handleDialogClose}
-                       handleSubmit={this.handleDialogSubmit}/>
+          </Grid>
         </Grid>
-        <Snackbar
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-          open={this.state.openSnackBar}
-          onClose={this.handleCloseSnackBar}
-          SnackbarContentProps={{
-            'aria-describedby': 'message-id',
-          }}
-          message={<span id="message-id">{this.state.snackBarMessage}</span>}
-        />
       </Grid>
     );
   }

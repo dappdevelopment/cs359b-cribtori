@@ -194,7 +194,7 @@ class Trade extends Component {
   render() {
     return (
       <div className="Trade">
-        <Typography variant="headline" gutterBottom>
+        <Typography variant="headline" gutterBottom align="center">
           Toris For Sale
         </Typography>
         <Grid container className="tori-sale-display"
@@ -204,7 +204,7 @@ class Trade extends Component {
                         justify={'center'}>
           {this.state.toriSaleDisplay}
         </Grid>
-        <Typography variant="headline" gutterBottom>
+        <Typography variant="headline" gutterBottom align="center">
           Accessories For Sale
         </Typography>
         <Grid container className="acc-sale-display"
