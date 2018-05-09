@@ -106,7 +106,6 @@ class ToriEdit extends Component {
       id: this.state.toriInfo.id,
       locations: JSON.stringify(layout),
     }
-    console.log(data);
     fetch('/room', {
       method: 'POST',
       headers: {
