@@ -5,14 +5,12 @@ import * as util from './utils.js'
 
 import { withStyles } from 'material-ui/styles';
 import Grid from 'material-ui/Grid';
-import Card, { CardActions, CardContent, CardMedia, CardHeader } from 'material-ui/Card';
+import Card, { CardActions, CardContent, CardHeader } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
 
-
 import ToriDetails from './ToriDetails.js'
-
-import ToriImg from './mockimg/tori-sample.png'
+import ToriImage from './ToriImage.js'
 
 const styles = theme => ({
   root: {
@@ -185,18 +183,12 @@ class MyToriDisplay extends Component {
     let proficiency = util.getProficiency(info.proficiency);
     let personality = util.getPersonality(info.personality);
 
-    // let imgNum = parseInt(toriDna, 10) % 4 + 1;
-    let imgName = ToriImg;
     return (
-      <Grid key={info.id} item sm={4}>
+      <Grid key={info.id} item sm={4} >
         <Card className="toribox">
           <CardHeader title={info.name} />
-          <CardMedia
-            image={imgName}
-            title={'Tori'}
-            className={this.props.classes.cardMedia}
-            />
           <CardContent>
+            <ToriImage dna={info.dna} size={150} />
             <List className="tori-details">
               <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={proficiency} /></ListItem>
               <ListItem><ListItemText primary="Personality:"/><ListItemText primary={personality} /></ListItem>

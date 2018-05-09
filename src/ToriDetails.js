@@ -81,6 +81,7 @@ class ToriDetails extends Component {
     util.retrieveTokenInfo(this.context.toriToken, this.props.toriId, this.context.userAccount).then((result) => {
       let info = util.parseToriResult(result);
       this.setState({
+        toriDna: info.dna,
         toriId: info.id,
         name: info.name,
         proficiency: info.proficiency,
@@ -427,7 +428,7 @@ class ToriDetails extends Component {
         </Grid>
         <Grid item sm={6}>
           {this.state.toriId !== -1 &&
-            <ToriRoom acc={this.state.accSelected} onItemPlaced={this.onItemPlaced} layout={this.state.roomLayout}/>
+            <ToriRoom dna ={this.state.toriDna} acc={this.state.accSelected} onItemPlaced={this.onItemPlaced} layout={this.state.roomLayout}/>
           }
         </Grid>
         <Grid item sm={3}>

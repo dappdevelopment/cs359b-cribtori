@@ -5,8 +5,7 @@ import GridList, { GridListTile } from 'material-ui/GridList';
 
 import { assets } from './assets.js';
 
-// Import Image
-import ToriImg from './mockimg/tori-sample.png';
+import ToriImage from './ToriImage.js';
 
 const LIM = 5;
 
@@ -57,7 +56,6 @@ class ToriRoom extends Component {
     let layout = [
       {
           key: 'tori',
-          img: ToriImg,
           c: 2,
           r: 2,
           s: 1,
@@ -126,7 +124,13 @@ class ToriRoom extends Component {
       let space = content.s;
 
       let c;
-      if (key !== 'tori' && !this.state.isSelecting) {
+      if (key === 'tori') {
+        c = (
+          <GridListTile key={`${key}_${x}_${y}`} onClick={(e) => this.onFullTileClick(x, y, e)} className={this.props.classes.gridTile} cols={space}>
+            <ToriImage dna={this.props.dna} size={80} />
+          </GridListTile>
+        );
+      } else if (key !== 'tori' && !this.state.isSelecting) {
         c = (
           <GridListTile key={`${key}_${x}_${y}`} onClick={(e) => this.onFullTileClick(x, y, e)} className={this.props.classes.gridTile} cols={space}>
             <img src={img} alt={key} />

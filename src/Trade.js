@@ -11,7 +11,7 @@ import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
 
-import ToriImg from './mockimg/tori-sample.png'
+import ToriImage from './ToriImage.js'
 
 const styles = theme => ({
   card: {
@@ -124,31 +124,23 @@ class Trade extends Component {
     let proficiency = util.getProficiency(info.proficiency);
     let personality = util.getPersonality(info.personality);
 
-    let imgName = ToriImg;
-
     return (
       <Grid key={info.id} item sm={4}>
         <Card className="toribox">
-          <CardMedia
-            image={imgName}
-            title={'Tori for sale'}
-            className={this.props.classes.cover}
-            />
-          <div className={this.props.classes.details}>
-            <CardContent className={this.props.classes.content}>
-              <Typography variant="headline">{info.name}</Typography>
-              <List>
-                <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={proficiency} /></ListItem>
-                <ListItem><ListItemText primary="Personality:"/><ListItemText primary={personality} /></ListItem>
-                <ListItem><ListItemText primary="Price:"/><ListItemText primary={this.context.web3.fromWei(info.salePrice, 'ether') + ' ETH'} /></ListItem>
-              </List>
-            </CardContent>
-            <CardActions>
-              <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(this.props.toriToken, info.id, 'tori', e)}>
-                Buy Tori
-              </Button>
-            </CardActions>
-          </div>
+          <CardContent className={this.props.classes.content}>
+            <Typography variant="headline">{info.name}</Typography>
+            <ToriImage dna={info.dna} size={150} />
+            <List>
+              <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={proficiency} /></ListItem>
+              <ListItem><ListItemText primary="Personality:"/><ListItemText primary={personality} /></ListItem>
+              <ListItem><ListItemText primary="Price:"/><ListItemText primary={this.context.web3.fromWei(info.salePrice, 'ether') + ' ETH'} /></ListItem>
+            </List>
+          </CardContent>
+          <CardActions>
+            <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(this.props.toriToken, info.id, 'tori', e)}>
+              Buy Tori
+            </Button>
+          </CardActions>
         </Card>
       </Grid>
     );
@@ -222,6 +214,7 @@ class Trade extends Component {
                         justify={'center'}>
           {this.state.accSaleDisplay}
         </Grid>
+        <ToriImage/>
       </div>
     );
   }
