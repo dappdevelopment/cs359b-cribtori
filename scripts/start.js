@@ -338,7 +338,7 @@ function createEndpoints(devServer) {
     var inserts = [req.body.id, req.body.locations, req.body.locations];
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
-      if (err) res.status(400).send({ message: 'saving room failed' });
+      if (err) res.status(400).send({ message: 'saving room failed, Error: ' + err });
       res.status(200).end();
     })
   });

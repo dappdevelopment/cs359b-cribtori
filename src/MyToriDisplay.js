@@ -60,7 +60,6 @@ class MyToriDisplay extends Component {
   componentDidMount() {
     util.retrieveTokenCount(this.context.toriToken, this.context.userAccount)
     .then((result) => {
-      console.log(result.toNumber());
       this.setState({
         isNewUser: result.toNumber() === 0,
         detailIsShown: false
@@ -139,23 +138,6 @@ class MyToriDisplay extends Component {
       //   console.log('After generating new accessories:', result);
       // })
     })
-  }
-
-
-  postToriForSale(toriId, e) {
-    console.log('Posting:', toriId);
-    util.postTokenForSale(this.context.toriToken, toriId, this.context.web3.toWei(1, 'ether'), this.context.userAccount)
-    .then((result) => {
-      console.log('After posting:', result);
-    }).catch(console.error);
-  }
-
-  removeToriForSale(toriId, e) {
-    console.log('Revoking:', toriId);
-    util.removeTokenForSale(this.context.toriToken, toriId, this.context.userAccount)
-    .then((result) => {
-      console.log('After revoking:', result);
-    }).catch(console.error);
   }
 
 

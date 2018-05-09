@@ -3,39 +3,13 @@ import PropTypes from 'prop-types';
 
 import Snackbar from 'material-ui/Snackbar';
 import Typography from 'material-ui/Typography';
-import { withStyles } from 'material-ui/styles';
-import Paper from 'material-ui/Paper';
-import { MenuItem, MenuList } from 'material-ui/Menu';
 import Grid from 'material-ui/Grid';
-import Divider from 'material-ui/Divider';
-import Button from 'material-ui/Button';
-import List, { ListItemText } from 'material-ui/List';
-import Avatar from 'material-ui/Avatar';
 
 import * as util from './utils.js';
-import { assets } from './assets.js';
 
 import ToriDetails from './ToriDetails.js';
+import ToriEdit from './ToriEdit.js';
 
-const styles = theme => ({
-  menuItem: {
-    '&:focus': {
-      backgroundColor: theme.palette.primary.main,
-      '& $primary, & $icon': {
-        color: theme.palette.common.white,
-      },
-    },
-  },
-  paper: {
-    display: 'inline-block',
-    margin: '16px 32px 16px 0',
-  },
-  root: {
-    flexGrow: 1,
-  },
-  primary: {},
-  icon: {}
-});
 
 class ToriDetailsContainer extends Component {
   static contextTypes = {
@@ -62,6 +36,8 @@ class ToriDetailsContainer extends Component {
 
     this.handleCloseSnackBar = this.handleCloseSnackBar.bind(this);
     this.handleMessage = this.handleMessage.bind(this);
+
+    this.retrieveLayout = this.retrieveLayout.bind(this);
   }
 
   componentDidMount() {
@@ -72,14 +48,16 @@ class ToriDetailsContainer extends Component {
         toriInfo: info,
       });
     });
+    this.retrieveLayout();
+  }
+
+  retrieveLayout() {
     // Fetch the room layout.
     util.retrieveRoomLayout(this.props.toriId)
     .then((result) => {
-      if (result.locations) {
-        this.setState({
-          roomLayout: JSON.parse(result.locations),
-        });
-      }
+      this.setState({
+        roomLayout: (result.locations) ? JSON.parse(result.locations) : [],
+      });
     })
     .catch(console.error);
   }
@@ -87,7 +65,7 @@ class ToriDetailsContainer extends Component {
   switchEdit() {
     this.setState({
       isEditRoom: !this.state.isEditRoom,
-    });
+    }, this.retrieveLayout);
   }
 
   saveEdit(newLayout) {
@@ -104,7 +82,6 @@ class ToriDetailsContainer extends Component {
   }
 
   handleMessage(message) {
-    console.log('Message', message)
     this.setState({
       openSnackBar: true,
       snackBarMessage: message,
@@ -113,19 +90,27 @@ class ToriDetailsContainer extends Component {
 
   constructMainDetails() {
     if (this.state.isEditRoom) {
-      return ('Hello');
+      return (<ToriEdit info={this.state.toriInfo}
+                        layout={this.state.roomLayout}
+                        onMessage={this.handleMessage}
+                        onSwitch={this.switchEdit}
+                        onSaveEdit={this.saveEdit} />);
     } else if (this.props.isOther) {
-      return ('World');
+      return (<ToriDetails info={this.state.toriInfo}
+                           layout={this.state.roomLayout}
+                           onMessage={this.handleMessage}
+                           onEdit={this.switchEdit}
+                           isOther={true} />);
     } else {
       return (<ToriDetails info={this.state.toriInfo}
                            layout={this.state.roomLayout}
                            onMessage={this.handleMessage}
-                           onEdit={this.switchEdit} />);
+                           onEdit={this.switchEdit}
+                           isOther={false} />);
     }
   }
 
   render() {
-    console.log(this.state.toriId, this.state.toriInfo)
     return (
       <Grid container className="tori-details-container"
                       spacing={8}
@@ -156,4 +141,4 @@ class ToriDetailsContainer extends Component {
   }
 }
 
-export default withStyles(styles)(ToriDetailsContainer)
+export default ToriDetailsContainer

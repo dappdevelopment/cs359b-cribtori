@@ -1,19 +1,13 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
-import Snackbar from 'material-ui/Snackbar';
-import Typography from 'material-ui/Typography';
 import { withStyles } from 'material-ui/styles';
 import Paper from 'material-ui/Paper';
 import { MenuItem, MenuList } from 'material-ui/Menu';
 import Grid from 'material-ui/Grid';
 import Divider from 'material-ui/Divider';
-import Button from 'material-ui/Button';
-import List, { ListItemText } from 'material-ui/List';
-import Avatar from 'material-ui/Avatar';
 
 import * as util from './utils.js';
-import { assets } from './assets.js';
 
 import ToriRoom from './ToriRoom.js'
 import ToriActivityLogs from './ToriActivityLogs.js'
@@ -21,20 +15,10 @@ import TradeDialog from './TradeDialog.js';
 
 
 const styles = theme => ({
-  menuItem: {
-    '&:focus': {
-      backgroundColor: theme.palette.primary.main,
-      '& $primary, & $icon': {
-        color: theme.palette.common.white,
-      },
-    },
-  },
   paper: {
     display: 'inline-block',
     margin: '16px 32px 16px 0',
-  },
-  primary: {},
-  icon: {},
+  }
 });
 
 class ToriDetails extends Component {
@@ -75,11 +59,12 @@ class ToriDetails extends Component {
   handleDialogSubmit(contract, data) {
     // TODO: show error message
     if (data.price === 0) {
-      console.log('Not valid amount or price');
+      this.props.onMessage('Not valid amount or price');
     } else {
-      util.postTokenForSale(this.context.toriToken, this.state.currentTori, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
+      util.postTokenForSale(this.context.toriToken, this.state.toriInfo.id, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
       .then((result) => {
         console.log('After posting:', result);
+        this.props.onMessage('Sale post transaction has been submitted');
       }).catch(console.error);
     }
     this.setState({
@@ -88,17 +73,16 @@ class ToriDetails extends Component {
   }
 
   postToriForSale(toriId, e) {
-    console.log('Posting:', toriId);
     this.setState({
       dialogOpen: true,
     })
   }
 
   removeToriForSale(toriId, e) {
-    console.log('Revoking:', toriId);
     util.removeTokenForSale(this.context.toriToken, toriId, this.context.userAccount)
     .then((result) => {
       console.log('After revoking:', result);
+      this.props.onMessage('Revoke sale transaction has been submitted');
     }).catch(console.error);
   }
 
@@ -198,7 +182,7 @@ class ToriDetails extends Component {
             <MenuItem onClick={this.playWithTori}>Play</MenuItem>
             <MenuItem onClick={this.craftAccessory}>Craft</MenuItem>
             <Divider />
-            <MenuItem onClick={this.switchEdit}>Edit Room</MenuItem>
+            <MenuItem onClick={this.props.onEdit}>Edit Room</MenuItem>
             {this.state.salePrice > 0 ? (
               <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriId, e)}>Revoke Sale Post</MenuItem>
             ) : (
@@ -228,6 +212,7 @@ class ToriDetails extends Component {
           </Grid>
           <Grid item sm={6}>
             <ToriRoom dna={this.state.toriInfo.dna}
+                      edit={false}
                       acc={this.state.accSelected}
                       onItemPlaced={this.onItemPlaced}
                       layout={this.state.roomLayout} />

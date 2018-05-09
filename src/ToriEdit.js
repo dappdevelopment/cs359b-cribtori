@@ -1,40 +1,27 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
-import Snackbar from 'material-ui/Snackbar';
 import Typography from 'material-ui/Typography';
 import { withStyles } from 'material-ui/styles';
 import Paper from 'material-ui/Paper';
-import { MenuItem, MenuList } from 'material-ui/Menu';
+import { MenuItem } from 'material-ui/Menu';
 import Grid from 'material-ui/Grid';
-import Divider from 'material-ui/Divider';
 import Button from 'material-ui/Button';
 import List, { ListItemText } from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
+import Chip from 'material-ui/Chip';
 
 import * as util from './utils.js';
 import { assets } from './assets.js';
 
 import ToriRoom from './ToriRoom.js'
-import ToriActivityLogs from './ToriActivityLogs.js'
-import TradeDialog from './TradeDialog.js';
 
 
 const styles = theme => ({
-  menuItem: {
-    '&:focus': {
-      backgroundColor: theme.palette.primary.main,
-      '& $primary, & $icon': {
-        color: theme.palette.common.white,
-      },
-    },
-  },
   paper: {
     display: 'inline-block',
     margin: '16px 32px 16px 0',
   },
-  primary: {},
-  icon: {},
 });
 
 class ToriEdit extends Component {
@@ -50,18 +37,18 @@ class ToriEdit extends Component {
     super(props)
 
     this.state = {
-      toriId: -1,
-      isEditRoom: false,
+      toriInfo: this.props.info,
+      roomLayout: this.props.layout,
       inventoryItems: [],
       accSelected: {},
-      openSnackBar: false,
-      newRoomLayout: [],
-      roomLayout: [],
       usedInventories: {},
-      dialogOpen: false,
+      isSelecting: false,
     }
 
+    this.retrieveUsedInventories = this.retrieveUsedInventories.bind(this);
     this.saveEdit = this.saveEdit.bind(this);
+
+    this.onUnselectItem = this.onUnselectItem.bind(this);
     this.onAccessorySelected = this.onAccessorySelected.bind(this);
     this.onItemPlaced = this.onItemPlaced.bind(this);
   }
@@ -79,13 +66,13 @@ class ToriEdit extends Component {
           info.balance = result.toNumber();
           this.setState({
             inventoryItems: this.state.inventoryItems.concat(info)
-          });
+          }, this.retrieveUsedInventories);
         })
       });
     });
   }
 
-  switchEdit() {
+  retrieveUsedInventories() {
     // Fetch all used inventories.
     let iCounter = {};
     // Get info about each toris' layout
@@ -108,72 +95,56 @@ class ToriEdit extends Component {
         }
       });
       this.setState({
-        isEditRoom: !this.state.isEditRoom,
-        newRoomLayout: [],
-        accSelected: {
-          refresh: this.state.isEditRoom
-        },
         usedInventories: iCounter,
       });
     });
   }
 
   saveEdit() {
-    let layout = this.state.newRoomLayout;
-    if (this.state.roomLayout !== this.state.newRoomLayout) {
-      this.setState({
-        roomLayout: this.state.newRoomLayout,
-        newRoomLayout: [],
-      });
-
-      let data = {
-        id: this.state.toriId,
-        locations: JSON.stringify(layout),
-      }
-      fetch('/room', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data),
-      })
-      .then(function(response) {
-        return response.status;
-      })
-      .then(function(status) {
-        let message = 'New room layout saved!';
-        if (status !== 200) {
-          message = 'Failed in saving room layout. Please try again layer.'
-        }
-        this.setState({
-          openSnackBar: true,
-          snackBarMessage: message,
-        });
-      }.bind(this))
-      .catch(console.err);
+    let layout = this.state.roomLayout;
+    let data = {
+      id: this.state.toriInfo.id,
+      locations: JSON.stringify(layout),
     }
-    this.switchEdit();
+    console.log(data);
+    fetch('/room', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data),
+    })
+    .then(function(response) {
+      console.log(response.text())
+      return response.status;
+    })
+    .then(function(status) {
+      let message = 'New room layout saved!';
+      if (status !== 200) {
+        message = 'Failed in saving room layout. Please try again layer.'
+      }
+      this.props.onMessage(message);
+      if (status === 200) {
+        this.props.onSwitch();
+      }
+    }.bind(this))
+    .catch(console.err);
   }
 
   onAccessorySelected(item, e) {
     this.setState({
+      isSelecting: true,
       accSelected: item,
     });
   }
 
-  onItemPlaced(layout) {
-    // Filter the layout, only include key, col, row, space.
-    // Filter tori as well.
+  onItemPlaced(layout, valid) {
+    if (!valid) {
+      this.props.onMessage('Not a valid placement');
+      return;
+    }
+    // Filter tori.
     layout = layout.filter((l) => l.key !== 'tori');
-    // TODO: remove this filter.
-    layout = layout.map((l) => {
-      return {
-        key: l.key,
-        c: l.c,
-        r: l.r,
-        s: l.s
-      }
-    });
 
     // Update the used inventory list by checking the differences between
     // the new layout and the old layout.
@@ -193,8 +164,9 @@ class ToriEdit extends Component {
     });
     this.setState({
       usedInventories: usedInventories,
-      newRoomLayout: layout,
+      roomLayout: layout,
       accSelected: {},
+      isSelecting: false,
     })
   }
 
@@ -207,7 +179,7 @@ class ToriEdit extends Component {
 
     let item = {key: info.symbol, space: info.space, img: imgName};
     return (
-      <MenuItem key={info.symbol} className={this.props.classes.menuItem} onClick={(e) => this.onAccessorySelected(item, e)}>
+      <MenuItem key={info.symbol} onClick={(e) => this.onAccessorySelected(item, e)}>
         <Avatar alt={info.name} src={imgName} />
         <Typography variant="caption" gutterBottom>
           {`x ${amount}`}
@@ -217,9 +189,14 @@ class ToriEdit extends Component {
     );
   }
 
-  render() {
-    let tori = this.props.toriInfo;
+  onUnselectItem() {
+    this.setState({
+      isSelecting: false,
+      accSelected: {},
+    });
+  }
 
+  render() {
     return (
       <Grid item sm={12} >
         <Grid container className="tori-details-container"
@@ -228,23 +205,30 @@ class ToriEdit extends Component {
                         direction={'row'}
                         justify={'center'}>
           <Grid item sm={3}>
+            { this.state.isSelecting && (
+              <Chip
+                avatar={<Avatar alt={this.state.accSelected.key} src={this.state.accSelected.img} />}
+                label="Selected accessory"
+                onDelete={this.onUnselectItem}
+              />
+            )}
             <List>
               {this.state.inventoryItems.map((info) => this.constructInventoryItem(info))}
             </List>
           </Grid>
           <Grid item sm={6}>
-            <ToriRoom dna={tori.dna}
+            <ToriRoom dna={this.state.toriInfo.dna}
                       acc={this.state.accSelected}
                       onItemPlaced={this.onItemPlaced}
                       layout={this.state.roomLayout}
-                      isEdit={true} />
+                      edit={true} />
           </Grid>
           <Grid item sm={3}>
             <Paper className={this.props.classes.paper}>
               <Button variant="raised" color="primary" onClick={this.saveEdit}>
                 Save Room
               </Button>
-              <Button variant="raised" color="secondary" onClick={this.switchEdit}>
+              <Button variant="raised" color="secondary" onClick={this.props.onSwitch}>
                 Cancel Edit
               </Button>
             </Paper>
