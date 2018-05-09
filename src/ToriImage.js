@@ -66,7 +66,7 @@ class ToriImage extends Component {
     let decorSaturate = Math.max(idx - 360, 1) % 200 + 50;
     let decorSephia = (Math.max(idx - 360 - 200, 1)) / (1000 - 360 - 200);
     dna = Math.floor(dna / 1000);
-
+    
     let isSpecial = (dna % 3) <= 1;
 
     let baseTime = 0.5;

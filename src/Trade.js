@@ -214,7 +214,6 @@ class Trade extends Component {
                         justify={'center'}>
           {this.state.accSaleDisplay}
         </Grid>
-        <ToriImage/>
       </div>
     );
   }

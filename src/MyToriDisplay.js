@@ -9,20 +9,18 @@ import Card, { CardActions, CardContent, CardHeader } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
 
-import ToriDetails from './ToriDetails.js'
+import ToriDetailsContainer from './ToriDetailsContainer.js'
 import ToriImage from './ToriImage.js'
 
 const styles = theme => ({
   root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    overflow: 'hidden',
     backgroundColor: theme.palette.background.paper,
+    flexGrow: 1,
   },
-  cardMedia: {
-    height: 200
-  }
+  card: {
+    maxWidth: 275,
+    flexGrow: 1
+  },
 });
 
 
@@ -184,12 +182,12 @@ class MyToriDisplay extends Component {
     let personality = util.getPersonality(info.personality);
 
     return (
-      <Grid key={info.id} item sm={4} >
-        <Card className="toribox">
+      <Grid key={info.id} item xs={4} style={{ flexBasis: 0}}>
+        <Card className={this.props.classes.card}>
           <CardHeader title={info.name} />
           <CardContent>
             <ToriImage dna={info.dna} size={150} />
-            <List className="tori-details">
+            <List className="tori-details" >
               <ListItem><ListItemText primary="Proficiency:"/><ListItemText primary={proficiency} /></ListItem>
               <ListItem><ListItemText primary="Personality:"/><ListItemText primary={personality} /></ListItem>
               { info.salePrice > 0 && (
@@ -220,13 +218,13 @@ class MyToriDisplay extends Component {
             Retrieve starter Toris
           </Button>
         }
-        <div id="tori-display" className={this.props.classes.root}>
+        <div id="tori-display">
           {this.state.detailIsShown ? (
-            <ToriDetails toriId={this.state.currentTori} isOther={this.props.mode !== 0}/>
+            <ToriDetailsContainer toriId={this.state.currentTori} isOther={this.props.mode !== 0}/>
           ) : (
-            <Grid container className="tori-details-container"
+            <Grid container className={this.props.classes.root}
                             spacing={16}
-                            alignItems={'center'}
+                            alignItems={'flex-start'}
                             direction={'row'}
                             justify={'center'}>
               {this.props.mode === 0 ?
