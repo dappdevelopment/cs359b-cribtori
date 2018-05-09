@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 
 import { assets } from './assets.js';
 
+
 class ToriImage extends Component {
 
   render() {
@@ -68,6 +69,9 @@ class ToriImage extends Component {
 
     let isSpecial = (dna % 3) <= 1;
 
+    let baseTime = 0.5;
+    let secTime = 0.6;
+
     return (
       <div style={{ height: size, width: size, position: 'relative', margin: `0 auto` }}>
         <img
@@ -78,6 +82,7 @@ class ToriImage extends Component {
             zIndex: 50,
             width: `100%`,
             filter: `hue-rotate(${baseHue}deg) saturate(${baseSaturate}%) sepia(${baseSephia})`,
+            animation: `animatedTori ${baseTime}s infinite alternate`,
           }} />
         <img
           src={cheek}
@@ -86,6 +91,7 @@ class ToriImage extends Component {
             position: 'absolute',
             zIndex: 200,
             width: `100%`,
+            animation: `animatedTori ${baseTime}s infinite alternate`,
           }} />
         <img
           src={shadow}
@@ -103,6 +109,7 @@ class ToriImage extends Component {
             zIndex: 150,
             width: `100%`,
             filter: `hue-rotate(${baseHue}deg) saturate(${baseSaturate}%) sepia(${baseSephia})`,
+            animation: `animatedTori ${baseTime}s infinite alternate`,
           }} />
         <img
           src={eyes}
@@ -111,6 +118,7 @@ class ToriImage extends Component {
             position: 'absolute',
             zIndex: 200,
             width: `100%`,
+            animation: `animatedTori ${baseTime}s infinite alternate`,
           }} />
         <img
           src={mouth}
@@ -119,6 +127,7 @@ class ToriImage extends Component {
             position: 'absolute',
             zIndex: 200,
             width: `100%`,
+            animation: `animatedTori ${baseTime}s infinite alternate`,
           }} />
         <img
           src={hand}
@@ -128,6 +137,7 @@ class ToriImage extends Component {
             zIndex: 200,
             width: `100%`,
             filter: `hue-rotate(${secHue}deg) saturate(${secSaturate}%) sepia(${secSephia})`,
+            animation: `animatedTori ${secTime}s infinite alternate`,
           }} />
         <img
           src={feet}
@@ -146,6 +156,7 @@ class ToriImage extends Component {
               zIndex: 200,
               width: `100%`,
               filter: `hue-rotate(${decorHue}deg) saturate(${decorSaturate}%) sepia(${decorSephia})`,
+              animation: `animatedTori ${baseTime}s infinite alternate`,
             }} />
         }
       </div>
