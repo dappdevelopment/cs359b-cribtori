@@ -81,7 +81,7 @@ class ToriDetails extends Component {
     .then(function(data) {
       if (data.hearts) {
         this.setState({
-          heartBase: data.hearts,
+          heartBase: Math.max(data.hearts, 0),
         });
       }
     }.bind(this))

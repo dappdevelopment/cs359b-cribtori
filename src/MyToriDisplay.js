@@ -9,8 +9,9 @@ import Card, { CardActions, CardContent, CardHeader } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
 
-import ToriDetailsContainer from './ToriDetailsContainer.js'
-import ToriImage from './ToriImage.js'
+import ToriWelcome from './ToriWelcome.js';
+import ToriDetailsContainer from './ToriDetailsContainer.js';
+import ToriImage from './ToriImage.js';
 
 const styles = theme => ({
   root: {
@@ -47,7 +48,6 @@ class MyToriDisplay extends Component {
       otherToriDisplay: [],
     }
 
-    this.generateInitToris = this.generateInitToris.bind(this);
     this.closeToriDetails = this.closeToriDetails.bind(this);
   }
 
@@ -128,18 +128,6 @@ class MyToriDisplay extends Component {
     .catch(console.error);
   }
 
-  generateInitToris(e) {
-    util.generateInitialTori(this.context.toriToken, [0, 1, 0, 0], "test", this.context.userAccount)
-    .then((result) => {
-      console.log('After generating new tori:', result);
-      // TODO: Generate new accessories.
-      // util.generateNewAccessories(this.context.accToken, this.context.userAccount)
-      // .then((result) => {
-      //   console.log('After generating new accessories:', result);
-      // })
-    })
-  }
-
 
   openToriDetails(toriId, e) {
     console.log("Showing details for:", toriId);
@@ -196,9 +184,7 @@ class MyToriDisplay extends Component {
           </Button>
         }
         {this.state.isNewUser && this.props.mode === 0 &&
-          <Button variant="raised" color="primary" className="retrieve-button" onClick={this.generateInitToris}>
-            Retrieve starter Toris
-          </Button>
+          <ToriWelcome onSubmit={() => console.log('submit')} />
         }
         <div id="tori-display">
           {this.state.detailIsShown ? (

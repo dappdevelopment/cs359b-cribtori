@@ -9,8 +9,9 @@ import Typography from 'material-ui/Typography';
 import Grid from 'material-ui/Grid';
 import Card, { CardActions, CardContent } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
-import Button from 'material-ui/Button';
+import Snackbar from 'material-ui/Snackbar';
 
+import AccessoryBuyInput from './AccessoryBuyInput.js';
 import ToriImage from './ToriImage.js'
 
 const styles = theme => ({
@@ -50,8 +51,13 @@ class Trade extends Component {
 
     this.state = {
       toriSaleDisplay: [],
-      accSaleDisplay: []
+      accSaleDisplay: [],
+      openSnackBar: false,
+      snackBarMessage: '',
     };
+
+    this.handleMessage = this.handleMessage.bind(this);
+    this.handleCloseSnackBar = this.handleCloseSnackBar.bind(this);
   }
 
   componentDidMount() {
@@ -127,6 +133,19 @@ class Trade extends Component {
     }
   }
 
+  handleCloseSnackBar() {
+    this.setState({
+      openSnackBar: false,
+    });
+  }
+
+  handleMessage(message) {
+    this.setState({
+      openSnackBar: true,
+      snackBarMessage: message,
+    }, this.refreshDisplay);
+  }
+
   constructToriSaleDisplay(info) {
     let proficiency = util.getProficiency(info.proficiency);
     let personality = util.getPersonality(info.personality);
@@ -144,9 +163,12 @@ class Trade extends Component {
             </List>
           </CardContent>
           <CardActions>
-            <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(this.props.toriToken, info.id, 'tori', e)}>
-              Buy Tori
-            </Button>
+            <AccessoryBuyInput contract={this.props.toriToken}
+                               addr={info.id}
+                               price={info.salePrice}
+                               total={1}
+                               custom={false}
+                               onMessage={this.handleMessage}/>
           </CardActions>
         </Card>
       </Grid>
@@ -161,10 +183,13 @@ class Trade extends Component {
       i += 1;
       return (
         <ListItem key={`${info.symbol}_${i}`}>
-          <ListItemText primary={`${item.amount} for ${this.context.web3.fromWei(item.price, 'ether')} ETH/token`}/>
-          <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(info.contract, item, 'acc', e)}>
-            Buy
-          </Button>
+          <ListItemText primary={`${item.amount.toNumber()} for ${this.context.web3.fromWei(item.price, 'ether')} ETH/token`}/>
+          <AccessoryBuyInput contract={info.contract}
+                             addr={item.addr}
+                             price={item.price.toNumber()}
+                             total={item.amount.toNumber()}
+                             custom={true}
+                             onMessage={this.handleMessage}/>
         </ListItem>
       );
     });
@@ -180,7 +205,7 @@ class Trade extends Component {
               <ListItem><ListItemText primary="Material:"/><ListItemText primary={info.material} /></ListItem>
               <ListItem><ListItemText primary="Space:"/><ListItemText primary={info.space} /></ListItem>
             </List>
-            <Typography variant="subheading">Offer</Typography>
+            <Typography variant="subheading">Offers:</Typography>
             { info.sales.length > 0 && (
               <List className="offer">
                 {offer}
@@ -216,6 +241,15 @@ class Trade extends Component {
                         justify={'center'}>
           {this.state.accSaleDisplay}
         </Grid>
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={this.state.openSnackBar}
+          onClose={this.handleCloseSnackBar}
+          SnackbarContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">{this.state.snackBarMessage}</span>}
+        />
       </div>
     );
   }
