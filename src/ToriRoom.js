@@ -103,7 +103,7 @@ class ToriRoom extends Component {
       cells.push(c);
     }
 
-    for (var idx = 0; idx < LIM * (LIM + 2); idx++) {
+    for (idx = 0; idx < LIM * (LIM + 2); idx++) {
       let x = idx % (LIM + 2) - 1;
       let y = Math.floor(idx / (LIM + 2));
 
@@ -145,7 +145,7 @@ class ToriRoom extends Component {
       cells.push(c);
     };
 
-    for (var idx = 0; idx < LIM + 2; idx++) {
+    for (idx = 0; idx < LIM + 2; idx++) {
       let c = (
         <GridListTile key={`wall_${idx}_bottom`}
                       cols={1}>
@@ -167,12 +167,24 @@ class ToriRoom extends Component {
 
       let c;
       if (key === 'tori') {
-        c = (
-          <GridListTile key={`${key}_${x}_${y}`}
-                        className={this.props.classes.gridTile} cols={space}>
-            <ToriImage dna={this.props.dna} size={unit} />
-          </GridListTile>
-        );
+        if (this.state.isEdit) {
+          c = (
+            <GridListTile key={`${key}_${x}_${y}`}
+                          className={this.props.classes.gridTile}
+                          cols={space} >
+              <ToriImage dna={this.props.dna} size={unit} />
+            </GridListTile>
+          );
+        } else {
+          c = (
+            <GridListTile key={`${key}_${x}_${y}`}
+                          onClick={this.props.handleToriClick}
+                          className={this.props.classes.gridTile}
+                          cols={space} >
+              <ToriImage dna={this.props.dna} size={unit} />
+            </GridListTile>
+          );
+        }
       } else if (this.state.isEdit && !this.state.isSelecting) {
         c = (
           <GridListTile key={`${key}_${x}_${y}`}

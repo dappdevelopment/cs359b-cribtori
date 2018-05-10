@@ -2,10 +2,15 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
 import { withStyles } from 'material-ui/styles';
+import Typography from 'material-ui/Typography';
 import Paper from 'material-ui/Paper';
 import { MenuItem, MenuList } from 'material-ui/Menu';
 import Grid from 'material-ui/Grid';
 import Divider from 'material-ui/Divider';
+
+import Favorite from '@material-ui/icons/Favorite';
+import FavoriteBorder from '@material-ui/icons/FavoriteBorder';
+import { HeartHalfFull } from 'mdi-material-ui';
 
 import * as util from './utils.js';
 
@@ -13,12 +18,16 @@ import ToriRoom from './ToriRoom.js'
 import ToriActivityLogs from './ToriActivityLogs.js'
 import TradeDialog from './TradeDialog.js';
 
+const HEART_LIM = 5;
 
 const styles = theme => ({
   paper: {
     display: 'inline-block',
     margin: '16px 32px 16px 0',
-  }
+  },
+  icon: {
+    color: 'red',
+  },
 });
 
 class ToriDetails extends Component {
@@ -33,11 +42,16 @@ class ToriDetails extends Component {
   constructor(props) {
     super(props)
 
+    let p = this.props.info.personality;
+
     this.state = {
       toriInfo: this.props.info,
       roomLayout: this.props.layout,
       dialogOpen: false,
       lastUpdate: new Date(),
+      heartBase: (p % 3) === 0 ? (p === 0) ? 3 : 2 : p,
+      heartAdjust: 0,
+      logged: false,
     }
 
     this.feedTori = this.feedTori.bind(this);
@@ -45,8 +59,63 @@ class ToriDetails extends Component {
     this.playWithTori = this.playWithTori.bind(this);
     this.craftAccessory = this.craftAccessory.bind(this);
 
+    this.adjustStatus = this.adjustStatus.bind(this);
+    this.onToriClick = this.onToriClick.bind(this);
+
+    this.constructHearts = this.constructHearts.bind(this);
+    this.updateHearts = this.updateHearts.bind(this);
+
     this.handleDialogClose = this.handleDialogClose.bind(this);
     this.handleDialogSubmit = this.handleDialogSubmit.bind(this);
+  }
+
+  componentDidMount() {
+    // TODO: show error message
+    fetch('/hearts/' + this.props.info.id)
+    .then(function(response) {
+      if (response.ok) {
+        return response.json();
+      }
+      throw response;
+    })
+    .then(function(data) {
+      if (data.hearts) {
+        this.setState({
+          heartBase: data.hearts,
+        });
+      }
+    }.bind(this))
+    .catch(console.err);
+  }
+
+  componentWillUnmount() {
+    // TODO: handle error
+    let h = this.state.heartBase + this.state.heartAdjust;
+    h = Math.floor(h * 10) / 10;
+    let data = {
+      id: this.state.toriInfo.id,
+      hearts: h,
+    }
+    fetch('/hearts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data),
+    })
+    .then(function(response) {
+      return response.status;
+    })
+    .then(function(status) {
+      let message = 'Hearts are stored!';
+      if (status === 406) {
+        message = this.state.toriInfo.name + ' forgots hearts';
+      } else if (status === 400) {
+        message = 'Saving ' + this.state.toriInfo.name + '\'s hearts failed, try again later';
+      }
+      this.props.onMessage(message);
+    }.bind(this))
+    .catch(console.err);
   }
 
 
@@ -57,7 +126,6 @@ class ToriDetails extends Component {
   }
 
   handleDialogSubmit(contract, data) {
-    // TODO: show error message
     if (data.price === 0) {
       this.props.onMessage('Not valid amount or price');
     } else {
@@ -116,6 +184,7 @@ class ToriDetails extends Component {
         });
       }
       this.props.onMessage(message);
+      this.updateHearts(1);
     }.bind(this))
     .catch(console.err);
   }
@@ -149,6 +218,7 @@ class ToriDetails extends Component {
         });
       }
       this.props.onMessage(message);
+      this.updateHearts(1);
     }.bind(this))
     .catch(console.err);
   }
@@ -167,6 +237,44 @@ class ToriDetails extends Component {
     console.log('Visit Tori');
   }
 
+  onToriClick() {
+    // TODO: Save this state to the DB
+    this.updateHearts(0.05);
+  }
+
+  updateHearts(val) {
+    let p = this.state.toriInfo.personality
+    let prop;
+    if (val > 0) {
+      // Rise
+      prop = p % 2 === 0 ? 1 : 0.5;
+    } else {
+      // Fall
+      prop = p % 3 === 0 ? 0.5 : 1;
+    }
+    this.setState({
+      heartAdjust: this.state.heartAdjust + prop * val,
+    })
+  }
+
+  adjustStatus(timestamp) {
+    if (!this.state.logged) {
+      let now = new Date();
+      let val = -5;
+      if (timestamp.feed !== -1) {
+        let feed = new Date(timestamp.feed);
+        let diff = now - feed;
+        if (diff >= 3 * 36e5) {
+          val = -((diff / 36e5) - 3) * 0.1;
+        } else {
+          val = 0;
+        }
+      }
+      this.setState({
+        logged: false
+      }, this.updateHearts(val));
+    }
+  }
 
   constructToriActions() {
     return (
@@ -194,6 +302,27 @@ class ToriDetails extends Component {
     );
   }
 
+  constructHearts() {
+    let totalHearts = this.state.heartBase + this.state.heartAdjust;
+    totalHearts = Math.max(Math.min(totalHearts, 5), 0);
+    let hearts = [];
+    for (var i = 0; i < Math.floor(totalHearts); i++) {
+      hearts.push(
+        <Favorite key={`heart_${i}`} className={this.props.classes.icon}/>
+      );
+    }
+    if (totalHearts - Math.floor(totalHearts) > 0) {
+      hearts.push(
+        <HeartHalfFull key={`heart_${i}`} className={this.props.classes.icon}/>
+      );
+    }
+    for (i = Math.ceil(totalHearts); i < HEART_LIM; i++) {
+      hearts.push(
+        <FavoriteBorder key={`heart_${i}`} className={this.props.classes.icon}/>
+      );
+    }
+    return hearts;
+  }
 
   render() {
     return (
@@ -207,7 +336,8 @@ class ToriDetails extends Component {
             {!this.props.isOther && (
               <ToriActivityLogs toriId={this.state.toriInfo.id}
                                 name={this.state.toriInfo.name}
-                                lastUpdate={this.state.lastUpdate} />
+                                lastUpdate={this.state.lastUpdate}
+                                onFilled={this.adjustStatus} />
             )}
           </Grid>
           <Grid item sm={6}>
@@ -215,10 +345,39 @@ class ToriDetails extends Component {
                       edit={false}
                       acc={this.state.accSelected}
                       onItemPlaced={this.onItemPlaced}
-                      layout={this.state.roomLayout} />
+                      layout={this.state.roomLayout}
+                      handleToriClick={this.onToriClick} />
           </Grid>
           <Grid item sm={3}>
             { this.constructToriActions() }
+          </Grid>
+          <Grid item sm={6}>
+            <Paper>
+              <Typography variant="subheading" gutterBottom align="center">
+                Status:
+              </Typography>
+              <Grid container className="tori-details-container"
+                              spacing={8}
+                              alignItems={'center'}
+                              direction={'row'}
+                              justify={'space-around'}>
+                <Grid item sm={3}>
+                  <Typography variant="body1" gutterBottom align="right">
+                    Personality: { util.getPersonality(this.state.toriInfo.personality) }
+                  </Typography>
+                </Grid>
+                <Grid item sm={6}>
+                  <Typography variant="body1" gutterBottom align="center">
+                    { this.constructHearts() }
+                  </Typography>
+                </Grid>
+                <Grid item sm={3}>
+                  <Typography variant="body1" gutterBottom align="left">
+                    Proficiency: { util.getProficiency(this.state.toriInfo.proficiency) }
+                  </Typography>
+                </Grid>
+              </Grid>
+            </Paper>
           </Grid>
         </Grid>
         <TradeDialog open={this.state.dialogOpen}
