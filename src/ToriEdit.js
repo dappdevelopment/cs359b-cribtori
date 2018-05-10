@@ -114,7 +114,6 @@ class ToriEdit extends Component {
       body: JSON.stringify(data),
     })
     .then(function(response) {
-      console.log(response.text())
       return response.status;
     })
     .then(function(status) {

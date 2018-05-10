@@ -14,10 +14,10 @@ contract WoodenDesk is AccessoriesToken {
     space = 2;
 
     fundsWallet = msg.sender;
-    balances[msg.sender] = 1000;
+    balances[msg.sender] = 10;
     totalSupply_ = 10000;
     unitsOneEthCanBuy = 100;
 
-    approveForSale(50, 100000000);
+    approveForSale(5, 100000000);
   }
 }
