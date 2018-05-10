@@ -84,15 +84,17 @@ class Inventory extends Component {
           this.context.accContracts.forEach((contract) => {
             // Get the info.
             let info;
-            util.retrieveAllTokenInfo(contract)
+            util.retrieveAllTokenInfo(contract, this.context.userAccount)
             .then((result) => {
               info = util.parseAccInfo(result);
               contract.balanceOf(this.context.userAccount)
               .then((result) => {
                 info.balance = result.toNumber();
-                this.setState({
-                  inventoryDisplay: this.state.inventoryDisplay.concat(this.constructInventoryDisplay(contract, info))
-                });
+                if (info.balance !== 0) {
+                  this.setState({
+                    inventoryDisplay: this.state.inventoryDisplay.concat(this.constructInventoryDisplay(contract, info))
+                  });
+                }
               })
             })
             .catch(console.error);

@@ -58,7 +58,7 @@ class ToriEdit extends Component {
     this.context.accContracts.forEach((contract) => {
       // Get the info.
       let info;
-      util.retrieveAllTokenInfo(contract)
+      util.retrieveAllTokenInfo(contract, this.context.userAccount)
       .then((result) => {
         info = util.parseAccInfo(result);
         contract.balanceOf(this.context.userAccount)

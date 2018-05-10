@@ -264,13 +264,28 @@ class ToriRoom extends Component {
     let space = this.props.acc.space;
     let layout = this.state.layout;
 
-    // TODO: Check if valid size.
     // TODO: handle different orientation.
     if (x === LIM - 1 && space > 1) {
       this.setState({
         isSelecting: false,
       }, () => this.props.onItemPlaced(layout, false));
       return;
+    }
+    // Check if it collides with other accessories.
+    if (space > 1) {
+      // Check if it collides with the entrance.
+      let notValid = (x + 1 === 2 && y === LIM - 1);
+      layout.forEach((l) => {
+        if (l.c === x + 1 && l.r === y) {
+          notValid = true;
+        }
+      });
+      if (notValid) {
+        this.setState({
+          isSelecting: false,
+        }, () => this.props.onItemPlaced(layout, false));
+        return;
+      }
     }
 
     // TODO: update with size.

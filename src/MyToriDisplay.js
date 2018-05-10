@@ -110,7 +110,7 @@ class MyToriDisplay extends Component {
         count = count.toNumber();
         // TODO: randomly choose which id to include
         // TODO: remove line below after testing.
-        let otherIds = [0];
+        let otherIds = [];
         for (let i = 0; i < count; i++) {
           if (ownerIds.indexOf(i) === -1) {
             otherIds.push(i);

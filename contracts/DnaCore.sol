@@ -79,10 +79,8 @@ contract DnaCore {
                                 internal view returns (uint256 dna,
                                                       uint32 proficiency,
                                                       uint32 personality){
-    uint256 nameRandomness = uint(keccak256(now, _owner, _name));
-    uint256 ownerRandomness = uint(keccak256(now, _owner));
-
-    uint256 traitRandomness = uint(keccak256(nameRandomness, ownerRandomness));
+    uint256 traitRandomness = uint(keccak256(now, _owner, _name));
+    
     dna = traitRandomness % DNA_LIMIT;
     if (dna / (10**(DNA_DIGIT - 1)) == 0) {
       dna += 10**(DNA_DIGIT - 1);
