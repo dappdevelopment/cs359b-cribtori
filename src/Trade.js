@@ -10,8 +10,9 @@ import Grid from 'material-ui/Grid';
 import Card, { CardActions, CardContent } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Snackbar from 'material-ui/Snackbar';
+import Divider from 'material-ui/Divider';
 
-import AccessoryBuyInput from './AccessoryBuyInput.js';
+import BuyInput from './BuyInput.js';
 import ToriImage from './ToriImage.js'
 
 const styles = theme => ({
@@ -118,21 +119,6 @@ class Trade extends Component {
       });
   }
 
-  buyForSale(contract, rep, mode, e) {
-    if (mode === 'acc') {
-      // TODO: customize amount
-      util.buyAccForSale(contract, rep.addr, 1, rep.price, this.context.userAccount)
-      .then((result) => {
-        this.refreshDisplay();
-      }).catch(console.error);
-    } else {
-      util.buyTokenForSale(contract, rep, this.context.web3.toWei(1), this.context.userAccount)
-      .then((result) => {
-        this.refreshDisplay();
-      }).catch(console.error);
-    }
-  }
-
   handleCloseSnackBar() {
     this.setState({
       openSnackBar: false,
@@ -163,12 +149,12 @@ class Trade extends Component {
             </List>
           </CardContent>
           <CardActions>
-            <AccessoryBuyInput contract={this.props.toriToken}
-                               addr={info.id}
-                               price={info.salePrice}
-                               total={1}
-                               custom={false}
-                               onMessage={this.handleMessage}/>
+            <BuyInput contract={this.context.toriToken}
+                      addr={info.id}
+                      price={info.salePrice}
+                      total={1}
+                      custom={false}
+                      onMessage={this.handleMessage}/>
           </CardActions>
         </Card>
       </Grid>
@@ -184,12 +170,12 @@ class Trade extends Component {
       return (
         <ListItem key={`${info.symbol}_${i}`}>
           <ListItemText primary={`${item.amount.toNumber()} for ${this.context.web3.fromWei(item.price, 'ether')} ETH/token`}/>
-          <AccessoryBuyInput contract={info.contract}
-                             addr={item.addr}
-                             price={item.price.toNumber()}
-                             total={item.amount.toNumber()}
-                             custom={true}
-                             onMessage={this.handleMessage}/>
+          <BuyInput contract={info.contract}
+                    addr={item.addr}
+                    price={item.price.toNumber()}
+                    total={item.amount.toNumber()}
+                    custom={true}
+                    onMessage={this.handleMessage}/>
         </ListItem>
       );
     });
@@ -221,24 +207,29 @@ class Trade extends Component {
   render() {
     return (
       <div className="Trade">
-        <Typography variant="headline" gutterBottom align="center">
-          Toris For Sale
-        </Typography>
         <Grid container className="tori-sale-display"
                         spacing={8}
                         alignItems={'center'}
                         direction={'row'}
                         justify={'center'}>
+          <Grid item sm={12}>
+            <Typography variant="headline" gutterBottom align="center">
+              Toris For Sale
+            </Typography>
+          </Grid>
           {this.state.toriSaleDisplay}
         </Grid>
-        <Typography variant="headline" gutterBottom align="center">
-          Accessories For Sale
-        </Typography>
+        <Divider />
         <Grid container className="acc-sale-display"
                         spacing={8}
                         alignItems={'center'}
                         direction={'row'}
                         justify={'center'}>
+          <Grid item sm={12}>
+            <Typography variant="headline" gutterBottom align="center">
+              Accessories For Sale
+            </Typography>
+          </Grid>
           {this.state.accSaleDisplay}
         </Grid>
         <Snackbar

@@ -125,7 +125,7 @@ class ToriDetails extends Component {
     })
   }
 
-  handleDialogSubmit(contract, data) {
+  handleDialogSubmit(contract, data, info) {
     if (data.price === 0) {
       this.props.onMessage('Not valid amount or price');
     } else {
@@ -149,6 +149,7 @@ class ToriDetails extends Component {
   removeToriForSale(toriId, e) {
     util.removeTokenForSale(this.context.toriToken, toriId, this.context.userAccount)
     .then((result) => {
+      console.log(result)
       console.log('After revoking:', result);
       this.props.onMessage('Revoke sale transaction has been submitted');
     }).catch(console.error);
@@ -291,10 +292,10 @@ class ToriDetails extends Component {
             <MenuItem onClick={this.craftAccessory}>Craft</MenuItem>
             <Divider />
             <MenuItem onClick={this.props.onEdit}>Edit Room</MenuItem>
-            {this.state.salePrice > 0 ? (
-              <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriId, e)}>Revoke Sale Post</MenuItem>
+            {this.state.toriInfo.salePrice > 0 ? (
+              <MenuItem onClick={(e) => this.removeToriForSale(this.state.toriInfo.id, e)}>Revoke Sale Post</MenuItem>
             ) : (
-              <MenuItem onClick={(e) => this.postToriForSale(this.state.toriId, e)}>Sell Tori</MenuItem>
+              <MenuItem onClick={(e) => this.postToriForSale(this.state.toriInfo.id, e)}>Sell Tori</MenuItem>
             )}
           </MenuList>
         )}

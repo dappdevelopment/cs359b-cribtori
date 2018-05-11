@@ -70,6 +70,7 @@ contract AccessoriesToken is StandardToken {
   function removeForSale() public returns (bool) {
     uint256 value = allowance(msg.sender, this);
     require(value != 0);
+    pricePerToken[msg.sender] = 0;
     allowedSale = allowedSale.sub(1);
     return decreaseApproval(this, value);
   }
@@ -89,7 +90,7 @@ contract AccessoriesToken is StandardToken {
     this.transferFrom(_owner, msg.sender, _value);
 
     if (allowedValue == _value) {
-      allowedSale = allowedSale.sub(1);
+      allowedSale -= 1;
     }
   }
 

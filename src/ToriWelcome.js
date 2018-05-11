@@ -113,9 +113,10 @@ class ToriWelcome extends Component {
               <Grid item sm={12}>
                 <Typography variant="body1" gutterBottom align="center">
                   Welcome to Cribtori. Before you explore all the features in Cribtori,
-                  you would need to generate your very first tori! Please fill in the
-                  questions below and choose a name for your starter tori. Then, we
-                  will generate a suitable tori for you!
+                  you would need to get your very first tori! You can either buy
+                  any available tori from <b>Yard Sale</b> or generate a custom
+                  tori here! Please fill in the questions below and choose a name
+                  for your starter tori. Then, we will generate a suitable tori for you!
                 </Typography>
                 <Divider />
               </Grid>

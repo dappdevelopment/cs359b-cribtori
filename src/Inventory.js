@@ -10,6 +10,7 @@ import Grid from 'material-ui/Grid';
 import Card, { CardActions, CardContent, CardHeader } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Button from 'material-ui/Button';
+import Snackbar from 'material-ui/Snackbar';
 
 import TradeDialog from './TradeDialog.js';
 
@@ -44,10 +45,14 @@ class Inventory extends Component {
       inventoryTypes: [],
       usedInventories: {},
       dialogOpen: false,
+      openSnackBar: false,
     };
 
     this.handleDialogSubmit = this.handleDialogSubmit.bind(this);
     this.handleDialogClose = this.handleDialogClose.bind(this);
+
+    this.handleCloseSnackBar = this.handleCloseSnackBar.bind(this);
+    this.handleMessage = this.handleMessage.bind(this);
   }
 
   componentDidMount() {
@@ -112,10 +117,12 @@ class Inventory extends Component {
     })
   }
 
-  handleDialogSubmit(contract, data) {
+  handleDialogSubmit(contract, data, info) {
     if (data.price === 0 || data.amount === 0) {
       // TODO: show error
-      console.log('Not valid amount or price');
+      this.handleMessage('Not valid amount or price');
+    } else if (info.balance - this.state.usedInventories[info.symbol] < data.amount) {
+      this.handleMessage('Insufficient amount. Check if placed.');
     } else {
       util.postAccForSale(contract, data.amount, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
       .then((result) => {
@@ -127,10 +134,11 @@ class Inventory extends Component {
     })
   }
 
-  postAccForSale(contract, accId, e) {
+  postAccForSale(contract, item, e) {
     this.setState({
       dialogOpen: true,
-      currContract: contract
+      currContract: contract,
+      currItem: item,
     })
   }
 
@@ -141,10 +149,23 @@ class Inventory extends Component {
     }).catch(console.error);
   }
 
+  handleCloseSnackBar() {
+    this.setState({
+      openSnackBar: false,
+    });
+  }
+
+  handleMessage(message) {
+    this.setState({
+      openSnackBar: true,
+      snackBarMessage: message,
+    });
+  }
 
   constructInventoryDisplay(contract, info) {
     let imgName = assets.accessories[info.symbol];
 
+    let buttonDisabled = info.balance === this.state.usedInventories[info.symbol];
     return (
       <Grid key={info.symbol} item sm={4}>
         <Card className={this.props.classes.card}>
@@ -170,7 +191,7 @@ class Inventory extends Component {
                 Revoke Sale Post
               </Button>
             ) : (
-              <Button variant="raised" color="primary" onClick={(e) => this.postAccForSale(contract, info.id, e)}>
+              <Button disabled={buttonDisabled} variant="raised" color="primary" onClick={(e) => this.postAccForSale(contract, info, e)}>
                 Sell Accessory
               </Button>
             )}
@@ -200,7 +221,17 @@ class Inventory extends Component {
                      amountNeeded={true}
                      contract={this.state.currContract}
                      handleClose={this.handleDialogClose}
-                     handleSubmit={this.handleDialogSubmit}/>
+                     handleSubmit={this.handleDialogSubmit}
+                     info={this.state.currItem}/>
+         <Snackbar
+           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+           open={this.state.openSnackBar}
+           onClose={this.handleCloseSnackBar}
+           SnackbarContentProps={{
+             'aria-describedby': 'message-id',
+           }}
+           message={<span id="message-id">{this.state.snackBarMessage}</span>}
+         />
       </div>
     );
   }

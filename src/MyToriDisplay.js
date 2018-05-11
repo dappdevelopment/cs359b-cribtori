@@ -179,7 +179,7 @@ class MyToriDisplay extends Component {
     return (
       <div className="tori-display-container">
         { this.state.detailIsShown &&
-          <Button variant="raised" color="primary" className="back-button" onClick={this.closeToriDetails}>
+          <Button variant="raised" color="secondary" className="back-button" onClick={this.closeToriDetails}>
             Back
           </Button>
         }

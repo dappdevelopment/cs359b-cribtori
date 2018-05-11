@@ -31,7 +31,7 @@ const styles = theme => ({
 
 
 
-class AccessoryBuyInput extends Component {
+class BuyInput extends Component {
 
   static contextTypes = {
     userAccount: PropTypes.string
@@ -70,17 +70,55 @@ class AccessoryBuyInput extends Component {
     let amount = 1;
     if (this.props.custom) {
       amount = this.state.amount;
+      util.buyAccForSale(this.props.contract,
+                         this.props.addr,
+                         amount,
+                         amount * this.props.price,
+                         this.context.userAccount)
+      .then((result) => {
+        let message = 'Buy transaction submitted';
+        if (!result) message = 'Transaction failed :(';
+        this.props.onMessage(message);
+      })
+      .catch(console.err);
+    } else {
+      console.log(this.props.contract,
+                           this.props.addr,
+                           this.props.price,
+                           this.context.userAccount)
+      util.buyTokenForSale(this.props.contract,
+                           this.props.addr,
+                           this.props.price,
+                           this.context.userAccount)
+      .then((result) => {
+        let message = 'Buy transaction submitted';
+        if (!result) message = 'Transaction failed :(';
+        this.props.onMessage(message);
+        console.log(result)
+        if (result && !this.props.custom) {
+          // TODO: do a confirmation here from the smart contract side.
+          let data = {
+            id: this.props.addr,
+            locations: JSON.stringify([]),
+          }
+          fetch('/room', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data),
+          })
+          .then(function(response) {
+            return response.status;
+          })
+          .then(function(status) {
+            // Updated!
+          })
+          .catch(console.err);
+        }
+      })
+      .catch(console.err);
     }
-    util.buyAccForSale(this.props.contract,
-                       this.props.addr,
-                       amount,
-                       this.props.price,
-                       this.context.userAccount)
-    .then((result) => {
-      let message = 'Buy transaction submitted';
-      if (!result) message = 'Transaction failed :(';
-      this.props.onMessage(message)
-    }).catch(console.error);
   }
 
   render() {
@@ -111,4 +149,4 @@ class AccessoryBuyInput extends Component {
   }
 }
 
-export default withStyles(styles)(AccessoryBuyInput)
+export default withStyles(styles)(BuyInput)

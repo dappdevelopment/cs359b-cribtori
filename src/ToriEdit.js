@@ -211,7 +211,9 @@ class ToriEdit extends Component {
               />
             )}
             <List>
-              {this.state.inventoryItems.map((info) => this.constructInventoryItem(info))}
+              {this.state.inventoryItems
+                .filter((info) => (info.balance !== 0))
+                .map((info) => this.constructInventoryItem(info))}
             </List>
           </Grid>
           <Grid item sm={6}>
