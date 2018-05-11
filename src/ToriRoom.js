@@ -6,8 +6,10 @@ import GridList, { GridListTile } from 'material-ui/GridList';
 import { assets } from './assets.js';
 
 import ToriImage from './ToriImage.js';
+import WallImage from './WallImage.js';
 
 const LIM = 5;
+const unit = 80;
 
 const styles = theme => ({
   root: {
@@ -18,14 +20,12 @@ const styles = theme => ({
     backgroundColor: theme.palette.background.paper,
   },
   gridList: {
-    minWidth: 400,
-    minHeight: 400,
-    width: 400,
-    height: 400
+    minWidth: unit * (LIM + 2),
+    width: unit * (LIM + 2),
   },
   gridTile: {
     backgroundImage: `url(${assets.background.floor[0]})`,
-    backgroundSize: 80,
+    backgroundSize: unit,
   },
   gridEmpty: {
     backgroundColor: theme.palette.primary.main,
@@ -89,13 +89,43 @@ class ToriRoom extends Component {
   }
 
   constructCells() {
-    // First, construct all grid with Floor.
+    // First, construct all grid with Wall.
     let cells = [];
-    for (var idx = 0; idx < LIM * LIM; idx++) {
-      let x = idx % LIM;
-      let y = Math.floor(idx / LIM);
+    for (var idx = 0; idx < LIM + 2; idx++) {
+      let o = (idx === 0) ? 1 : (idx === LIM + 2 - 1) ? 3 : 0;
+      let c = (
+        <GridListTile key={`wall_${idx}_top`}
+                      cols={1}>
+          <WallImage size={unit}
+                     orientation={o} />
+        </GridListTile>
+      );
+      cells.push(c);
+    }
+
+    for (idx = 0; idx < LIM * (LIM + 2); idx++) {
+      let x = idx % (LIM + 2) - 1;
+      let y = Math.floor(idx / (LIM + 2));
+
+      let o = (x === -1) ? 1 : 3;
       let c;
-      if (this.state.isSelecting) {
+      if (x === -1 || x === LIM) {
+        c = (
+          <GridListTile key={`wall_${o}_${y}`}
+                        cols={1}>
+            <WallImage size={unit}
+                       orientation={o} />
+          </GridListTile>
+        );
+      } else if (x === 2 && y === LIM - 1) {
+        c = (
+          <GridListTile key={`cell_${x}_${y}`}
+                        className={this.props.classes.gridTile}
+                        cols={1}>
+            <img src={assets.background.door} alt={'Door'} />
+          </GridListTile>
+        )
+      } else if (this.state.isSelecting) {
         c = (
           <GridListTile onClick={(e) => this.onEmptyTileClick(x, y, e)}
                         key={`cell_${x}_${y}`}
@@ -112,8 +142,21 @@ class ToriRoom extends Component {
           </GridListTile>
         )
       }
-      cells[idx] = c;
+      cells.push(c);
     };
+
+    for (idx = 0; idx < LIM + 2; idx++) {
+      let c = (
+        <GridListTile key={`wall_${idx}_bottom`}
+                      cols={1}>
+          {idx !== 0 && idx !== 3 && idx !== LIM + 1 && (
+            <WallImage size={unit}
+                       orientation={2} />
+          )}
+        </GridListTile>
+      );
+      cells.push(c);
+    }
 
     // Second, iterate through layout and reassign cells.
     this.state.layout.forEach((content) => {
@@ -124,12 +167,24 @@ class ToriRoom extends Component {
 
       let c;
       if (key === 'tori') {
-        c = (
-          <GridListTile key={`${key}_${x}_${y}`}
-                        className={this.props.classes.gridTile} cols={space}>
-            <ToriImage dna={this.props.dna} size={80} />
-          </GridListTile>
-        );
+        if (this.state.isEdit) {
+          c = (
+            <GridListTile key={`${key}_${x}_${y}`}
+                          className={this.props.classes.gridTile}
+                          cols={space} >
+              <ToriImage dna={this.props.dna} size={unit} />
+            </GridListTile>
+          );
+        } else {
+          c = (
+            <GridListTile key={`${key}_${x}_${y}`}
+                          onClick={this.props.handleToriClick}
+                          className={this.props.classes.gridTile}
+                          cols={space} >
+              <ToriImage dna={this.props.dna} size={unit} />
+            </GridListTile>
+          );
+        }
       } else if (this.state.isEdit && !this.state.isSelecting) {
         c = (
           <GridListTile key={`${key}_${x}_${y}`}
@@ -152,13 +207,17 @@ class ToriRoom extends Component {
       cells = cells.map((oldC) => {
         let oKey = oldC.key;
         let temp = oKey.split('_');
-        let oX = parseInt(temp[1], 10);
-        let oY = parseInt(temp[2], 10);
-
-        if (oX === x && oY === y) {
-          return c;
-        } else {
+        if (temp[0] === 'wall') {
           return oldC;
+        } else {
+          let oX = parseInt(temp[1], 10);
+          let oY = parseInt(temp[2], 10);
+
+          if (oX === x && oY === y) {
+            return c;
+          } else {
+            return oldC;
+          }
         }
       });
 
@@ -167,6 +226,9 @@ class ToriRoom extends Component {
         cells = cells.filter((c) => {
           let oKey = c.key;
           let temp = oKey.split('_');
+          if (temp[0] === 'wall') {
+            return true;
+          }
           let oX = parseInt(temp[1], 10);
           let oY = parseInt(temp[2], 10);
 
@@ -202,13 +264,28 @@ class ToriRoom extends Component {
     let space = this.props.acc.space;
     let layout = this.state.layout;
 
-    // TODO: Check if valid size.
     // TODO: handle different orientation.
     if (x === LIM - 1 && space > 1) {
       this.setState({
         isSelecting: false,
       }, () => this.props.onItemPlaced(layout, false));
       return;
+    }
+    // Check if it collides with other accessories.
+    if (space > 1) {
+      // Check if it collides with the entrance.
+      let notValid = (x + 1 === 2 && y === LIM - 1);
+      layout.forEach((l) => {
+        if (l.c === x + 1 && l.r === y) {
+          notValid = true;
+        }
+      });
+      if (notValid) {
+        this.setState({
+          isSelecting: false,
+        }, () => this.props.onItemPlaced(layout, false));
+        return;
+      }
     }
 
     // TODO: update with size.
@@ -231,9 +308,9 @@ class ToriRoom extends Component {
     let cells = this.constructCells();
     return (
       <div className={this.props.classes.root}>
-        <GridList cellHeight={80}
+        <GridList cellHeight={unit}
                   className={this.props.classes.gridList}
-                  cols={5}
+                  cols={7}
                   spacing={0}>
           {cells}
         </GridList>

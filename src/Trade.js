@@ -7,10 +7,12 @@ import { assets } from './assets.js'
 import { withStyles } from 'material-ui/styles';
 import Typography from 'material-ui/Typography';
 import Grid from 'material-ui/Grid';
-import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
+import Card, { CardActions, CardContent } from 'material-ui/Card';
 import List, { ListItem, ListItemText } from 'material-ui/List';
-import Button from 'material-ui/Button';
+import Snackbar from 'material-ui/Snackbar';
+import Divider from 'material-ui/Divider';
 
+import BuyInput from './BuyInput.js';
 import ToriImage from './ToriImage.js'
 
 const styles = theme => ({
@@ -29,6 +31,9 @@ const styles = theme => ({
     width: 151,
     height: 151,
   },
+  inventoryImg: {
+    width: `100%`,
+  }
 });
 
 
@@ -47,8 +52,13 @@ class Trade extends Component {
 
     this.state = {
       toriSaleDisplay: [],
-      accSaleDisplay: []
+      accSaleDisplay: [],
+      openSnackBar: false,
+      snackBarMessage: '',
     };
+
+    this.handleMessage = this.handleMessage.bind(this);
+    this.handleCloseSnackBar = this.handleCloseSnackBar.bind(this);
   }
 
   componentDidMount() {
@@ -59,65 +69,67 @@ class Trade extends Component {
     // Toris
     util.retrieveAllTokensForSale(this.context.toriToken, this.context.userAccount)
     .then((toriIds) => {
-      this.setState({toriSaleDisplay: []});
-
-      toriIds.forEach(id => {
-        util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
-          let info = util.parseToriResult(result);
-          if (info.owner !== this.context.userAccount) {
-            this.setState({
-              toriSaleDisplay: this.state.toriSaleDisplay.concat(this.constructToriSaleDisplay(info))
-            });
-          }
+      this.setState({toriSaleDisplay: []},
+        () => {
+        toriIds.forEach(id => {
+          util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
+            let info = util.parseToriResult(result);
+            if (info.owner !== this.context.userAccount) {
+              this.setState({
+                toriSaleDisplay: this.state.toriSaleDisplay.concat(this.constructToriSaleDisplay(info))
+              });
+            }
+          });
         });
       });
     })
     // Accessories
-    this.context.accContracts.forEach((contract) => {
-      util.retrieveAllTokenInfo(contract)
-      .then((result) => {
-        let info = util.parseAccInfo(result);
-        info.contract = contract;
-        let sales = [];
-        util.retrieveAllAccsForSale(contract, this.context.userAccount)
-        .then((result) => {
-          result[0].forEach((val, i) => {
-            let price = result[1][i];
-            let addr = result[2][i];
-            let item = {
-              amount: val,
-              price: price,
-              addr: addr
-            };
-            sales.push(item);
-          });
-          // Filter sales
-          sales = sales.filter((item) => (item.addr !== this.context.userAccount));
-          info.sales = sales;
-          if (sales.length !== 0) {
-            this.setState({
-              accSaleDisplay: this.state.accSaleDisplay.concat(this.constructAccSaleDisplay(info))
-            });
-          }
-        })
-      })
-      .catch(console.error);
+    this.setState({accSaleDisplay: []},
+      () => {
+        this.context.accContracts.forEach((contract) => {
+          util.retrieveAllTokenInfo(contract, this.context.userAccount)
+          .then((result) => {
+            let info = util.parseAccInfo(result);
+            info.contract = contract;
+            let sales = [];
+            util.retrieveAllAccsForSale(contract, this.context.userAccount)
+            .then((result) => {
+              result[0].forEach((val, i) => {
+                let price = result[1][i];
+                let addr = result[2][i];
+                let item = {
+                  amount: val,
+                  price: price,
+                  addr: addr
+                };
+                sales.push(item);
+              });
+              // Filter sales
+              sales = sales.filter((item) => (item.addr !== this.context.userAccount));
+              info.sales = sales;
+              if (sales.length !== 0) {
+                this.setState({
+                  accSaleDisplay: this.state.accSaleDisplay.concat(this.constructAccSaleDisplay(info))
+                });
+              }
+            })
+          })
+          .catch(console.error);
+        });
+      });
+  }
+
+  handleCloseSnackBar() {
+    this.setState({
+      openSnackBar: false,
     });
   }
 
-  buyForSale(contract, rep, mode, e) {
-    if (mode === 'acc') {
-      // TODO: customize amount
-      util.buyAccForSale(contract, rep, 1, this.context.web3.toWei(1), this.context.userAccount)
-      .then((result) => {
-        this.refreshDisplay();
-      }).catch(console.error);
-    } else {
-      util.buyTokenForSale(contract, rep, this.context.web3.toWei(1), this.context.userAccount)
-      .then((result) => {
-        this.refreshDisplay();
-      }).catch(console.error);
-    }
+  handleMessage(message) {
+    this.setState({
+      openSnackBar: true,
+      snackBarMessage: message,
+    }, this.refreshDisplay);
   }
 
   constructToriSaleDisplay(info) {
@@ -137,9 +149,12 @@ class Trade extends Component {
             </List>
           </CardContent>
           <CardActions>
-            <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(this.props.toriToken, info.id, 'tori', e)}>
-              Buy Tori
-            </Button>
+            <BuyInput contract={this.context.toriToken}
+                      addr={info.id}
+                      price={info.salePrice}
+                      total={1}
+                      custom={false}
+                      onMessage={this.handleMessage}/>
           </CardActions>
         </Card>
       </Grid>
@@ -154,10 +169,13 @@ class Trade extends Component {
       i += 1;
       return (
         <ListItem key={`${info.symbol}_${i}`}>
-          <ListItemText primary={`${item.amount} for ${this.context.web3.fromWei(item.price, 'ether')} ETH/token`}/>
-          <Button variant="raised" color="primary" onClick={(e) => this.buyForSale(item.contract, item.addr, 'acc', e)}>
-            Buy
-          </Button>
+          <ListItemText primary={`${item.amount.toNumber()} for ${this.context.web3.fromWei(item.price, 'ether')} ETH/token`}/>
+          <BuyInput contract={info.contract}
+                    addr={item.addr}
+                    price={item.price.toNumber()}
+                    total={item.amount.toNumber()}
+                    custom={true}
+                    onMessage={this.handleMessage}/>
         </ListItem>
       );
     });
@@ -165,26 +183,21 @@ class Trade extends Component {
     return (
       <Grid key={info.symbol} item sm={4}>
         <Card className="accbox">
-          <CardMedia
-            image={imgName}
-            title={'Accessory for sale'}
-            className={this.props.classes.cover} />
-          <div className={this.props.classes.details}>
-            <CardContent>
-              <Typography variant="headline">{info.name}</Typography>
-              <List className="acc-details">
-                <ListItem><ListItemText primary="Variety:"/><ListItemText primary={info.variety} /></ListItem>
-                <ListItem><ListItemText primary="Material:"/><ListItemText primary={info.material} /></ListItem>
-                <ListItem><ListItemText primary="Space:"/><ListItemText primary={info.space} /></ListItem>
+          <CardContent>
+            <Typography variant="headline">{info.name}</Typography>
+            <img src={imgName} alt={info.name} className={this.props.classes.inventoryImg}/>
+            <List className="acc-details">
+              <ListItem><ListItemText primary="Variety:"/><ListItemText primary={info.variety} /></ListItem>
+              <ListItem><ListItemText primary="Material:"/><ListItemText primary={info.material} /></ListItem>
+              <ListItem><ListItemText primary="Space:"/><ListItemText primary={info.space} /></ListItem>
+            </List>
+            <Typography variant="subheading">Offers:</Typography>
+            { info.sales.length > 0 && (
+              <List className="offer">
+                {offer}
               </List>
-              <Typography variant="subheading">Offer</Typography>
-              { info.sales.length > 0 && (
-                <List className="offer">
-                  {offer}
-                </List>
-              )}
-            </CardContent>
-          </div>
+            )}
+          </CardContent>
         </Card>
       </Grid>
     );
@@ -194,26 +207,40 @@ class Trade extends Component {
   render() {
     return (
       <div className="Trade">
-        <Typography variant="headline" gutterBottom align="center">
-          Toris For Sale
-        </Typography>
         <Grid container className="tori-sale-display"
                         spacing={8}
                         alignItems={'center'}
                         direction={'row'}
                         justify={'center'}>
+          <Grid item sm={12}>
+            <Typography variant="headline" gutterBottom align="center">
+              Toris For Sale
+            </Typography>
+          </Grid>
           {this.state.toriSaleDisplay}
         </Grid>
-        <Typography variant="headline" gutterBottom align="center">
-          Accessories For Sale
-        </Typography>
+        <Divider />
         <Grid container className="acc-sale-display"
                         spacing={8}
                         alignItems={'center'}
                         direction={'row'}
                         justify={'center'}>
+          <Grid item sm={12}>
+            <Typography variant="headline" gutterBottom align="center">
+              Accessories For Sale
+            </Typography>
+          </Grid>
           {this.state.accSaleDisplay}
         </Grid>
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={this.state.openSnackBar}
+          onClose={this.handleCloseSnackBar}
+          SnackbarContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">{this.state.snackBarMessage}</span>}
+        />
       </div>
     );
   }

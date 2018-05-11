@@ -29,7 +29,7 @@ class ToriActivityLogs extends Component {
 
     this.state = {
       toriId: -1,
-      activityItems: []
+      activityItems: [],
     }
 
   }
@@ -64,11 +64,17 @@ class ToriActivityLogs extends Component {
         return response.json();
       })
       .then(function(result) {
+        let timestamp = {
+          clean: -1,
+          feed: -1,
+        }
         result.forEach((data, i) => {
+          if (timestamp[data.activity_type] === -1) timestamp[data.activity_type] = data.timestamp;
           this.setState({
             activityItems: this.state.activityItems.concat(this.constructActivityDisplay(data, i)),
           });
         });
+        this.props.onFilled(timestamp);
       }.bind(this))
       .catch(console.err);
     })

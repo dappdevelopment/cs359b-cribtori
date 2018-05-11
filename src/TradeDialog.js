@@ -37,7 +37,7 @@ class TradeDialog extends Component {
       price: this.state.price,
       amount: this.state.amount,
     }
-    this.props.handleSubmit(this.props.contract, data)
+    this.props.handleSubmit(this.props.contract, data, this.props.info)
   }
 
   render() {

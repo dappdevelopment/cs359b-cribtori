@@ -52,8 +52,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
     tokenOwner[id] = msg.sender;
     ownedTokensCount[msg.sender] = ownedTokensCount[msg.sender].add(1);
 
-    toriSale[0] = 1000000000000000;
-    toriSaleCount = toriSaleCount.add(1);
+    approveForSale(0, 1000000000000000);
   }
 
 
@@ -168,7 +167,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
 
   function removeForSale(uint256 _tokenId) public onlyOwnerOf(_tokenId) {
     require(toriSale[_tokenId] > 0);
-    delete toriSale[_tokenId];
+    toriSale[_tokenId] = 0;
     toriSaleCount = toriSaleCount.sub(1);
 
     clearApproval(msg.sender, _tokenId);
@@ -176,7 +175,10 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
 
   function buyForSale(uint256 _tokenId) public payable {
     // TODO: does msg.value needs to be exactly equal?
-    require((toriSale[_tokenId] > 0) && (msg.value >= toriSale[_tokenId]));
+    require(isApprovedOrOwner(this, _tokenId) &&
+            (toriSale[_tokenId] > 0) &&
+            (msg.value >= toriSale[_tokenId]));
+
     address _from = ownerOf(_tokenId);
     // Send the ether.
     uint256 excess = msg.value - toriSale[_tokenId];
@@ -186,11 +188,13 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
     } else {
       _from.transfer(msg.value);
     }
+
+    // Delete sale entry.
+    toriSale[_tokenId] = 0;
+    toriSaleCount = toriSaleCount.sub(1);
+
     // We want to call this from this contract.
     this.safeTransferFrom(_from, msg.sender, _tokenId);
-    // Delete sale entry.
-    delete toriSale[_tokenId];
-    toriSaleCount = toriSaleCount.sub(1);
   }
 
   function retrieveAllForSales() public view returns (uint[]) {

@@ -48,24 +48,29 @@ class ToriDetailsContainer extends Component {
         toriInfo: info,
       });
     });
-    this.retrieveLayout();
+    this.retrieveLayout(false);
   }
 
-  retrieveLayout() {
+  retrieveLayout(afterSwitch) {
     // Fetch the room layout.
     util.retrieveRoomLayout(this.props.toriId)
     .then((result) => {
-      this.setState({
-        roomLayout: (result.locations) ? JSON.parse(result.locations) : [],
-      });
+      if (afterSwitch) {
+        this.setState({
+          roomLayout: (result.locations) ? JSON.parse(result.locations) : [],
+          isEditRoom: !this.state.isEditRoom,
+        });
+      } else {
+        this.setState({
+          roomLayout: (result.locations) ? JSON.parse(result.locations) : [],
+        });
+      }
     })
     .catch(console.error);
   }
 
   switchEdit() {
-    this.setState({
-      isEditRoom: !this.state.isEditRoom,
-    }, this.retrieveLayout);
+    this.retrieveLayout(true);
   }
 
   saveEdit(newLayout) {

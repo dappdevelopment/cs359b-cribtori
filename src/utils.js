@@ -20,8 +20,8 @@ export function generateInitialTori(contract, quiz, name, addr) {
 }
 
 
-export function retrieveAllTokenInfo(contract) {
-  return contract.retrieveAllInfo();
+export function retrieveAllTokenInfo(contract, addr) {
+  return contract.retrieveAllInfo({ from: addr });
 }
 
 export function parseAccInfo(result) {

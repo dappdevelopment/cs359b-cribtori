@@ -58,7 +58,7 @@ class ToriEdit extends Component {
     this.context.accContracts.forEach((contract) => {
       // Get the info.
       let info;
-      util.retrieveAllTokenInfo(contract)
+      util.retrieveAllTokenInfo(contract, this.context.userAccount)
       .then((result) => {
         info = util.parseAccInfo(result);
         contract.balanceOf(this.context.userAccount)
@@ -106,7 +106,6 @@ class ToriEdit extends Component {
       id: this.state.toriInfo.id,
       locations: JSON.stringify(layout),
     }
-    console.log(data);
     fetch('/room', {
       method: 'POST',
       headers: {
@@ -115,7 +114,6 @@ class ToriEdit extends Component {
       body: JSON.stringify(data),
     })
     .then(function(response) {
-      console.log(response.text())
       return response.status;
     })
     .then(function(status) {
@@ -213,7 +211,9 @@ class ToriEdit extends Component {
               />
             )}
             <List>
-              {this.state.inventoryItems.map((info) => this.constructInventoryItem(info))}
+              {this.state.inventoryItems
+                .filter((info) => (info.balance !== 0))
+                .map((info) => this.constructInventoryItem(info))}
             </List>
           </Grid>
           <Grid item sm={6}>

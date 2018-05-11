@@ -2,7 +2,11 @@ import FLOOR_0 from './img/background/floor_0.png';
 import FLOOR_1 from './img/background/floor_1.png';
 import FLOOR_2 from './img/background/floor_2.png';
 
-import WALL from './img/background/wall.png';
+import WALL_0 from './img/background/wall_0.png';
+import WALL_1 from './img/background/wall_1.png';
+import WALL_2 from './img/background/wall_2.png';
+
+import DOOR from './img/background/door.png';
 
 // Accessories
 import TWC from './img/accessories/TWC.png';
@@ -49,7 +53,8 @@ export const assets = {
     floor: [
       FLOOR_0, FLOOR_1, FLOOR_2
     ],
-    wall: WALL
+    wall: [ WALL_0, WALL_1, WALL_2 ],
+    door: DOOR,
   },
   accessories: {
     TWC: TWC,

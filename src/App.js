@@ -5,6 +5,7 @@ import ToriToken from '../build/contracts/ToriToken.json'
 // Accessories contract
 import WoodenDesk from '../build/contracts/WoodenDesk.json'
 import WoodenCabinet from '../build/contracts/WoodenCabinet.json'
+import WoodenStool from '../build/contracts/WoodenStool.json'
 
 import getWeb3 from './utils/getWeb3'
 
@@ -99,7 +100,9 @@ class App extends Component {
     // Accessories
     const wd = contract(WoodenDesk);
     const wc = contract(WoodenCabinet);
-    let accessories = [wd, wc];
+    const ws = contract(WoodenStool);
+
+    let accessories = [wd, wc, ws];
     accessories.forEach((c) => c.setProvider(this.state.web3.currentProvider));
 
     // Get accounts.

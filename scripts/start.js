@@ -279,7 +279,7 @@ function createEndpoints(devServer) {
   // Posting activities.
   devServer.post('/activity', function(req, res) {
     // TODO: activity validation and authentication.
-    var SIX_HOUR = 6 * 60 * 60 * 1000;
+    var ONE_HOUR = 6 * 60 * 60 * 1000;
     var PERIOD = (req.activity_type === 'feed') ? 1 : 2;
 
     var actTime = new Date();
@@ -296,7 +296,7 @@ function createEndpoints(devServer) {
 
       if (rows.length > 0) {
         var prevTime = new Date(rows[0].time);
-        if (actTime - prevTime < PERIOD * SIX_HOUR) {
+        if (actTime - prevTime < PERIOD * ONE_HOUR) {
           return res.status(406).send({ message: 'Previous activity occur less than allowed period!'});
         }
       }
@@ -339,6 +339,38 @@ function createEndpoints(devServer) {
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
       if (err) res.status(400).send({ message: 'saving room failed, Error: ' + err });
+      res.status(200).end();
+    })
+  });
+
+  // Retrieving hearts.
+  devServer.get('/hearts/:id', function(req, res) {
+    var id = req.params.id;
+    var query = 'SELECT * from hearts where tori_id = ?';
+    var inserts = [id];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) return res.status(400).send({ message: 'invalid tori ID' });
+
+      if (rows.length > 0) {
+        var data = {
+          tori_id: rows[0].tori_id,
+          hearts: rows[0].hearts,
+        }
+        return res.status(200).send(data);
+      }
+      return res.status(200).send({});
+    })
+  });
+
+  // Posting hearts.
+  devServer.post('/hearts', function(req, res) {
+    // TODO: room validation and authentication.
+    var query = 'INSERT INTO hearts (tori_id, hearts) VALUES (?, ?) ON DUPLICATE KEY UPDATE hearts = ?';
+    var inserts = [req.body.id, req.body.hearts, req.body.hearts];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) res.status(400).send({ message: 'saving hearts failed, Error: ' + err });
       res.status(200).end();
     })
   });
