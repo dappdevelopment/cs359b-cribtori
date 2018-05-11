@@ -10,14 +10,15 @@ contract WoodenDesk is AccessoriesToken {
     symbol = "TWD";
 
     variety = "Desk";
-    material = "Wood";
+    material = [0];
     space = 2;
+    orientation = 0;
 
     fundsWallet = msg.sender;
     balances[msg.sender] = 10;
     totalSupply_ = 10000;
-    unitsOneEthCanBuy = 100;
+    unitsOneEthCanBuy = 50;
 
-    approveForSale(5, 100000000);
+    approveForSale(5, 10000000000000);
   }
 }

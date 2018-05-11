@@ -24,15 +24,19 @@ export function retrieveAllTokenInfo(contract, addr) {
   return contract.retrieveAllInfo({ from: addr });
 }
 
+
+const MATERIALS = ['Wood', 'Cloth'];
+
 export function parseAccInfo(result) {
   let info = {
     name: result[0],
     symbol: result[1],
     variety: result[2],
-    material: result[3],
+    material: result[3].map((m) => {return MATERIALS[m.toNumber()]}).join(', '),
     space: result[4].toNumber(),
-    amount: result[5].toNumber(),
-    price: result[6].toNumber(),
+    orientation: result[5].toNumber(),
+    amount: result[6].toNumber(),
+    price: result[7].toNumber(),
   }
   return info;
 }

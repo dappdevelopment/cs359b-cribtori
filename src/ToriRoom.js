@@ -62,6 +62,7 @@ class ToriRoom extends Component {
           c: 2,
           r: 2,
           s: 1,
+          o: 0,
       },
     ];
 
@@ -164,14 +165,25 @@ class ToriRoom extends Component {
       let y = content.r;
       let key = content.key;
       let space = content.s;
-
+      let orientation = content.o;
+      let col = 1;
+      let row = 1;
+      if (space > 1) {
+        if (orientation === 0) {
+          col = space;
+        } else {
+          row = space;
+        }
+      }
+      console.log(key, col, row, space)
       let c;
       if (key === 'tori') {
         if (this.state.isEdit) {
           c = (
             <GridListTile key={`${key}_${x}_${y}`}
                           className={this.props.classes.gridTile}
-                          cols={space} >
+                          cols={col}
+                          rows={row} >
               <ToriImage dna={this.props.dna} size={unit} />
             </GridListTile>
           );
@@ -180,7 +192,8 @@ class ToriRoom extends Component {
             <GridListTile key={`${key}_${x}_${y}`}
                           onClick={this.props.handleToriClick}
                           className={this.props.classes.gridTile}
-                          cols={space} >
+                          cols={col}
+                          rows={row} >
               <ToriImage dna={this.props.dna} size={unit} />
             </GridListTile>
           );
@@ -190,7 +203,8 @@ class ToriRoom extends Component {
           <GridListTile key={`${key}_${x}_${y}`}
                         onClick={(e) => this.onFullTileClick(x, y, e)}
                         className={this.props.classes.gridTile}
-                        cols={space}>
+                        cols={col}
+                        rows={row} >
             <img src={assets.accessories[key]} alt={key} />
           </GridListTile>
         );
@@ -198,7 +212,8 @@ class ToriRoom extends Component {
         c = (
           <GridListTile key={`${key}_${x}_${y}`}
                         className={this.props.classes.gridTile}
-                        cols={space}>
+                        cols={col}
+                        rows={row} >
             <img src={assets.accessories[key]} alt={key} />
           </GridListTile>
         );
@@ -223,6 +238,14 @@ class ToriRoom extends Component {
 
       // TODO: how about orientation? For now only handle horizontal orientation.
       if (space > 1) {
+        // Horizontal by default
+        let nX = x + 1;
+        let nY = y;
+        if (orientation === 1) {
+          nX = x;
+          nY = y + 1;
+        }
+
         cells = cells.filter((c) => {
           let oKey = c.key;
           let temp = oKey.split('_');
@@ -232,7 +255,7 @@ class ToriRoom extends Component {
           let oX = parseInt(temp[1], 10);
           let oY = parseInt(temp[2], 10);
 
-          return (oY !== y || oX !== x + 1);
+          return (oY !== nY || oX !== nX);
         });
       }
     });
@@ -262,10 +285,11 @@ class ToriRoom extends Component {
     // Update cell.
     let key = this.props.acc.key;
     let space = this.props.acc.space;
+    let orientation = this.props.acc.orientation;
     let layout = this.state.layout;
 
-    // TODO: handle different orientation.
-    if (x === LIM - 1 && space > 1) {
+    if ((x === LIM - 1 && space > 1 && orientation === 0) ||
+        (y === LIM - 1 && space > 1 && orientation === 1)) {
       this.setState({
         isSelecting: false,
       }, () => this.props.onItemPlaced(layout, false));
@@ -273,10 +297,17 @@ class ToriRoom extends Component {
     }
     // Check if it collides with other accessories.
     if (space > 1) {
+      // Horizontal by default
+      let nX = x + 1;
+      let nY = y;
+      if (orientation === 1) {
+        nX = x;
+        nY = y + 1;
+      }
       // Check if it collides with the entrance.
-      let notValid = (x + 1 === 2 && y === LIM - 1);
+      let notValid = (nX === 2 && nY === LIM - 1);
       layout.forEach((l) => {
-        if (l.c === x + 1 && l.r === y) {
+        if (l.c === nX && l.r === nY) {
           notValid = true;
         }
       });
@@ -288,12 +319,12 @@ class ToriRoom extends Component {
       }
     }
 
-    // TODO: update with size.
     let l = {
       key: key,
       c: x,
       r: y,
       s: space,
+      o: orientation,
     };
 
     layout = layout.concat(l);

@@ -10,8 +10,9 @@ contract WoodenCabinet is AccessoriesToken {
     symbol = "TWC";
 
     variety = "Cabinet";
-    material = "Wood";
+    material = [0];
     space = 1;
+    orientation = 0;
 
     fundsWallet = msg.sender;
     balances[msg.sender] = 10;

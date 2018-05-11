@@ -12,6 +12,8 @@ import DOOR from './img/background/door.png';
 import TWC from './img/accessories/TWC.png';
 import TWD from './img/accessories/TWD.png';
 import TWS from './img/accessories/TWS.png';
+import TWB from './img/accessories/TWB.png';
+import TCC from './img/accessories/TCC.png';
 
 // Tori
 import CHEEK from './img/tori/cheek.png';
@@ -60,6 +62,8 @@ export const assets = {
     TWC: TWC,
     TWD: TWD,
     TWS: TWS,
+    TWB: TWB,
+    TCC: TCC
   },
   tori: {
     cheek: CHEEK,

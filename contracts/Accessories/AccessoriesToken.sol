@@ -4,6 +4,9 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import 'openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 
 contract AccessoriesToken is StandardToken {
+
+  string[] public MATERIAL_NAME = ["Wood", "Cloth"];
+
   string public name;
   uint8 public decimals;
   string public symbol;
@@ -13,8 +16,10 @@ contract AccessoriesToken is StandardToken {
   address public fundsWallet;
 
   string public variety;
-  string public material;
+  uint32[] public material;
   uint32 public space;
+  // 0: horizontal, 1: vertical
+  uint8 public orientation;
 
   function() payable{
     totalEthInWei = totalEthInWei + msg.value;
@@ -34,15 +39,18 @@ contract AccessoriesToken is StandardToken {
     string _name,
     string _symbol,
     string _variety,
-    string _material,
+    uint32[] _material,
     uint32 _space,
+    uint32 _orientation,
     uint256 _amount,
     uint256 _price) {
     _name = name;
     _symbol = symbol;
     _variety = variety;
+    // TODO: workaround for returning multiple strings.
     _material = material;
     _space = space;
+    _orientation = orientation;
     _amount = allowance(msg.sender, this);
     _price = pricePerToken[msg.sender];
   }
