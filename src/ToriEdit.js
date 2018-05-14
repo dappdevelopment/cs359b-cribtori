@@ -106,7 +106,7 @@ class ToriEdit extends Component {
       id: this.state.toriInfo.id,
       locations: JSON.stringify(layout),
     }
-    fetch('/room', {
+    fetch('/cribtori/room', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

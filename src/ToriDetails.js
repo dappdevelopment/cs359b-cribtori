@@ -71,7 +71,7 @@ class ToriDetails extends Component {
 
   componentDidMount() {
     // TODO: show error message
-    fetch('/hearts/' + this.props.info.id)
+    fetch('/cribtori/hearts/' + this.props.info.id)
     .then(function(response) {
       if (response.ok) {
         return response.json();
@@ -96,7 +96,7 @@ class ToriDetails extends Component {
       id: this.state.toriInfo.id,
       hearts: h,
     }
-    fetch('/hearts', {
+    fetch('/cribtori/hearts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -162,7 +162,7 @@ class ToriDetails extends Component {
       activity_type: 'feed',
       description: '',
     };
-    fetch('/activity', {
+    fetch('/cribtori/activity', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -197,7 +197,7 @@ class ToriDetails extends Component {
       activity_type: 'clean',
       description: '',
     };
-    fetch('/activity', {
+    fetch('/cribtori/activity', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

@@ -112,7 +112,7 @@ export function getPersonality(i) {
 
 
 export function retrieveRoomLayout(id) {
-  return fetch('/room/' + id)
+  return fetch('/cribtori/room/' + id)
   .then(function(response) {
     if (response.ok) {
       return response.json();
