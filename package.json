@@ -120,5 +120,6 @@
   },
   "eslintConfig": {
     "extends": "react-app"
-  }
+  },
+  "homepage": "https://dapps.stanford.edu/cribtori/"
 }

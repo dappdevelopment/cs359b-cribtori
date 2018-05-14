@@ -1,0 +1,22 @@
+pragma solidity ^0.4.21;
+
+import './AccessoriesToken.sol';
+
+contract WoodenBed is AccessoriesToken {
+
+  function WoodenBed() {
+    name = "Wooden Bed";
+    decimals = 0;
+    symbol = "TWB";
+
+    variety = "Bed";
+    material = [0, 1];
+    space = 2;
+    orientation = 0;
+
+    fundsWallet = msg.sender;
+    balances[msg.sender] = 10;
+    totalSupply_ = 10000;
+    unitsOneEthCanBuy = 40;
+  }
+}

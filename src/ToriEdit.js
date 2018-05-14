@@ -106,7 +106,7 @@ class ToriEdit extends Component {
       id: this.state.toriInfo.id,
       locations: JSON.stringify(layout),
     }
-    fetch('/room', {
+    fetch('/cribtori/room', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -175,7 +175,10 @@ class ToriEdit extends Component {
       amount -= this.state.usedInventories[info.symbol];
     }
 
-    let item = {key: info.symbol, space: info.space, img: imgName};
+    let item = {key: info.symbol,
+                space: info.space,
+                orientation: info.orientation,
+                img: imgName};
     return (
       <MenuItem key={info.symbol} onClick={(e) => this.onAccessorySelected(item, e)}>
         <Avatar alt={info.name} src={imgName} />

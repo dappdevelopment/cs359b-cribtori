@@ -2,21 +2,21 @@ pragma solidity ^0.4.21;
 
 import './AccessoriesToken.sol';
 
-contract WoodenStool is AccessoriesToken {
+contract ClothCushion is AccessoriesToken {
 
-  function WoodenStool() {
-    name = "WoodenStool";
+  function ClothCushion() {
+    name = "Cloth Cushion";
     decimals = 0;
-    symbol = "TWS";
+    symbol = "TCC";
 
     variety = "Chair";
-    material = [0];
+    material = [1];
     space = 1;
     orientation = 0;
 
     fundsWallet = msg.sender;
     balances[msg.sender] = 10;
     totalSupply_ = 10000;
-    unitsOneEthCanBuy = 100;
+    unitsOneEthCanBuy = 80;
   }
 }
