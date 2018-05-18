@@ -98,7 +98,7 @@ contract ToriVisit is DnaCore, Ownable {
       ticketCount[msg.sender] = ticketCount[msg.sender].sub(1);
     }
 
-    occupied[_toriId] = false;
+    occupied[ticket.toriId] = false;
 
     return result;
   }
@@ -120,12 +120,12 @@ contract ToriVisit is DnaCore, Ownable {
     return result;
   }
 
-  function getTicketInfo(uint256 _ticketId) public returns (uint256 toriId,
-                                                            uint256 otherId,
-                                                            uint256 submitTime,
-                                                            uint256 dueTime,
-                                                            address owner,
-                                                            bool claimed) {
+  function getTicketInfo(uint256 _ticketId) public view returns (uint256 toriId,
+                                                                uint256 otherId,
+                                                                uint256 submitTime,
+                                                                uint256 dueTime,
+                                                                address owner,
+                                                                bool claimed) {
     VisitTicket storage ticket = tickets[_ticketId];
     toriId = ticket.toriId;
     otherId = ticket.otherId;

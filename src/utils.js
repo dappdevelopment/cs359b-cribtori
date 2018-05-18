@@ -120,3 +120,40 @@ export function retrieveRoomLayout(id) {
     throw response;
   });
 }
+
+
+/* TORI VISIT */
+export function visitTori(contract, id, otherId, addr) {
+  return contract.visit(id, otherId, {from: addr});
+}
+
+export function claimTori(contract, ticketId, name, addr) {
+  return contract.claimTori(ticketId, name, {from: addr});
+}
+
+export function getTicketIndexes(contract, addr) {
+  return contract.getTicketIndexes(addr, {from: addr});
+}
+
+export function getTicketInfo(contract, ticketId, addr) {
+  return contract.getTicketInfo(ticketId, {from: addr});
+}
+
+export function parseTicketResult(result) {
+  let toriId = result[0].toNumber();
+  let otherId = result[1].toNumber();
+  let submitTime = result[2].toNumber();
+  let dueTime = result[3].toNumber();
+  let owner = result[4];
+  let claimed = result[5]; // TODO
+
+  let ticketInfo = {
+    toriId: toriId,
+    otherId: otherId,
+    submitTime: submitTime,
+    dueTime: dueTime,
+    owner: owner,
+    claimed: claimed,
+  }
+  return ticketInfo;
+}
