@@ -32,6 +32,8 @@ class ToriVisitItem extends Component {
     super(props);
 
     this.state = {};
+
+    this.selectTori = this.selectTori.bind(this);
   }
 
   componentDidMount() {
@@ -60,6 +62,15 @@ class ToriVisitItem extends Component {
     });
   }
 
+  selectTori() {
+    // TODO: Call contract here for generating new tori.
+    // TODO: add label for My tori that the selected tori is visiting (disable any actions)
+    // TODO: create a 'mapping' (?) so we know whether our tori is being visited or not
+    // TODO: create a timer on when the visitation is going to end
+    // TODO: for now, ask user to manually call the smart contract to generate a new tori
+    // TODO: new tori is assigned to the user, and all flags are resetted. 
+    console.log('Tori selected');
+  }
 
   render() {
     return (
@@ -68,7 +79,7 @@ class ToriVisitItem extends Component {
           <div>
             {this.state.toriInfo.name}
             <ToriImage dna={this.state.toriInfo.dna} size={50} />
-            <Button variant="raised" color="secondary">
+            <Button variant="raised" color="secondary" onClick={this.selectTori}>
               Select
             </Button>
           </div>

@@ -238,10 +238,6 @@ class ToriDetails extends Component {
     console.log('Crafting accessory...');
   }
 
-  visitTori() {
-    console.log('Visit Tori');
-  }
-
   onToriClick() {
     // TODO: Save this state to the DB
     this.updateHearts(0.05);
@@ -282,11 +278,6 @@ class ToriDetails extends Component {
   }
 
   constructToriActions() {
-    /*
-    <MenuList>
-      <MenuItem onClick={this.visitTori}>Visit</MenuItem>
-    </MenuList>
-    */
     return (
       <Paper className={this.props.classes.paper}>
         { this.props.isOther ? (

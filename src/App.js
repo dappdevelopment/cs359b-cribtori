@@ -57,9 +57,11 @@ class App extends Component {
       web3: null,
       mode: 0,
       accessoriesTokenInstances: [],
+      currentDisplay: this.renderSwitch(0),
     }
 
     this.switchDisplay = this.switchDisplay.bind(this);
+    this.renderSwitch = this.renderSwitch.bind(this);
   }
 
   getChildContext() {
@@ -131,26 +133,30 @@ class App extends Component {
   }
 
   switchDisplay(e, mode) {
-    this.setState({mode: mode});
+    this.setState({
+      mode: mode,
+      currentDisplay: this.renderSwitch(-1)
+    }, () => {
+      this.setState({
+        currentDisplay: this.renderSwitch(mode)
+      })
+    });
   }
 
-  renderSwitch() {
-    switch(this.state.mode) {
+  renderSwitch(mode) {
+    switch(mode) {
+      case -1:
+        return (<div></div>)
       case 1:
-          return <Inventory />;
-      case 2:
-          // Other tori display
-          return <MyToriDisplay mode={this.state.mode}/>;
+        return <Inventory />;
       case 3:
-          return <Trade />;
+        return <Trade />;
       default:
-        return <MyToriDisplay mode={this.state.mode}/>;
+        return <MyToriDisplay mode={mode}/>;
     }
   }
 
   render() {
-    // console.log(this.state.toriTokenInstance);
-    let currentDisplay = this.renderSwitch();
     return (
       <div className="App">
         <AppBar position="static">
@@ -167,7 +173,7 @@ class App extends Component {
           </Tabs>
         </AppBar>
           {this.state.toriTokenInstance &&
-            currentDisplay
+            this.state.currentDisplay
           }
       </div>
     );

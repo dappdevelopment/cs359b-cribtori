@@ -76,16 +76,6 @@ class MyToriDisplay extends Component {
     .catch(console.error);
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps !== this.props) {
-      if (this.props.mode !== prevProps.mode) {
-        this.setState({
-          detailIsShown: false,
-        })
-      }
-    }
-  }
-
   refreshToriDisplay() {
     // otherToriDisplay
     let ownerIds;
@@ -98,18 +88,22 @@ class MyToriDisplay extends Component {
           toriDisplay: [],
           usedInventories: {},
           toriSiblings: ownerIds,
+          toriInfos: [],
         });
 
         ownerIds.forEach(id => {
           util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
+            let info = util.parseToriResult(result);
             this.setState({
-              toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))
+              toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result)),
+              toriInfos: this.state.toriInfos.concat(info),
             });
           });
         });
       }
     )
     .then(() => {
+      if (this.props.mode === 0) return;
       util.retrieveAllToriCount(this.context.toriToken, this.context.userAccount)
       .then((count) => {
         count = count.toNumber();
@@ -123,8 +117,10 @@ class MyToriDisplay extends Component {
         }
         otherIds.forEach((id) => {
           util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
+            let info = util.parseToriResult(result);
             this.setState({
-              otherToriDisplay: this.state.otherToriDisplay.concat(this.constructToriDisplay(result))
+              otherToriDisplay: this.state.otherToriDisplay.concat(this.constructToriDisplay(result)),
+              toriInfos: this.state.toriInfos.concat(info),
             });
           });
         });
@@ -193,7 +189,9 @@ class MyToriDisplay extends Component {
         }
         <div id="tori-display">
           {this.state.detailIsShown ? (
-            <ToriDetailsContainer toriId={this.state.currentTori} isOther={this.props.mode !== 0}/>
+            <ToriDetailsContainer toriId={this.state.currentTori}
+                                  toriInfo={this.state.toriInfos.filter((i) => i.id == this.state.currentTori)[0]}
+                                  isOther={this.props.mode !== 0}/>
           ) : (
             <Grid container className={this.props.classes.root}
                             spacing={16}

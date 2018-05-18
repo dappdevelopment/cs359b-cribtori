@@ -24,11 +24,11 @@ class ToriDetailsContainer extends Component {
     super(props)
 
     this.state = {
-      toriId: -1,
+      toriId: this.props.toriId,
       isEditRoom: false,
       openSnackBar: false,
       dialogOpen: false,
-      toriInfo: {},
+      toriInfo: this.props.toriInfo,
     }
 
     this.switchEdit = this.switchEdit.bind(this);
@@ -41,14 +41,7 @@ class ToriDetailsContainer extends Component {
   }
 
   componentDidMount() {
-    util.retrieveTokenInfo(this.context.toriToken, this.props.toriId, this.context.userAccount).then((result) => {
-      let info = util.parseToriResult(result);
-      this.setState({
-        toriId: info.id,
-        toriInfo: info,
-      });
-    });
-    this.retrieveLayout(false);
+    if (this.state.toriId !== -1) this.retrieveLayout(false);
   }
 
   retrieveLayout(afterSwitch) {
