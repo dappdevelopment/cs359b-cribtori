@@ -4,13 +4,17 @@ import PropTypes from 'prop-types';
 import * as util from './utils.js';
 import { assets } from './assets.js'
 
-import { withStyles } from 'material-ui/styles';
-import Typography from 'material-ui/Typography';
-import Grid from 'material-ui/Grid';
-import Card, { CardActions, CardContent } from 'material-ui/Card';
-import List, { ListItem, ListItemText } from 'material-ui/List';
-import Snackbar from 'material-ui/Snackbar';
-import Divider from 'material-ui/Divider';
+import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Snackbar from '@material-ui/core/Snackbar';
+import Divider from '@material-ui/core/Divider';
 
 import BuyInput from './BuyInput.js';
 import ToriImage from './ToriImage.js'

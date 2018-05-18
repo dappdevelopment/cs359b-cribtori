@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
-import Typography from 'material-ui/Typography';
-import { withStyles } from 'material-ui/styles';
-import Paper from 'material-ui/Paper';
-import { MenuItem } from 'material-ui/Menu';
-import Grid from 'material-ui/Grid';
-import Button from 'material-ui/Button';
-import List, { ListItemText } from 'material-ui/List';
-import Avatar from 'material-ui/Avatar';
-import Chip from 'material-ui/Chip';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+import MenuItem from '@material-ui/core/MenuItem';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import List from '@material-ui/core/List';
+import ListItemText from '@material-ui/core/ListItemText';
+import Avatar from '@material-ui/core/Avatar';
+import Chip from '@material-ui/core/Chip';
 
 import * as util from './utils.js';
 import { assets } from './assets.js';

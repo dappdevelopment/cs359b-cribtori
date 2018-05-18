@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 
 import * as util from './utils.js';
 
-import { withStyles } from 'material-ui/styles';
-import Button from 'material-ui/Button';
-import { MenuItem } from 'material-ui/Menu';
-import Select from 'material-ui/Select';
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
 
 const styles = theme => ({
   card: {

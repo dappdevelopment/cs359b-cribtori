@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
-import Snackbar from 'material-ui/Snackbar';
-import Typography from 'material-ui/Typography';
-import Grid from 'material-ui/Grid';
+import Snackbar from '@material-ui/core/Snackbar';
+import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
 
 import * as util from './utils.js';
 

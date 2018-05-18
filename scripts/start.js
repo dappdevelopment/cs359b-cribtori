@@ -235,21 +235,21 @@ function createEndpoints(devServer) {
   devServer.use(bodyParser.urlencoded({ extended: false }));
   devServer.use(bodyParser.json());
 
-  devServer.get('/hello', function(req, res) {
+  devServer.get('/cribtori/hello', function(req, res) {
     res.status(200).send('hello world');
   });
 
-  devServer.get('/test/:id', function(req, res) {
+  devServer.get('/cribtori/test/:id', function(req, res) {
     var id = req.params.id;
     res.status(200).send(id);
   });
 
-  devServer.post('/test', function(req, res) {
+  devServer.post('/cribtori/test', function(req, res) {
     res.status(200).send('hello!');
   });
 
   // Retrieving activities.
-  devServer.get('/activity/:id', function(req, res) {
+  devServer.get('/cribtori/activity/:id', function(req, res) {
     var id = req.params.id;
     var limit = req.query.limit;
     var query = 'SELECT * from activity where tori_id = ? ORDER BY time DESC';
@@ -277,7 +277,7 @@ function createEndpoints(devServer) {
   });
 
   // Posting activities.
-  devServer.post('/activity', function(req, res) {
+  devServer.post('/cribtori/activity', function(req, res) {
     // TODO: activity validation and authentication.
     var ONE_HOUR = 6 * 60 * 60 * 1000;
     var PERIOD = (req.activity_type === 'feed') ? 1 : 2;
@@ -288,7 +288,7 @@ function createEndpoints(devServer) {
       return res.status(400).send({ message: 'activity not recognized' });
     }
 
-    var query = 'SELECT * from activity WHERE tori_id = ? AND activity_type = ? ORDER BY time DESC LIMIT 1';
+    var query = 'SELECT * from activity WHERE tori_id = ? AND activity_type = ? ORDER BY time DESC';
     var inserts = [req.body.id, req.body.activity_type];
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
@@ -301,18 +301,30 @@ function createEndpoints(devServer) {
         }
       }
 
-      query = 'INSERT INTO activity (tori_id, time, activity_type, description) VALUES (?, ?, ?, ?)';
-      inserts = [req.body.id, actTime, req.body.activity_type, req.body.description];
-      query = mysql.format(query, inserts);
-      connection.query(query, function (err, rows, fields) {
-        if (err) return res.status(400).send({ message: 'activity log failed, Error: ' + err });
-        return res.status(200).end();
-      });
+      // Check if more than 10
+      if (rows.length > 20) {
+        query = 'UPDATE activity SET time = ?, activity_type = ?, description = ? WHERE tori_id = ? AND ' +
+                'time = (SELECT time from activity WHERE tori_id = ? ORDER BY time ASC);'
+        inserts = [actTime, req.body.activity_type, req.body.description, req.body.id, req.body.id];
+        query = mysql.format(query, inserts);
+        connection.query(query, function (err, rows, fields) {
+          if (err) return res.status(400).send({ message: 'activity log failed, Error: ' + err });
+          return res.status(200).end();
+        });
+      } else {
+        query = 'INSERT INTO activity (tori_id, time, activity_type, description) VALUES (?, ?, ?, ?)';
+        inserts = [req.body.id, actTime, req.body.activity_type, req.body.description];
+        query = mysql.format(query, inserts);
+        connection.query(query, function (err, rows, fields) {
+          if (err) return res.status(400).send({ message: 'activity log failed, Error: ' + err });
+          return res.status(200).end();
+        });
+      }
     })
   });
 
   // Retrieving room arrangements.
-  devServer.get('/room/:id', function(req, res) {
+  devServer.get('/cribtori/room/:id', function(req, res) {
     var id = req.params.id;
     var query = 'SELECT * from arrangement where tori_id = ?';
     var inserts = [id];
@@ -332,7 +344,7 @@ function createEndpoints(devServer) {
   });
 
   // Posting arrangements.
-  devServer.post('/room', function(req, res) {
+  devServer.post('/cribtori/room', function(req, res) {
     // TODO: room validation and authentication.
     var query = 'INSERT INTO arrangement (tori_id, locations) VALUES (?, ?) ON DUPLICATE KEY UPDATE locations = ?';
     var inserts = [req.body.id, req.body.locations, req.body.locations];
@@ -344,7 +356,7 @@ function createEndpoints(devServer) {
   });
 
   // Retrieving hearts.
-  devServer.get('/hearts/:id', function(req, res) {
+  devServer.get('/cribtori/hearts/:id', function(req, res) {
     var id = req.params.id;
     var query = 'SELECT * from hearts where tori_id = ?';
     var inserts = [id];
@@ -364,7 +376,7 @@ function createEndpoints(devServer) {
   });
 
   // Posting hearts.
-  devServer.post('/hearts', function(req, res) {
+  devServer.post('/cribtori/hearts', function(req, res) {
     // TODO: room validation and authentication.
     var query = 'INSERT INTO hearts (tori_id, hearts) VALUES (?, ?) ON DUPLICATE KEY UPDATE hearts = ?';
     var inserts = [req.body.id, req.body.hearts, req.body.hearts];

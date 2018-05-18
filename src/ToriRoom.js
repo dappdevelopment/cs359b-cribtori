@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 
-import { withStyles } from 'material-ui/styles';
-import GridList, { GridListTile } from 'material-ui/GridList';
+import { withStyles } from '@material-ui/core/styles';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
 
 import { assets } from './assets.js';
 
@@ -175,7 +176,7 @@ class ToriRoom extends Component {
           row = space;
         }
       }
-      console.log(key, col, row, space)
+
       let c;
       if (key === 'tori') {
         if (this.state.isEdit) {

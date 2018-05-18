@@ -1,12 +1,14 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
-import { withStyles } from 'material-ui/styles';
-import Typography from 'material-ui/Typography';
-import Paper from 'material-ui/Paper';
-import { MenuItem, MenuList } from 'material-ui/Menu';
-import Grid from 'material-ui/Grid';
-import Divider from 'material-ui/Divider';
+import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import Paper from '@material-ui/core/Paper';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
+
+import Grid from '@material-ui/core/Grid';
+import Divider from '@material-ui/core/Divider';
 
 import Favorite from '@material-ui/icons/Favorite';
 import FavoriteBorder from '@material-ui/icons/FavoriteBorder';
@@ -17,6 +19,7 @@ import * as util from './utils.js';
 import ToriRoom from './ToriRoom.js'
 import ToriActivityLogs from './ToriActivityLogs.js'
 import TradeDialog from './TradeDialog.js';
+import ToriVisit from './ToriVisit.js';
 
 const HEART_LIM = 5;
 
@@ -170,6 +173,7 @@ class ToriDetails extends Component {
       body: JSON.stringify(data),
     })
     .then(function(response) {
+      console.log(response.text())
       return response.status;
     })
     .then(function(status) {
@@ -278,12 +282,15 @@ class ToriDetails extends Component {
   }
 
   constructToriActions() {
+    /*
+    <MenuList>
+      <MenuItem onClick={this.visitTori}>Visit</MenuItem>
+    </MenuList>
+    */
     return (
       <Paper className={this.props.classes.paper}>
         { this.props.isOther ? (
-          <MenuList>
-            <MenuItem onClick={this.visitTori}>Visit</MenuItem>
-          </MenuList>
+          <ToriVisit name={this.state.toriInfo.name} />
         ) : (
           <MenuList>
             <MenuItem onClick={this.feedTori}>Feed</MenuItem>
