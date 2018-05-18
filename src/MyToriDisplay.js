@@ -97,7 +97,7 @@ class MyToriDisplay extends Component {
           otherToriDisplay: [],
           toriDisplay: [],
           usedInventories: {},
-          toriSiblings: toriIds,
+          toriSiblings: ownerIds,
         });
 
         ownerIds.forEach(id => {
