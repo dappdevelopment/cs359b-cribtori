@@ -107,7 +107,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
                             uint32 _personality,
                             string _name,
                             address _owner) public returns (bool success) {
-    return generateNewTori(_dna, _proficiency, _personality, _name, _owner);
+    return _generateNewTori(_dna, _proficiency, _personality, _name, _owner);
   }
 
   function getTokenIndexes(address _owner) public view returns (uint[]) {

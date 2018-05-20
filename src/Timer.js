@@ -32,6 +32,10 @@ class Timer extends Component {
   }
 
   tick() {
+    if (this.state.countdown - 1 < 0) {
+      clearInterval(this.timer);
+      this.props.timerCallback();
+    }
     this.setState({
       countdown: Math.max(0, (this.state.countdown - 1)),
     });

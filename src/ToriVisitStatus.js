@@ -45,6 +45,7 @@ class ToriVisitStatus extends Component {
     this.claimTori = this.claimTori.bind(this);
     this.updateClaim = this.updateClaim.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.timerDone = this.timerDone.bind(this);
   }
 
   componentDidMount() {
@@ -69,6 +70,11 @@ class ToriVisitStatus extends Component {
       }
     })
     .catch(console.error);
+
+    this.context.toriVisit.timeDiff(0, {from: this.context.userAccount})
+    .then((result) => {
+      console.log(result[0].toNumber(), result[1].toNumber(), result[2].toNumber(), result[3], result[4])
+    })
   }
 
   updateClaim() {
@@ -88,7 +94,7 @@ class ToriVisitStatus extends Component {
       return response.status;
     })
     .then(function(status) {
-      let message = 'Tori is already claimed.';
+      let message = 'Tori is claimed.';
       if (status === 400) {
         // TODO: handle this...
         message = 'Error in updating claim';
@@ -118,13 +124,19 @@ class ToriVisitStatus extends Component {
     });
   }
 
+  timerDone() {
+    this.setState({
+      dueTime: new Date().getTime()/1000 - 1,
+    });
+  }
+
   render() {
     let timeToClaim = (new Date(this.state.dueTime * 1000) < new Date());
     return (
       <div className={this.props.classes.visitStatus}>
         <Chip label="Out for visitation ..." />
         { this.state.dueTime &&
-          (<Timer dueTime={this.state.dueTime}/>)
+          (<Timer dueTime={this.state.dueTime} timerCallback={this.timerDone}/>)
         }
         { timeToClaim && (
           <ExpansionPanel className={this.props.classes.visitPanel}>

@@ -240,7 +240,7 @@ class Trade extends Component {
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
           open={this.state.openSnackBar}
           onClose={this.handleCloseSnackBar}
-          SnackbarContentProps={{
+          snackbarcontentprops={{
             'aria-describedby': 'message-id',
           }}
           message={<span id="message-id">{this.state.snackBarMessage}</span>}

@@ -85,6 +85,24 @@ contract ToriVisit is DnaCore, Ownable {
     // TODO: broadcast an event
   }
 
+  function timeDiff(uint256 _ticketId) public view returns (uint256 s, uint256 diff, uint256 due, bool isDone, bool isOwned) {
+    diff = now - tickets[_ticketId].submitTime;
+    due =  TIME_LIMIT;
+    isDone = diff >= TIME_LIMIT;
+    isOwned = ticketOwner[_ticketId] == msg.sender;
+
+    VisitTicket memory ticket = tickets[_ticketId];
+    uint256 newDna;
+    uint32 newProficiency;
+    uint32 newPersonality;
+
+    (newDna, newProficiency, newPersonality) = _combineTwoTraits(ticket.dna, ticket.proficiency,
+                                                                 ticket.personality, ticket.otherDna,
+                                                                 ticket.otherProficiency, ticket.otherPersonality,
+                                                                 msg.sender);
+    s = newDna / DNA_LIMIT;
+  }
+
   function claimTori(uint256 _ticketId, string _name) public returns (bool result) {
     VisitTicket storage ticket = tickets[_ticketId];
     require((ticketOwner[_ticketId] == msg.sender) && (now - ticket.submitTime) >= TIME_LIMIT);
@@ -100,9 +118,8 @@ contract ToriVisit is DnaCore, Ownable {
     if (result) {
       ticket.claimed = true;
       ticketCount[msg.sender] = ticketCount[msg.sender].sub(1);
+      occupied[ticket.toriId] = false;
     }
-
-    occupied[ticket.toriId] = false;
 
     return result;
   }

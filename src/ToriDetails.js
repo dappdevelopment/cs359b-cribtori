@@ -91,7 +91,7 @@ class ToriDetails extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps !== this.props && this.props.visitTarget) {
+    if (prevProps !== this.props && this.props.visitTarget !== undefined) {
       if (this.props.visitTarget !== undefined) {
         util.retrieveTokenInfo(this.context.toriToken, this.props.visitTarget, this.context.userAccount)
         .then((result) => {

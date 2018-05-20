@@ -95,6 +95,7 @@ class ToriRoom extends Component {
 
   constructToriCell(col, row, unit) {
     let toriCell;
+    
     if (this.props.visitDna !== undefined) {
       toriCell = (
         <div className={this.props.classes.perspectiveRoot}>
@@ -107,7 +108,6 @@ class ToriRoom extends Component {
         </div>
       );
     } else {
-      console.log('other', this.props.visitDna)
       toriCell = (<ToriImage dna={this.props.dna} size={unit} />);
     }
     return toriCell;
