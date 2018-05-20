@@ -33,7 +33,7 @@ class ToriVisit extends Component {
   componentDidMount() {
     this.setState({
       visitList: this.context.toriSiblings.map((id) => {
-        return (<ToriVisitItem key={id} toriId={id} />);
+        return (<ToriVisitItem key={id} toriId={id} targetId={this.props.targetId} onMessage={this.props.onMessage}/>);
       })
     })
   }

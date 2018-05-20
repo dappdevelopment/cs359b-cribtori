@@ -135,6 +135,10 @@ export function getTicketIndexes(contract, addr) {
   return contract.getTicketIndexes(addr, {from: addr});
 }
 
+export function getToriTicket(contract, id, addr) {
+  return contract.getToriTicket(addr, id, {from: addr});
+}
+
 export function getTicketInfo(contract, ticketId, addr) {
   return contract.getTicketInfo(ticketId, {from: addr});
 }

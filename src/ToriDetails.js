@@ -6,7 +6,6 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
-
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 
@@ -281,7 +280,7 @@ class ToriDetails extends Component {
     return (
       <Paper className={this.props.classes.paper}>
         { this.props.isOther ? (
-          <ToriVisit name={this.state.toriInfo.name} />
+          <ToriVisit name={this.state.toriInfo.name} targetId={this.state.toriInfo.id} onMessage={this.props.onMessage}/>
         ) : (
           <MenuList>
             <MenuItem onClick={this.feedTori}>Feed</MenuItem>

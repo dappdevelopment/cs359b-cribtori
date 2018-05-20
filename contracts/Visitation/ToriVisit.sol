@@ -30,7 +30,8 @@ contract ToriVisit is DnaCore, Ownable {
   using SafeMath for uint256;
 
   ToriTokenInterface toriTokenInterface;
-  uint256 private TIME_LIMIT = 5 * 60 * 1000;
+  // TODO change this!
+  uint256 private TIME_LIMIT = 5 minutes;
 
   struct VisitTicket {
     uint256 toriId;
@@ -58,6 +59,7 @@ contract ToriVisit is DnaCore, Ownable {
 
   function visit(uint256 _toriId, uint256 _otherToriId) public returns (uint256 id) {
     require(toriTokenInterface.ownerOf(_toriId) == msg.sender &&
+            toriTokenInterface.ownerOf(_otherToriId) != msg.sender &&
             !occupied[_toriId]);
     // Get the dna, personality, and proficiency of each tori.
     uint256 dna;
@@ -79,6 +81,8 @@ contract ToriVisit is DnaCore, Ownable {
     ticketCount[msg.sender] = ticketCount[msg.sender].add(1);
 
     occupied[_toriId] = true;
+
+    // TODO: broadcast an event
   }
 
   function claimTori(uint256 _ticketId, string _name) public returns (bool result) {
@@ -118,6 +122,15 @@ contract ToriVisit is DnaCore, Ownable {
       }
     }
     return result;
+  }
+
+  function getToriTicket(address _owner, uint256 _toriId) public view returns (uint, bool found) {
+    for (uint i = 0; i < tickets.length; i++) {
+      if (ticketOwner[i] == _owner && !tickets[i].claimed && tickets[i].toriId == _toriId) {
+        return (i, true);
+      }
+    }
+    return (0, false);
   }
 
   function getTicketInfo(uint256 _ticketId) public view returns (uint256 toriId,

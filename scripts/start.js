@@ -386,6 +386,35 @@ function createEndpoints(devServer) {
       res.status(200).end();
     })
   });
+
+  // Retrieving visit.
+  devServer.get('/cribtori/visit/:id', function(req, res) {
+    var id = req.params.id;
+    var query = 'SELECT * from visit where tori_id = ? AND claimed = 0';
+    var inserts = [id];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) return res.status(400).send({ message: 'invalid tori ID' });
+
+      if (rows.length > 0) {
+        return res.status(200).send({target: rows[0].target_id});
+      } else {
+        return res.status(200).send({});
+      }
+    })
+  });
+
+  // Posting visits.
+  devServer.post('/cribtori/visit', function(req, res) {
+    // TODO: room validation and authentication.
+    var query = 'INSERT INTO visit (tori_id, target_id, claimed) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE target_id = ?, claimed = ?';
+    var inserts = [req.body.id, req.body.targetId, req.body.claimed, req.body.targetId, req.body.claimed];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) res.status(400).send({ message: 'saving visitation failed, Error: ' + err });
+      res.status(200).end();
+    })
+  });
 }
 
 

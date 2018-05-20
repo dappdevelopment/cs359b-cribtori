@@ -9,6 +9,7 @@ import * as util from './utils.js';
 
 import ToriDetails from './ToriDetails.js';
 import ToriEdit from './ToriEdit.js';
+import ToriVisitStatus from './ToriVisitStatus.js';
 
 
 class ToriDetailsContainer extends Component {
@@ -41,7 +42,27 @@ class ToriDetailsContainer extends Component {
   }
 
   componentDidMount() {
-    if (this.state.toriId !== -1) this.retrieveLayout(false);
+    if (this.state.toriId !== -1) {
+      this.retrieveLayout(false);
+
+      if (!this.props.isOther) {
+        fetch('/cribtori/visit/' + this.state.toriId)
+        .then(function(response) {
+          if (response.ok) {
+            return response.json();
+          }
+          throw response;
+        })
+        .then(function(data) {
+          if (data.target != undefined) {
+            this.setState({
+              visitTarget: data.target,
+            });
+          }
+        }.bind(this))
+        .catch(console.err);
+      }
+    }
   }
 
   retrieveLayout(afterSwitch) {
@@ -109,6 +130,7 @@ class ToriDetailsContainer extends Component {
   }
 
   render() {
+    // TODO: add link to the visitation target
     return (
       <Grid container className="tori-details-container"
                       spacing={8}
@@ -119,6 +141,9 @@ class ToriDetailsContainer extends Component {
           <Grid item sm={12}>
             <Typography variant="headline" gutterBottom align="center">
               {this.state.toriInfo.name}
+              { this.state.visitTarget !== undefined &&
+                (<ToriVisitStatus toriId={this.state.toriId} onMessage={this.handleMessage}/>)
+              }
             </Typography>
           </Grid>
         )}
@@ -129,7 +154,7 @@ class ToriDetailsContainer extends Component {
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
           open={this.state.openSnackBar}
           onClose={this.handleCloseSnackBar}
-          SnackbarContentProps={{
+          snackbarcontentprops={{
             'aria-describedby': 'message-id',
           }}
           message={<span id="message-id">{this.state.snackBarMessage}</span>}

@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 
 import ToriToken from '../build/contracts/ToriToken.json'
+import ToriVisit from '../build/contracts/ToriVisit.json'
 // Accessories contract
 import WoodenDesk from '../build/contracts/WoodenDesk.json'
 import WoodenCabinet from '../build/contracts/WoodenCabinet.json'
@@ -45,6 +46,7 @@ class App extends Component {
   static childContextTypes = {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
+    toriVisit: PropTypes.object,
     accContracts: PropTypes.array,
     userAccount: PropTypes.string,
   }
@@ -68,6 +70,7 @@ class App extends Component {
     return {
       web3: this.state.web3,
       toriToken: this.state.toriTokenInstance,
+      toriVisit: this.state.toriVisitInstance,
       accContracts: this.state.accessoriesTokenInstances,
       userAccount: this.state.userAccount,
     };
@@ -102,6 +105,8 @@ class App extends Component {
     const contract = require('truffle-contract');
     const toriToken = contract(ToriToken);
     toriToken.setProvider(this.state.web3.currentProvider);
+    const toriVisit = contract(ToriVisit);
+    toriVisit.setProvider(this.state.web3.currentProvider);
     // Accessories
     const wd = contract(WoodenDesk);
     const wc = contract(WoodenCabinet);
@@ -119,6 +124,11 @@ class App extends Component {
       // Tori Token
       toriToken.deployed().then((instance) => {
         this.setState({toriTokenInstance: instance})
+      });
+
+      // Tori Visit
+      toriVisit.deployed().then((instance) => {
+        this.setState({toriVisitInstance: instance})
       });
 
       // Tori Accessories

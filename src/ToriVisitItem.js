@@ -25,6 +25,7 @@ class ToriVisitItem extends Component {
   static contextTypes = {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
+    toriVisit: PropTypes.object,
     userAccount: PropTypes.string,
   }
 
@@ -63,13 +64,34 @@ class ToriVisitItem extends Component {
   }
 
   selectTori() {
-    // TODO: Call contract here for generating new tori.
-    // TODO: add label for My tori that the selected tori is visiting (disable any actions)
-    // TODO: create a 'mapping' (?) so we know whether our tori is being visited or not
-    // TODO: create a timer on when the visitation is going to end
-    // TODO: for now, ask user to manually call the smart contract to generate a new tori
-    // TODO: new tori is assigned to the user, and all flags are resetted. 
-    console.log('Tori selected');
+    util.visitTori(this.context.toriVisit, this.props.toriId, this.props.targetId, this.context.userAccount)
+    .then((result) => {
+      let data = {
+        id: this.props.toriId,
+        targetId: this.props.targetId,
+        claimed: 0
+      }
+      fetch('/cribtori/visit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
+      })
+      .then(function(response) {
+        return response.status;
+      })
+      .then(function(status) {
+        let message = this.state.toriInfo.name + '\'s on its way!';
+        if (status === 400) {
+          // TODO: handle this...
+          message = this.state.toriInfo.name + '\'s lost ...';
+        }
+        this.props.onMessage(message);
+      }.bind(this))
+      .catch(console.err);
+    })
+    .catch(console.error);
   }
 
   render() {
