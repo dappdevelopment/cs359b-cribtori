@@ -90,6 +90,21 @@ class ToriDetails extends Component {
     .catch(console.err);
   }
 
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps !== this.props && this.props.visitTarget) {
+      if (this.props.visitTarget !== undefined) {
+        util.retrieveTokenInfo(this.context.toriToken, this.props.visitTarget, this.context.userAccount)
+        .then((result) => {
+          let info = util.parseToriResult(result);
+          this.setState({
+            visitDna: info.dna,
+          })
+        })
+        .catch(console.err);
+      }
+    }
+  }
+
   componentWillUnmount() {
     // TODO: handle error
     let h = this.state.heartBase + this.state.heartAdjust;
@@ -344,7 +359,9 @@ class ToriDetails extends Component {
                       acc={this.state.accSelected}
                       onItemPlaced={this.onItemPlaced}
                       layout={this.state.roomLayout}
-                      handleToriClick={this.onToriClick} />
+                      handleToriClick={this.onToriClick}
+                      isVisit={this.props.isVisit}
+                      visitDna={this.state.visitDna} />
           </Grid>
           <Grid item sm={3}>
             { this.constructToriActions() }

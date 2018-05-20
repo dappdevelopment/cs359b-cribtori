@@ -61,6 +61,23 @@ class ToriVisitItem extends Component {
         toriInfo: info,
       });
     });
+
+    // Get the visitation info.
+    fetch('/cribtori/visit/' + this.props.toriId)
+    .then(function(response) {
+      if (response.ok) {
+        return response.json();
+      }
+      throw response;
+    })
+    .then(function(data) {
+      if (data.target !== undefined) {
+        this.setState({
+          visitTarget: data.target,
+        });
+      }
+    }.bind(this))
+    .catch(console.err);
   }
 
   selectTori() {
@@ -101,7 +118,10 @@ class ToriVisitItem extends Component {
           <div>
             {this.state.toriInfo.name}
             <ToriImage dna={this.state.toriInfo.dna} size={50} />
-            <Button variant="raised" color="secondary" onClick={this.selectTori}>
+            <Button disabled={this.state.visitTarget !== undefined}
+                    variant="raised"
+                    color="secondary"
+                    onClick={this.selectTori}>
               Select
             </Button>
           </div>

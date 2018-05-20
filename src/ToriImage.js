@@ -66,14 +66,28 @@ class ToriImage extends Component {
     let decorSaturate = Math.max(idx - 360, 1) % 200 + 50;
     let decorSephia = (Math.max(idx - 360 - 200, 1)) / (1000 - 360 - 200);
     dna = Math.floor(dna / 1000);
-    
+
     let isSpecial = (dna % 3) <= 1;
 
     let baseTime = 0.5;
     let secTime = 0.6;
 
+    // Handle sharing posiiton.
+    let pos = (this.props.sharing) ? 'absolute' : 'relative';
+    // Handle transform.
+    let perspective = (this.props.sharing === 'host') ?
+                      'rotateY(20deg) translateX(-15px)' :
+                      (this.props.sharing === 'guest') ?
+                      'rotateY(-20deg) translateX(15px)' :
+                      '';
+
     return (
-      <div style={{ height: size, width: size, position: 'relative', margin: `0 auto` }}>
+      <div style={{ height: size,
+                    width: size,
+                    position: pos,
+                    margin: `0 auto`,
+                    transform: perspective
+                  }}>
         <img
           src={feetBase}
           alt="Feet Base"

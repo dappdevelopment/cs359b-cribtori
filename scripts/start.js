@@ -404,6 +404,22 @@ function createEndpoints(devServer) {
     })
   });
 
+  devServer.get('/cribtori/visitTarget/:id', function(req, res) {
+    var id = req.params.id;
+    var query = 'SELECT * from visit where target_id = ? AND claimed = 0';
+    var inserts = [id];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) return res.status(400).send({ message: 'invalid tori ID' });
+
+      if (rows.length > 0) {
+        return res.status(200).send({target: rows[0].tori_id});
+      } else {
+        return res.status(200).send({});
+      }
+    })
+  });
+
   // Posting visits.
   devServer.post('/cribtori/visit', function(req, res) {
     // TODO: room validation and authentication.

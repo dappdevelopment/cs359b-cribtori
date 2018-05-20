@@ -8,7 +8,6 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-import InputAdornment from '@material-ui/core/InputAdornment';
 import TextField from '@material-ui/core/TextField';
 
 import Chip from '@material-ui/core/Chip';
@@ -106,7 +105,7 @@ class ToriVisitStatus extends Component {
       let message = 'Claim unsuccessful, try again later :(';
       if (result) {
         this.updateClaim();
-        let message = 'Claim successful! Refresh to see your new Tori!';
+        message = 'Claim successful! Refresh to see your new Tori!';
       }
       this.props.onMessage(message);
     })
@@ -120,7 +119,7 @@ class ToriVisitStatus extends Component {
   }
 
   render() {
-    let timeToClaim = true//(new Date(this.state.dueTime * 1000) < new Date());
+    let timeToClaim = (new Date(this.state.dueTime * 1000) < new Date());
     return (
       <div className={this.props.classes.visitStatus}>
         <Chip label="Out for visitation ..." />

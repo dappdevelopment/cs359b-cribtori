@@ -62,6 +62,21 @@ class ToriDetailsContainer extends Component {
         }.bind(this))
         .catch(console.err);
       }
+      fetch('/cribtori/visitTarget/' + this.state.toriId)
+      .then(function(response) {
+        if (response.ok) {
+          return response.json();
+        }
+        throw response;
+      })
+      .then(function(data) {
+        if (data.target !== undefined) {
+          this.setState({
+            visitTarget: data.target,
+          });
+        }
+      }.bind(this))
+      .catch(console.err);
     }
   }
 
@@ -113,18 +128,21 @@ class ToriDetailsContainer extends Component {
                         layout={this.state.roomLayout}
                         onMessage={this.handleMessage}
                         onSwitch={this.switchEdit}
-                        onSaveEdit={this.saveEdit} />);
+                        onSaveEdit={this.saveEdit}
+                        isVisit={this.state.visitTarget !== undefined} />);
     } else if (this.props.isOther) {
       return (<ToriDetails info={this.state.toriInfo}
                            layout={this.state.roomLayout}
                            onMessage={this.handleMessage}
                            onEdit={this.switchEdit}
+                           visitTarget={this.state.visitTarget}
                            isOther={true} />);
     } else {
       return (<ToriDetails info={this.state.toriInfo}
                            layout={this.state.roomLayout}
                            onMessage={this.handleMessage}
                            onEdit={this.switchEdit}
+                           isVisit={this.state.visitTarget !== undefined}
                            isOther={false} />);
     }
   }
@@ -141,7 +159,7 @@ class ToriDetailsContainer extends Component {
           <Grid item sm={12}>
             <Typography variant="headline" gutterBottom align="center">
               {this.state.toriInfo.name}
-              { this.state.visitTarget !== undefined &&
+              { !this.props.isOther && this.state.visitTarget !== undefined &&
                 (<ToriVisitStatus toriId={this.state.toriId} onMessage={this.handleMessage}/>)
               }
             </Typography>
