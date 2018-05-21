@@ -107,7 +107,7 @@ class ToriEdit extends Component {
       id: this.state.toriInfo.id,
       locations: JSON.stringify(layout),
     }
-    fetch('/cribtori/room', {
+    fetch('/cribtori/api/room', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -225,7 +225,8 @@ class ToriEdit extends Component {
                       acc={this.state.accSelected}
                       onItemPlaced={this.onItemPlaced}
                       layout={this.state.roomLayout}
-                      edit={true} />
+                      edit={true}
+                      isVisit={this.props.isVisit} />
           </Grid>
           <Grid item sm={3}>
             <Paper className={this.props.classes.paper}>

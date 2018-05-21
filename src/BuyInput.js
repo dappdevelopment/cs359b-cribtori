@@ -101,7 +101,7 @@ class BuyInput extends Component {
             id: this.props.addr,
             locations: JSON.stringify([]),
           }
-          fetch('/cribtori/room', {
+          fetch('/cribtori/api/room', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

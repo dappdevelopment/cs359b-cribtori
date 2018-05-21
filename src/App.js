@@ -1,19 +1,21 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Link, Switch, Route } from 'react-router-dom';
 
-import ToriToken from '../build/contracts/ToriToken.json'
+import ToriToken from '../build/contracts/ToriToken.json';
+import ToriVisit from '../build/contracts/ToriVisit.json';
 // Accessories contract
-import WoodenDesk from '../build/contracts/WoodenDesk.json'
-import WoodenCabinet from '../build/contracts/WoodenCabinet.json'
-import WoodenStool from '../build/contracts/WoodenStool.json'
-import WoodenBed from '../build/contracts/WoodenBed.json'
-import ClothCushion from '../build/contracts/ClothCushion.json'
+import WoodenDesk from '../build/contracts/WoodenDesk.json';
+import WoodenCabinet from '../build/contracts/WoodenCabinet.json';
+import WoodenStool from '../build/contracts/WoodenStool.json';
+import WoodenBed from '../build/contracts/WoodenBed.json';
+import ClothCushion from '../build/contracts/ClothCushion.json';
 
-import getWeb3 from './utils/getWeb3'
+import getWeb3 from './utils/getWeb3';
 
-import MyToriDisplay from './MyToriDisplay.js'
-import Inventory from './Inventory.js'
-import Trade from './Trade.js'
+import MyToriDisplay from './MyToriDisplay.js';
+import Inventory from './Inventory.js';
+import Trade from './Trade.js';
 
 import './css/oswald.css'
 import './css/open-sans.css'
@@ -45,6 +47,7 @@ class App extends Component {
   static childContextTypes = {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
+    toriVisit: PropTypes.object,
     accContracts: PropTypes.array,
     userAccount: PropTypes.string,
   }
@@ -66,6 +69,7 @@ class App extends Component {
     return {
       web3: this.state.web3,
       toriToken: this.state.toriTokenInstance,
+      toriVisit: this.state.toriVisitInstance,
       accContracts: this.state.accessoriesTokenInstances,
       userAccount: this.state.userAccount,
     };
@@ -100,6 +104,8 @@ class App extends Component {
     const contract = require('truffle-contract');
     const toriToken = contract(ToriToken);
     toriToken.setProvider(this.state.web3.currentProvider);
+    const toriVisit = contract(ToriVisit);
+    toriVisit.setProvider(this.state.web3.currentProvider);
     // Accessories
     const wd = contract(WoodenDesk);
     const wc = contract(WoodenCabinet);
@@ -119,6 +125,11 @@ class App extends Component {
         this.setState({toriTokenInstance: instance})
       });
 
+      // Tori Visit
+      toriVisit.deployed().then((instance) => {
+        this.setState({toriVisitInstance: instance})
+      });
+
       // Tori Accessories
       accessories.forEach((c) => {
         c.deployed().then((instance) => {
@@ -131,26 +142,13 @@ class App extends Component {
   }
 
   switchDisplay(e, mode) {
-    this.setState({mode: mode});
-  }
-
-  renderSwitch() {
-    switch(this.state.mode) {
-      case 1:
-          return <Inventory />;
-      case 2:
-          // Other tori display
-          return <MyToriDisplay mode={this.state.mode}/>;
-      case 3:
-          return <Trade />;
-      default:
-        return <MyToriDisplay mode={this.state.mode}/>;
-    }
+    this.setState({
+      mode: mode,
+    });
   }
 
   render() {
-    // console.log(this.state.toriTokenInstance);
-    let currentDisplay = this.renderSwitch();
+    // this.state.currentDisplay
     return (
       <div className="App">
         <AppBar position="static">
@@ -159,15 +157,20 @@ class App extends Component {
               Cribtori
             </Typography>
           </Toolbar>
-          <Tabs value={this.state.mode} onChange={this.switchDisplay}>
-            <Tab label="My Toris" href="#home" />
-            <Tab label="Inventories" />
-            <Tab label="Other Toris" />
-            <Tab label="Yard Sale" />
+          <Tabs value={this.state.mode} onChange={this.switchDisplay} centered>
+            <Tab label="My Toris" component={Link} to={'/'} />
+            <Tab label="Inventories" component={Link} to={'/inventory'} />
+            <Tab label="Other Toris" component={Link} to={'/others'} />
+            <Tab label="Yard Sale" component={Link} to={'/trade'} />
           </Tabs>
         </AppBar>
           {this.state.toriTokenInstance &&
-            currentDisplay
+            <Switch>
+              <Route exact path='/' component={MyToriDisplay} />
+              <Route path='/inventory' component={Inventory} />
+              <Route path='/others' component={MyToriDisplay} />
+              <Route path='/trade' component={Trade} />
+            </Switch>
           }
       </div>
     );

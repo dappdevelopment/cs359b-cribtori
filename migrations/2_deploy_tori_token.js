@@ -6,9 +6,6 @@ module.exports = function(deployer) {
     return deployer.deploy(ToriVisit)
   })
   .then(() => {
-    return deployer.deploy(ToriVisit)
-  })
-  .then(() => {
     return ToriToken.deployed();
   })
   .then((toriInstance) => {

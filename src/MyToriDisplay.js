@@ -51,6 +51,7 @@ class MyToriDisplay extends Component {
       detailIsShown: false,
       toriSiblings: [],
       otherToriDisplay: [],
+      isOther: this.props.location.pathname === '/others'
     }
 
     this.closeToriDetails = this.closeToriDetails.bind(this);
@@ -77,12 +78,15 @@ class MyToriDisplay extends Component {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (prevProps !== this.props) {
-      if (this.props.mode !== prevProps.mode) {
-        this.setState({
-          detailIsShown: false,
-        })
-      }
+    if (prevProps === this.props) {
+      return;
+    }
+    let isOther = this.props.location.pathname === '/others';
+
+    if (this.state.isOther != isOther) {
+      this.setState({
+        isOther: isOther
+      }, this.refreshToriDisplay);
     }
   }
 
@@ -93,23 +97,28 @@ class MyToriDisplay extends Component {
     .then(
       (toriIds) => {
         ownerIds = toriIds.map((id) => {return id.toNumber()});
+        console.log(ownerIds)
         this.setState({
           otherToriDisplay: [],
           toriDisplay: [],
           usedInventories: {},
-          toriSiblings: toriIds,
+          toriSiblings: ownerIds,
+          toriInfos: [],
         });
 
         ownerIds.forEach(id => {
           util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
+            let info = util.parseToriResult(result);
             this.setState({
-              toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result))
+              toriDisplay: this.state.toriDisplay.concat(this.constructToriDisplay(result)),
+              toriInfos: this.state.toriInfos.concat(info),
             });
           });
         });
       }
     )
     .then(() => {
+      if (!this.state.isOther) return;
       util.retrieveAllToriCount(this.context.toriToken, this.context.userAccount)
       .then((count) => {
         count = count.toNumber();
@@ -123,8 +132,10 @@ class MyToriDisplay extends Component {
         }
         otherIds.forEach((id) => {
           util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount).then((result) => {
+            let info = util.parseToriResult(result);
             this.setState({
-              otherToriDisplay: this.state.otherToriDisplay.concat(this.constructToriDisplay(result))
+              otherToriDisplay: this.state.otherToriDisplay.concat(this.constructToriDisplay(result)),
+              toriInfos: this.state.toriInfos.concat(info),
             });
           });
         });
@@ -188,19 +199,21 @@ class MyToriDisplay extends Component {
             Back
           </Button>
         }
-        {this.state.isNewUser && this.props.mode === 0 &&
+        {this.state.isNewUser && !this.state.isOther &&
           <ToriWelcome onSubmit={() => console.log('submit')} />
         }
         <div id="tori-display">
           {this.state.detailIsShown ? (
-            <ToriDetailsContainer toriId={this.state.currentTori} isOther={this.props.mode !== 0}/>
+            <ToriDetailsContainer toriId={this.state.currentTori}
+                                  toriInfo={this.state.toriInfos.filter((i) => i.id == this.state.currentTori)[0]}
+                                  isOther={this.state.isOther}/>
           ) : (
             <Grid container className={this.props.classes.root}
                             spacing={16}
                             alignItems={'flex-start'}
                             direction={'row'}
                             justify={'center'}>
-              {this.props.mode === 0 ?
+              {!this.state.isOther ?
                 this.state.toriDisplay
               :
                 this.state.otherToriDisplay

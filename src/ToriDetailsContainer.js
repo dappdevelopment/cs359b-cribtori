@@ -9,6 +9,7 @@ import * as util from './utils.js';
 
 import ToriDetails from './ToriDetails.js';
 import ToriEdit from './ToriEdit.js';
+import ToriVisitStatus from './ToriVisitStatus.js';
 
 
 class ToriDetailsContainer extends Component {
@@ -24,11 +25,11 @@ class ToriDetailsContainer extends Component {
     super(props)
 
     this.state = {
-      toriId: -1,
+      toriId: this.props.toriId,
       isEditRoom: false,
       openSnackBar: false,
       dialogOpen: false,
-      toriInfo: {},
+      toriInfo: this.props.toriInfo,
     }
 
     this.switchEdit = this.switchEdit.bind(this);
@@ -41,14 +42,42 @@ class ToriDetailsContainer extends Component {
   }
 
   componentDidMount() {
-    util.retrieveTokenInfo(this.context.toriToken, this.props.toriId, this.context.userAccount).then((result) => {
-      let info = util.parseToriResult(result);
-      this.setState({
-        toriId: info.id,
-        toriInfo: info,
-      });
-    });
-    this.retrieveLayout(false);
+    if (this.state.toriId !== -1) {
+      this.retrieveLayout(false);
+
+      if (!this.props.isOther) {
+        fetch('/cribtori/api/visit/' + this.state.toriId)
+        .then(function(response) {
+          if (response.ok) {
+            return response.json();
+          }
+          throw response;
+        })
+        .then(function(data) {
+          if (data.target != undefined) {
+            this.setState({
+              visitTarget: data.target,
+            });
+          }
+        }.bind(this))
+        .catch(console.err);
+      }
+      fetch('/cribtori/api/visitTarget/' + this.state.toriId)
+      .then(function(response) {
+        if (response.ok) {
+          return response.json();
+        }
+        throw response;
+      })
+      .then(function(data) {
+        if (data.target !== undefined) {
+          this.setState({
+            visitTarget: data.target,
+          });
+        }
+      }.bind(this))
+      .catch(console.err);
+    }
   }
 
   retrieveLayout(afterSwitch) {
@@ -99,23 +128,27 @@ class ToriDetailsContainer extends Component {
                         layout={this.state.roomLayout}
                         onMessage={this.handleMessage}
                         onSwitch={this.switchEdit}
-                        onSaveEdit={this.saveEdit} />);
+                        onSaveEdit={this.saveEdit}
+                        isVisit={this.state.visitTarget !== undefined} />);
     } else if (this.props.isOther) {
       return (<ToriDetails info={this.state.toriInfo}
                            layout={this.state.roomLayout}
                            onMessage={this.handleMessage}
                            onEdit={this.switchEdit}
+                           visitTarget={this.state.visitTarget}
                            isOther={true} />);
     } else {
       return (<ToriDetails info={this.state.toriInfo}
                            layout={this.state.roomLayout}
                            onMessage={this.handleMessage}
                            onEdit={this.switchEdit}
+                           isVisit={this.state.visitTarget !== undefined}
                            isOther={false} />);
     }
   }
 
   render() {
+    // TODO: add link to the visitation target
     return (
       <Grid container className="tori-details-container"
                       spacing={8}
@@ -126,6 +159,9 @@ class ToriDetailsContainer extends Component {
           <Grid item sm={12}>
             <Typography variant="headline" gutterBottom align="center">
               {this.state.toriInfo.name}
+              { !this.props.isOther && this.state.visitTarget !== undefined &&
+                (<ToriVisitStatus toriId={this.state.toriId} onMessage={this.handleMessage}/>)
+              }
             </Typography>
           </Grid>
         )}
@@ -136,7 +172,7 @@ class ToriDetailsContainer extends Component {
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
           open={this.state.openSnackBar}
           onClose={this.handleCloseSnackBar}
-          SnackbarContentProps={{
+          snackbarcontentprops={{
             'aria-describedby': 'message-id',
           }}
           message={<span id="message-id">{this.state.snackBarMessage}</span>}

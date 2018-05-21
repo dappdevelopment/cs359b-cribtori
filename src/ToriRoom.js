@@ -34,6 +34,9 @@ const styles = theme => ({
     height: `90%`,
     opacity: 0.3,
     margin: `5%`
+  },
+  perspectiveRoot: {
+    perspective: 200,
   }
 });
 
@@ -88,6 +91,26 @@ class ToriRoom extends Component {
         }, () => this.constructLayout());
       }
     }
+  }
+
+  constructToriCell(col, row, unit) {
+    let toriCell;
+    
+    if (this.props.visitDna !== undefined) {
+      toriCell = (
+        <div className={this.props.classes.perspectiveRoot}>
+          <ToriImage dna={this.props.visitDna}
+                     size={unit}
+                     sharing={'guest'} />
+          <ToriImage dna={this.props.dna}
+                     size={unit}
+                     sharing={'host'} />
+        </div>
+      );
+    } else {
+      toriCell = (<ToriImage dna={this.props.dna} size={unit} />);
+    }
+    return toriCell;
   }
 
   constructCells() {
@@ -179,13 +202,16 @@ class ToriRoom extends Component {
 
       let c;
       if (key === 'tori') {
+        let toriCell = this.constructToriCell(col, row, unit);
         if (this.state.isEdit) {
           c = (
             <GridListTile key={`${key}_${x}_${y}`}
                           className={this.props.classes.gridTile}
                           cols={col}
                           rows={row} >
-              <ToriImage dna={this.props.dna} size={unit} />
+              { !this.props.isVisit &&
+                toriCell
+              }
             </GridListTile>
           );
         } else {
@@ -195,7 +221,9 @@ class ToriRoom extends Component {
                           className={this.props.classes.gridTile}
                           cols={col}
                           rows={row} >
-              <ToriImage dna={this.props.dna} size={unit} />
+              { !this.props.isVisit &&
+                toriCell
+              }
             </GridListTile>
           );
         }

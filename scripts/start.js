@@ -235,21 +235,21 @@ function createEndpoints(devServer) {
   devServer.use(bodyParser.urlencoded({ extended: false }));
   devServer.use(bodyParser.json());
 
-  devServer.get('/cribtori/hello', function(req, res) {
+  devServer.get('/cribtori/api/hello', function(req, res) {
     res.status(200).send('hello world');
   });
 
-  devServer.get('/cribtori/test/:id', function(req, res) {
+  devServer.get('/cribtori/api/test/:id', function(req, res) {
     var id = req.params.id;
     res.status(200).send(id);
   });
 
-  devServer.post('/cribtori/test', function(req, res) {
+  devServer.post('/cribtori/api/test', function(req, res) {
     res.status(200).send('hello!');
   });
 
   // Retrieving activities.
-  devServer.get('/cribtori/activity/:id', function(req, res) {
+  devServer.get('/cribtori/api/activity/:id', function(req, res) {
     var id = req.params.id;
     var limit = req.query.limit;
     var query = 'SELECT * from activity where tori_id = ? ORDER BY time DESC';
@@ -277,7 +277,7 @@ function createEndpoints(devServer) {
   });
 
   // Posting activities.
-  devServer.post('/cribtori/activity', function(req, res) {
+  devServer.post('/cribtori/api/activity', function(req, res) {
     // TODO: activity validation and authentication.
     var ONE_HOUR = 6 * 60 * 60 * 1000;
     var PERIOD = (req.activity_type === 'feed') ? 1 : 2;
@@ -324,7 +324,7 @@ function createEndpoints(devServer) {
   });
 
   // Retrieving room arrangements.
-  devServer.get('/cribtori/room/:id', function(req, res) {
+  devServer.get('/cribtori/api/room/:id', function(req, res) {
     var id = req.params.id;
     var query = 'SELECT * from arrangement where tori_id = ?';
     var inserts = [id];
@@ -344,7 +344,7 @@ function createEndpoints(devServer) {
   });
 
   // Posting arrangements.
-  devServer.post('/cribtori/room', function(req, res) {
+  devServer.post('/cribtori/api/room', function(req, res) {
     // TODO: room validation and authentication.
     var query = 'INSERT INTO arrangement (tori_id, locations) VALUES (?, ?) ON DUPLICATE KEY UPDATE locations = ?';
     var inserts = [req.body.id, req.body.locations, req.body.locations];
@@ -356,7 +356,7 @@ function createEndpoints(devServer) {
   });
 
   // Retrieving hearts.
-  devServer.get('/cribtori/hearts/:id', function(req, res) {
+  devServer.get('/cribtori/api/hearts/:id', function(req, res) {
     var id = req.params.id;
     var query = 'SELECT * from hearts where tori_id = ?';
     var inserts = [id];
@@ -376,13 +376,58 @@ function createEndpoints(devServer) {
   });
 
   // Posting hearts.
-  devServer.post('/cribtori/hearts', function(req, res) {
+  devServer.post('/cribtori/api/hearts', function(req, res) {
     // TODO: room validation and authentication.
     var query = 'INSERT INTO hearts (tori_id, hearts) VALUES (?, ?) ON DUPLICATE KEY UPDATE hearts = ?';
     var inserts = [req.body.id, req.body.hearts, req.body.hearts];
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
       if (err) res.status(400).send({ message: 'saving hearts failed, Error: ' + err });
+      res.status(200).end();
+    })
+  });
+
+  // Retrieving visit.
+  devServer.get('/cribtori/api/visit/:id', function(req, res) {
+    var id = req.params.id;
+    var query = 'SELECT * from visit where tori_id = ? AND claimed = 0';
+    var inserts = [id];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) return res.status(400).send({ message: 'invalid tori ID' });
+
+      if (rows.length > 0) {
+        return res.status(200).send({target: rows[0].target_id});
+      } else {
+        return res.status(200).send({});
+      }
+    })
+  });
+
+  devServer.get('/cribtori/api/visitTarget/:id', function(req, res) {
+    var id = req.params.id;
+    var query = 'SELECT * from visit where target_id = ? AND claimed = 0';
+    var inserts = [id];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) return res.status(400).send({ message: 'invalid tori ID' });
+
+      if (rows.length > 0) {
+        return res.status(200).send({target: rows[0].tori_id});
+      } else {
+        return res.status(200).send({});
+      }
+    })
+  });
+
+  // Posting visits.
+  devServer.post('/cribtori/api/visit', function(req, res) {
+    // TODO: room validation and authentication.
+    var query = 'INSERT INTO visit (tori_id, target_id, claimed) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE target_id = ?, claimed = ?';
+    var inserts = [req.body.id, req.body.targetId, req.body.claimed, req.body.targetId, req.body.claimed];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) res.status(400).send({ message: 'saving visitation failed, Error: ' + err });
       res.status(200).end();
     })
   });

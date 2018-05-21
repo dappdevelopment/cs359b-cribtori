@@ -6,7 +6,6 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
-
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 
@@ -74,7 +73,7 @@ class ToriDetails extends Component {
 
   componentDidMount() {
     // TODO: show error message
-    fetch('/cribtori/hearts/' + this.props.info.id)
+    fetch('/cribtori/api/hearts/' + this.props.info.id)
     .then(function(response) {
       if (response.ok) {
         return response.json();
@@ -91,6 +90,21 @@ class ToriDetails extends Component {
     .catch(console.err);
   }
 
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps !== this.props && this.props.visitTarget !== undefined) {
+      if (this.props.visitTarget !== undefined) {
+        util.retrieveTokenInfo(this.context.toriToken, this.props.visitTarget, this.context.userAccount)
+        .then((result) => {
+          let info = util.parseToriResult(result);
+          this.setState({
+            visitDna: info.dna,
+          })
+        })
+        .catch(console.err);
+      }
+    }
+  }
+
   componentWillUnmount() {
     // TODO: handle error
     let h = this.state.heartBase + this.state.heartAdjust;
@@ -99,7 +113,7 @@ class ToriDetails extends Component {
       id: this.state.toriInfo.id,
       hearts: h,
     }
-    fetch('/cribtori/hearts', {
+    fetch('/cribtori/api/hearts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -165,7 +179,7 @@ class ToriDetails extends Component {
       activity_type: 'feed',
       description: '',
     };
-    fetch('/cribtori/activity', {
+    fetch('/cribtori/api/activity', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -201,7 +215,7 @@ class ToriDetails extends Component {
       activity_type: 'clean',
       description: '',
     };
-    fetch('/cribtori/activity', {
+    fetch('/cribtori/api/activity', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -236,10 +250,6 @@ class ToriDetails extends Component {
   craftAccessory() {
     // TODO:
     console.log('Crafting accessory...');
-  }
-
-  visitTori() {
-    console.log('Visit Tori');
   }
 
   onToriClick() {
@@ -282,21 +292,19 @@ class ToriDetails extends Component {
   }
 
   constructToriActions() {
-    /*
-    <MenuList>
-      <MenuItem onClick={this.visitTori}>Visit</MenuItem>
-    </MenuList>
-    */
     return (
       <Paper className={this.props.classes.paper}>
         { this.props.isOther ? (
-          <ToriVisit name={this.state.toriInfo.name} />
+          <ToriVisit name={this.state.toriInfo.name}
+                     targetId={this.state.toriInfo.id}
+                     onMessage={this.props.onMessage}
+                     mode={'visit'} />
         ) : (
           <MenuList>
             <MenuItem onClick={this.feedTori}>Feed</MenuItem>
             <MenuItem onClick={this.cleanTori}>Clean</MenuItem>
-            <MenuItem onClick={this.playWithTori}>Play</MenuItem>
-            <MenuItem onClick={this.craftAccessory}>Craft</MenuItem>
+            <MenuItem onClick={this.playWithTori} disabled >Play</MenuItem>
+            <MenuItem onClick={this.craftAccessory} disabled >Craft</MenuItem>
             <Divider />
             <MenuItem onClick={this.props.onEdit}>Edit Room</MenuItem>
             {this.state.toriInfo.salePrice > 0 ? (
@@ -304,6 +312,12 @@ class ToriDetails extends Component {
             ) : (
               <MenuItem onClick={(e) => this.postToriForSale(this.state.toriInfo.id, e)}>Sell Tori</MenuItem>
             )}
+            <Divider />
+            <ToriVisit name={this.state.toriInfo.name}
+                       targetId={this.state.toriInfo.id}
+                       onMessage={this.props.onMessage}
+                       disabled={this.props.isVisit}
+                       mode={'fuse'} />
           </MenuList>
         )}
       </Paper>
@@ -354,7 +368,9 @@ class ToriDetails extends Component {
                       acc={this.state.accSelected}
                       onItemPlaced={this.onItemPlaced}
                       layout={this.state.roomLayout}
-                      handleToriClick={this.onToriClick} />
+                      handleToriClick={this.onToriClick}
+                      isVisit={this.props.isVisit}
+                      visitDna={this.state.visitDna} />
           </Grid>
           <Grid item sm={3}>
             { this.constructToriActions() }

@@ -75,8 +75,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
     Tori memory newTori = _generateRandomTori(_quizzes, _name, msg.sender);
     // Push to the book keeping array.
     uint256 id = toris.push(newTori) - 1;
-    tokenOwner[id] = msg.sender;
-    ownedTokensCount[msg.sender] = ownedTokensCount[msg.sender].add(1);
+    _mint(msg.sender, id);
 
     emit NewTori(msg.sender, id);
     return true;
@@ -96,8 +95,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
     Tori memory newTori = Tori(_dna, _name, _proficiency, _personality, uint32(now));
     // Push to the book keeping array.
     uint256 id = toris.push(newTori) - 1;
-    tokenOwner[id] = _owner;
-    ownedTokensCount[_owner] = ownedTokensCount[_owner].add(1);
+    _mint(_owner, id);
     emit NewTori(_owner, id);
     return true;
   }
@@ -107,7 +105,23 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
                             uint32 _personality,
                             string _name,
                             address _owner) public returns (bool success) {
-    return generateNewTori(_dna, _proficiency, _personality, _name, _owner);
+    return _generateNewTori(_dna, _proficiency, _personality, _name, _owner);
+  }
+
+  function _burnTori(address _owner, uint256 _tokenId) onlyWhitelisted private returns (bool success) {
+    // Check if for sale
+    // TODO: remove it automatically for now.
+    if (toriSale[_tokenId] > 0) {
+      toriSale[_tokenId] = 0;
+      toriSaleCount = toriSaleCount.sub(1);
+    }
+    _burn(_owner, _tokenId);
+    // TODO: check if burn succeed
+    return true;
+  }
+
+  function burnTori(address _owner, uint256 _tokenId) public returns (bool success) {
+    return _burnTori(_owner, _tokenId);
   }
 
   function getTokenIndexes(address _owner) public view returns (uint[]) {
