@@ -70,11 +70,6 @@ class ToriVisitStatus extends Component {
       }
     })
     .catch(console.error);
-
-    this.context.toriVisit.timeDiff(0, {from: this.context.userAccount})
-    .then((result) => {
-      console.log(result[0].toNumber(), result[1].toNumber(), result[2].toNumber(), result[3], result[4])
-    })
   }
 
   updateClaim() {
