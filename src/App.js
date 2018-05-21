@@ -1,20 +1,21 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Link, Switch, Route } from 'react-router-dom';
 
-import ToriToken from '../build/contracts/ToriToken.json'
-import ToriVisit from '../build/contracts/ToriVisit.json'
+import ToriToken from '../build/contracts/ToriToken.json';
+import ToriVisit from '../build/contracts/ToriVisit.json';
 // Accessories contract
-import WoodenDesk from '../build/contracts/WoodenDesk.json'
-import WoodenCabinet from '../build/contracts/WoodenCabinet.json'
-import WoodenStool from '../build/contracts/WoodenStool.json'
-import WoodenBed from '../build/contracts/WoodenBed.json'
-import ClothCushion from '../build/contracts/ClothCushion.json'
+import WoodenDesk from '../build/contracts/WoodenDesk.json';
+import WoodenCabinet from '../build/contracts/WoodenCabinet.json';
+import WoodenStool from '../build/contracts/WoodenStool.json';
+import WoodenBed from '../build/contracts/WoodenBed.json';
+import ClothCushion from '../build/contracts/ClothCushion.json';
 
-import getWeb3 from './utils/getWeb3'
+import getWeb3 from './utils/getWeb3';
 
-import MyToriDisplay from './MyToriDisplay.js'
-import Inventory from './Inventory.js'
-import Trade from './Trade.js'
+import MyToriDisplay from './MyToriDisplay.js';
+import Inventory from './Inventory.js';
+import Trade from './Trade.js';
 
 import './css/oswald.css'
 import './css/open-sans.css'
@@ -59,11 +60,9 @@ class App extends Component {
       web3: null,
       mode: 0,
       accessoriesTokenInstances: [],
-      currentDisplay: this.renderSwitch(0),
     }
 
     this.switchDisplay = this.switchDisplay.bind(this);
-    this.renderSwitch = this.renderSwitch.bind(this);
   }
 
   getChildContext() {
@@ -145,28 +144,11 @@ class App extends Component {
   switchDisplay(e, mode) {
     this.setState({
       mode: mode,
-      currentDisplay: this.renderSwitch(-1)
-    }, () => {
-      this.setState({
-        currentDisplay: this.renderSwitch(mode)
-      })
     });
   }
 
-  renderSwitch(mode) {
-    switch(mode) {
-      case -1:
-        return (<div></div>)
-      case 1:
-        return <Inventory />;
-      case 3:
-        return <Trade />;
-      default:
-        return <MyToriDisplay mode={mode}/>;
-    }
-  }
-
   render() {
+    // this.state.currentDisplay
     return (
       <div className="App">
         <AppBar position="static">
@@ -175,15 +157,20 @@ class App extends Component {
               Cribtori
             </Typography>
           </Toolbar>
-          <Tabs value={this.state.mode} onChange={this.switchDisplay}>
-            <Tab label="My Toris" href="#home" />
-            <Tab label="Inventories" />
-            <Tab label="Other Toris" />
-            <Tab label="Yard Sale" />
+          <Tabs value={this.state.mode} onChange={this.switchDisplay} centered>
+            <Tab label="My Toris" component={Link} to={'/'} />
+            <Tab label="Inventories" component={Link} to={'/inventory'} />
+            <Tab label="Other Toris" component={Link} to={'/others'} />
+            <Tab label="Yard Sale" component={Link} to={'/trade'} />
           </Tabs>
         </AppBar>
           {this.state.toriTokenInstance &&
-            this.state.currentDisplay
+            <Switch>
+              <Route exact path='/' component={MyToriDisplay} />
+              <Route path='/inventory' component={Inventory} />
+              <Route path='/others' component={MyToriDisplay} />
+              <Route path='/trade' component={Trade} />
+            </Switch>
           }
       </div>
     );

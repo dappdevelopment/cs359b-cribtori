@@ -46,7 +46,7 @@ class ToriDetailsContainer extends Component {
       this.retrieveLayout(false);
 
       if (!this.props.isOther) {
-        fetch('/cribtori/visit/' + this.state.toriId)
+        fetch('/cribtori/api/visit/' + this.state.toriId)
         .then(function(response) {
           if (response.ok) {
             return response.json();
@@ -62,7 +62,7 @@ class ToriDetailsContainer extends Component {
         }.bind(this))
         .catch(console.err);
       }
-      fetch('/cribtori/visitTarget/' + this.state.toriId)
+      fetch('/cribtori/api/visitTarget/' + this.state.toriId)
       .then(function(response) {
         if (response.ok) {
           return response.json();

@@ -51,6 +51,7 @@ class MyToriDisplay extends Component {
       detailIsShown: false,
       toriSiblings: [],
       otherToriDisplay: [],
+      isOther: this.props.location.pathname === '/others'
     }
 
     this.closeToriDetails = this.closeToriDetails.bind(this);
@@ -74,6 +75,19 @@ class MyToriDisplay extends Component {
       }
     })
     .catch(console.error);
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps === this.props) {
+      return;
+    }
+    let isOther = this.props.location.pathname === '/others';
+
+    if (this.state.isOther != isOther) {
+      this.setState({
+        isOther: isOther
+      }, this.refreshToriDisplay);
+    }
   }
 
   refreshToriDisplay() {
@@ -103,7 +117,7 @@ class MyToriDisplay extends Component {
       }
     )
     .then(() => {
-      if (this.props.mode === 0) return;
+      if (!this.state.isOther) return;
       util.retrieveAllToriCount(this.context.toriToken, this.context.userAccount)
       .then((count) => {
         count = count.toNumber();
@@ -184,21 +198,21 @@ class MyToriDisplay extends Component {
             Back
           </Button>
         }
-        {this.state.isNewUser && this.props.mode === 0 &&
+        {this.state.isNewUser && !this.state.isOther &&
           <ToriWelcome onSubmit={() => console.log('submit')} />
         }
         <div id="tori-display">
           {this.state.detailIsShown ? (
             <ToriDetailsContainer toriId={this.state.currentTori}
                                   toriInfo={this.state.toriInfos.filter((i) => i.id == this.state.currentTori)[0]}
-                                  isOther={this.props.mode !== 0}/>
+                                  isOther={this.state.isOther}/>
           ) : (
             <Grid container className={this.props.classes.root}
                             spacing={16}
                             alignItems={'flex-start'}
                             direction={'row'}
                             justify={'center'}>
-              {this.props.mode === 0 ?
+              {!this.state.isOther ?
                 this.state.toriDisplay
               :
                 this.state.otherToriDisplay

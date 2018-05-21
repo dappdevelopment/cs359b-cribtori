@@ -83,7 +83,7 @@ class ToriVisitStatus extends Component {
       targetId: this.props.targetId,
       claimed: 1
     }
-    fetch('/cribtori/visit', {
+    fetch('/cribtori/api/visit', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

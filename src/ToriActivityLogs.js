@@ -58,7 +58,7 @@ class ToriActivityLogs extends Component {
       toriId: this.props.toriId,
       activityItems: [],
     }, () => {
-      fetch('/cribtori/activity/' + this.props.toriId + '?limit=5')
+      fetch('/cribtori/api/activity/' + this.props.toriId + '?limit=5')
       .then(function(response) {
         return response.json();
       })

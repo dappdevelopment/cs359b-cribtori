@@ -39,7 +39,7 @@ class ToriVisitItem extends Component {
 
   componentDidMount() {
     // TODO: get the heart from the activities
-    fetch('/cribtori/hearts/' + this.props.toriId)
+    fetch('/cribtori/api/hearts/' + this.props.toriId)
     .then(function(response) {
       if (response.ok) {
         return response.json();
@@ -63,7 +63,7 @@ class ToriVisitItem extends Component {
     });
 
     // Get the visitation info.
-    fetch('/cribtori/visit/' + this.props.toriId)
+    fetch('/cribtori/api/visit/' + this.props.toriId)
     .then(function(response) {
       if (response.ok) {
         return response.json();
@@ -88,7 +88,7 @@ class ToriVisitItem extends Component {
         targetId: this.props.targetId,
         claimed: 0
       }
-      fetch('/cribtori/visit', {
+      fetch('/cribtori/api/visit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
