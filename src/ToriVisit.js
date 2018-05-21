@@ -14,7 +14,9 @@ import * as util from './utils.js';
 import ToriVisitItem from './ToriVisitItem.js';
 
 const styles = theme => ({
-
+  warning: {
+    color: 'red'
+  }
 });
 
 class ToriVisit extends Component {
@@ -31,21 +33,40 @@ class ToriVisit extends Component {
   }
 
   componentDidMount() {
+    let ids = this.context.toriSiblings;
+    ids = ids.filter((id) => id !== this.props.targetId);
     this.setState({
-      visitList: this.context.toriSiblings.map((id) => {
-        return (<ToriVisitItem key={id} toriId={id} targetId={this.props.targetId} onMessage={this.props.onMessage}/>);
+      visitList: ids.map((id) => {
+        return (<ToriVisitItem key={id}
+                               toriId={id}
+                               targetName={this.props.name}
+                               targetId={this.props.targetId}
+                               onMessage={this.props.onMessage}
+                               mode={this.props.mode}/>);
       })
     })
   }
 
 
   render() {
+    let title = (this.props.mode === 'visit') ?
+                `Visit ${this.props.name}` :
+                `Fuse ${this.props.name}`;
+    let warning = 'WARNING: Fusing will COMBINE the two Toris!';
+
+    let disabled = this.props.disabled;
+
     return (
-      <ExpansionPanel>
+      <ExpansionPanel disabled={disabled}>
         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>Visit {this.props.name}</Typography>
+          <Typography>{title}</Typography>
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
+          {this.props.mode === 'fuse' && (
+            <div>
+              <Typography className={this.props.classes.warning}>{warning}</Typography>
+            </div>
+          )}
           <List>
             { this.state.visitList }
           </List>

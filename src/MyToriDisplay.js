@@ -97,6 +97,7 @@ class MyToriDisplay extends Component {
     .then(
       (toriIds) => {
         ownerIds = toriIds.map((id) => {return id.toNumber()});
+        console.log(ownerIds)
         this.setState({
           otherToriDisplay: [],
           toriDisplay: [],

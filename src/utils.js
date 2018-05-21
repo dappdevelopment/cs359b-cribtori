@@ -123,6 +123,11 @@ export function retrieveRoomLayout(id) {
 
 
 /* TORI VISIT */
+export function fuseToris(contract, id, otherId, name, addr) {
+  console.log(contract, id, otherId, name, addr)
+  return contract.fuseToris(id, otherId, name, {from: addr});
+}
+
 export function visitTori(contract, id, otherId, addr) {
   return contract.visit(id, otherId, {from: addr});
 }

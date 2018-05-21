@@ -295,13 +295,16 @@ class ToriDetails extends Component {
     return (
       <Paper className={this.props.classes.paper}>
         { this.props.isOther ? (
-          <ToriVisit name={this.state.toriInfo.name} targetId={this.state.toriInfo.id} onMessage={this.props.onMessage}/>
+          <ToriVisit name={this.state.toriInfo.name}
+                     targetId={this.state.toriInfo.id}
+                     onMessage={this.props.onMessage}
+                     mode={'visit'} />
         ) : (
           <MenuList>
             <MenuItem onClick={this.feedTori}>Feed</MenuItem>
             <MenuItem onClick={this.cleanTori}>Clean</MenuItem>
-            <MenuItem onClick={this.playWithTori}>Play</MenuItem>
-            <MenuItem onClick={this.craftAccessory}>Craft</MenuItem>
+            <MenuItem onClick={this.playWithTori} disabled >Play</MenuItem>
+            <MenuItem onClick={this.craftAccessory} disabled >Craft</MenuItem>
             <Divider />
             <MenuItem onClick={this.props.onEdit}>Edit Room</MenuItem>
             {this.state.toriInfo.salePrice > 0 ? (
@@ -309,6 +312,12 @@ class ToriDetails extends Component {
             ) : (
               <MenuItem onClick={(e) => this.postToriForSale(this.state.toriInfo.id, e)}>Sell Tori</MenuItem>
             )}
+            <Divider />
+            <ToriVisit name={this.state.toriInfo.name}
+                       targetId={this.state.toriInfo.id}
+                       onMessage={this.props.onMessage}
+                       disabled={this.props.isVisit}
+                       mode={'fuse'} />
           </MenuList>
         )}
       </Paper>

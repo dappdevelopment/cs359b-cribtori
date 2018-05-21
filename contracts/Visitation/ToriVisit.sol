@@ -16,6 +16,8 @@ contract ToriTokenInterface {
                       uint postingPrice,
                       address toriOwner);
 
+  function burnTori(address _owner, uint256 _tokenId) public returns (bool success);
+
   function generateNewTori(uint256 _dna,
                             uint32 _proficiency,
                             uint32 _personality,
@@ -57,6 +59,46 @@ contract ToriVisit is DnaCore, Ownable {
     toriTokenInterface = ToriTokenInterface(_address);
   }
 
+  function fuseToris(uint256 _toriId, uint256 _otherToriId, string _name) public returns (bool success) {
+    require(toriTokenInterface.ownerOf(_toriId) == msg.sender &&
+            toriTokenInterface.ownerOf(_otherToriId) == msg.sender &&
+            !occupied[_toriId] && !occupied[_otherToriId]);
+    // Get the dna, personality, and proficiency of each tori.
+    uint256 dna;
+    uint32 proficiency;
+    uint32 personality;
+    (, dna, , proficiency, personality, , , ) = toriTokenInterface.getTokenInfo(_toriId);
+    uint256 otherDna;
+    uint32 otherProficiency;
+    uint32 otherPersonality;
+    (, otherDna, , otherProficiency, otherPersonality, , , ) = toriTokenInterface.getTokenInfo(_otherToriId);
+
+    uint256 newDna;
+    uint32 newProficiency;
+    uint32 newPersonality;
+    (newDna, newProficiency, newPersonality) = _combineTwoTraits(dna, proficiency,
+                                                                 personality, otherDna,
+                                                                 otherProficiency, otherPersonality,
+                                                                 msg.sender);
+    success = toriTokenInterface.generateNewTori(newDna, newProficiency, newPersonality, _name, msg.sender);
+    if (success) {
+      // Burn the tokens
+      // TODO: Evaluate gas
+      success = toriTokenInterface.burnTori(msg.sender, _toriId);
+      success = success && toriTokenInterface.burnTori(msg.sender, _otherToriId);
+
+      // Check if success
+      if (!success) {
+        revert();
+        return false;
+      }
+    } else {
+      revert();
+      return false;
+    }
+    return true;
+  }
+
   function visit(uint256 _toriId, uint256 _otherToriId) public returns (uint256 id) {
     require(toriTokenInterface.ownerOf(_toriId) == msg.sender &&
             toriTokenInterface.ownerOf(_otherToriId) != msg.sender &&
@@ -85,24 +127,6 @@ contract ToriVisit is DnaCore, Ownable {
     // TODO: broadcast an event
   }
 
-  function timeDiff(uint256 _ticketId) public view returns (uint256 s, uint256 diff, uint256 due, bool isDone, bool isOwned) {
-    diff = now - tickets[_ticketId].submitTime;
-    due =  TIME_LIMIT;
-    isDone = diff >= TIME_LIMIT;
-    isOwned = ticketOwner[_ticketId] == msg.sender;
-
-    VisitTicket memory ticket = tickets[_ticketId];
-    uint256 newDna;
-    uint32 newProficiency;
-    uint32 newPersonality;
-
-    (newDna, newProficiency, newPersonality) = _combineTwoTraits(ticket.dna, ticket.proficiency,
-                                                                 ticket.personality, ticket.otherDna,
-                                                                 ticket.otherProficiency, ticket.otherPersonality,
-                                                                 msg.sender);
-    s = newDna / DNA_LIMIT;
-  }
-
   function claimTori(uint256 _ticketId, string _name) public returns (bool result) {
     VisitTicket storage ticket = tickets[_ticketId];
     require((ticketOwner[_ticketId] == msg.sender) && (now - ticket.submitTime) >= TIME_LIMIT);
@@ -119,6 +143,9 @@ contract ToriVisit is DnaCore, Ownable {
       ticket.claimed = true;
       ticketCount[msg.sender] = ticketCount[msg.sender].sub(1);
       occupied[ticket.toriId] = false;
+    } else {
+      revert();
+      return false;
     }
 
     return result;

@@ -35,6 +35,8 @@ class ToriVisitItem extends Component {
     this.state = {};
 
     this.selectTori = this.selectTori.bind(this);
+    this.handleVisit = this.handleVisit.bind(this);
+    this.handleFuse = this.handleFuse.bind(this);
   }
 
   componentDidMount() {
@@ -81,6 +83,15 @@ class ToriVisitItem extends Component {
   }
 
   selectTori() {
+    if (this.props.mode === 'visit') {
+      this.handleVisit();
+    } else {
+      // TODO: show warning
+      this.handleFuse();
+    }
+  }
+
+  handleVisit() {
     util.visitTori(this.context.toriVisit, this.props.toriId, this.props.targetId, this.context.userAccount)
     .then((result) => {
       let data = {
@@ -111,7 +122,27 @@ class ToriVisitItem extends Component {
     .catch(console.error);
   }
 
+  handleFuse() {
+    // TODO: future feature: make the name custom.
+    // Create a new name
+    let fuseName = this.props.targetName.substring(0, Math.floor(this.props.targetName.length / 2)) +
+                    this.state.toriInfo.name.substring(0, Math.floor(this.state.toriInfo.name.length / 2));
+    util.fuseToris(this.context.toriVisit, this.props.targetId, this.props.toriId, fuseName, this.context.userAccount)
+    .then((result) => {
+      // TODO: Maybe update the DB?
+      let message = this.state.toriInfo.name + '\'s been fused';
+      if (!result) {
+        message = this.state.toriInfo.name + '\'s fusion failed';
+      }
+      this.props.onMessage(message);
+    })
+    .catch(console.error);
+  }
+
   render() {
+    let buttonInfo = (this.props.mode === 'visit') ?
+                     'Send for Visitation' :
+                     'Select as Benefactor';
     return (
       <ListItem>
         { this.state.toriInfo &&
@@ -122,7 +153,7 @@ class ToriVisitItem extends Component {
                     variant="raised"
                     color="secondary"
                     onClick={this.selectTori}>
-              Select
+              { buttonInfo }
             </Button>
           </div>
         }
