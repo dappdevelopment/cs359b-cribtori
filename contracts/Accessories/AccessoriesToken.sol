@@ -5,7 +5,7 @@ import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC20/Standard
 
 contract AccessoriesToken is StandardToken {
 
-  string[] public MATERIAL_NAME = ["Wood", "Cloth"];
+  string[] public MATERIAL_NAME = ["Wood", "Cloth", "Metal"];
 
   string public name;
   uint8 public decimals;
@@ -20,6 +20,7 @@ contract AccessoriesToken is StandardToken {
   uint32 public space;
   // 0: horizontal, 1: vertical
   uint8 public orientation;
+  uint8 public rarity;
 
   function() payable{
     totalEthInWei = totalEthInWei + msg.value;
@@ -41,7 +42,8 @@ contract AccessoriesToken is StandardToken {
     string _variety,
     uint32[] _material,
     uint32 _space,
-    uint32 _orientation,
+    uint8 _orientation,
+    uint8 _rarity,
     uint256 _amount,
     uint256 _price) {
     _name = name;
@@ -51,6 +53,7 @@ contract AccessoriesToken is StandardToken {
     _material = material;
     _space = space;
     _orientation = orientation;
+    _rarity = rarity;
     _amount = allowance(msg.sender, this);
     _price = pricePerToken[msg.sender];
   }

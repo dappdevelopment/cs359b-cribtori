@@ -13,6 +13,7 @@ contract WoodenCabinet is AccessoriesToken {
     material = [0];
     space = 1;
     orientation = 0;
+    rarity = 1;
 
     fundsWallet = msg.sender;
     balances[msg.sender] = 10;

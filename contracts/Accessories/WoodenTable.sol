@@ -2,22 +2,22 @@ pragma solidity ^0.4.21;
 
 import './AccessoriesToken.sol';
 
-contract WoodenStool is AccessoriesToken {
+contract WoodenTable is AccessoriesToken {
 
-  function WoodenStool() {
-    name = "WoodenStool";
+  function WoodenTable() {
+    name = "Wooden Table";
     decimals = 0;
-    symbol = "TWS";
+    symbol = "TWT";
 
-    variety = "Chair";
+    variety = "Table";
     material = [0];
     space = 1;
     orientation = 0;
-    rarity = 1;
+    rarity = 2;
 
     fundsWallet = msg.sender;
     balances[msg.sender] = 10;
     totalSupply_ = 10000;
-    unitsOneEthCanBuy = 100;
+    unitsOneEthCanBuy = 50;
   }
 }

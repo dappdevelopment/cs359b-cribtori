@@ -14,6 +14,10 @@ import TWD from './img/accessories/TWD.png';
 import TWS from './img/accessories/TWS.png';
 import TWB from './img/accessories/TWB.png';
 import TCC from './img/accessories/TCC.png';
+import TWT from './img/accessories/TWT.png';
+import TST from './img/accessories/TST.png';
+import TFT from './img/accessories/TFT.png';
+import TPP from './img/accessories/TPP.png';
 
 // Tori
 import CHEEK from './img/tori/cheek.png';
@@ -29,6 +33,7 @@ import DECOR_0 from './img/tori/decoration/0.png';
 import DECOR_1 from './img/tori/decoration/1.png';
 import DECOR_2 from './img/tori/decoration/2.png';
 import DECOR_3 from './img/tori/decoration/3.png';
+import DECOR_4 from './img/tori/decoration/4.png';
 
 import EYES_0 from './img/tori/eyes/0.png';
 import EYES_1 from './img/tori/eyes/1.png';
@@ -42,13 +47,15 @@ import FEET_2 from './img/tori/feet/2.png';
 import HAND_0 from './img/tori/hand/0.png';
 import HAND_1 from './img/tori/hand/1.png';
 import HAND_2 from './img/tori/hand/2.png';
+import HAND_3 from './img/tori/hand/3.png';
 
 import MOUTH_0 from './img/tori/mouth/0.png';
 import MOUTH_1 from './img/tori/mouth/1.png';
 import MOUTH_2 from './img/tori/mouth/2.png';
 import MOUTH_3 from './img/tori/mouth/3.png';
 
-
+import S_KITTY from './img/tori/special/kitty.png';
+import S_TREE from './img/tori/special/tree.png';
 
 export const assets = {
   background: {
@@ -63,7 +70,11 @@ export const assets = {
     TWD: TWD,
     TWS: TWS,
     TWB: TWB,
-    TCC: TCC
+    TCC: TCC,
+    TWT: TWT,
+    TST: TST,
+    TFT: TFT,
+    TPP: TPP
   },
   tori: {
     cheek: CHEEK,
@@ -73,7 +84,7 @@ export const assets = {
       BODY_0, BODY_1, BODY_2, BODY_3
     ],
     decoration: [
-      DECOR_0, DECOR_1, DECOR_2, DECOR_3
+      DECOR_0, DECOR_1, DECOR_2, DECOR_3, DECOR_4
     ],
     eyes: [
       EYES_0, EYES_1, EYES_2, EYES_3
@@ -82,10 +93,14 @@ export const assets = {
       FEET_0, FEET_1, FEET_2
     ],
     hand: [
-      HAND_0, HAND_1, HAND_2
+      HAND_0, HAND_1, HAND_2, HAND_3
     ],
     mouth: [
       MOUTH_0, MOUTH_1, MOUTH_2, MOUTH_3
-    ]
+    ],
+    special: {
+      'kitty': S_KITTY,
+      'tree': S_TREE
+    }
   }
 };
