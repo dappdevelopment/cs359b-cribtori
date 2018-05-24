@@ -2,8 +2,10 @@ pragma solidity ^0.4.21;
 
 import "github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol";
 import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC20/RBACMintableToken.sol';
 
-contract AccessoriesToken is StandardToken {
+
+contract AccessoriesToken is StandardToken, RBACMintableToken {
 
   string[] public MATERIAL_NAME = ["Wood", "Cloth", "Metal"];
 
@@ -122,4 +124,5 @@ contract AccessoriesToken is StandardToken {
     }
     return (values, prices, owners);
   }
+
 }
