@@ -2,14 +2,14 @@ pragma solidity ^0.4.21;
 
 import './AccessoriesToken.sol';
 
-contract WoodenStool is AccessoriesToken {
+contract PottedPlant is AccessoriesToken {
 
-  function WoodenStool() {
-    name = "WoodenStool";
+  function PottedPlant() {
+    name = "Potted Plant";
     decimals = 0;
-    symbol = "TWS";
+    symbol = "TPP";
 
-    variety = "Chair";
+    variety = "Plant";
     material = [0];
     space = 1;
     orientation = 0;

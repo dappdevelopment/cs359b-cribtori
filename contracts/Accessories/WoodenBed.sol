@@ -13,6 +13,7 @@ contract WoodenBed is AccessoriesToken {
     material = [0, 1];
     space = 2;
     orientation = 0;
+    rarity = 2;
 
     fundsWallet = msg.sender;
     balances[msg.sender] = 10;

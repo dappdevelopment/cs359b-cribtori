@@ -1,11 +1,17 @@
 pragma solidity ^0.4.21;
 
-import "github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol";
-import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol'; */
+/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol'; */
 
-contract AccessoriesToken is StandardToken {
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import 'openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
 
-  string[] public MATERIAL_NAME = ["Wood", "Cloth"];
+import '../RBACMintableToken.sol';
+
+
+contract AccessoriesToken is StandardToken, RBACMintableToken {
+
+  string[] public MATERIAL_NAME = ["Wood", "Cloth", "Metal"];
 
   string public name;
   uint8 public decimals;
@@ -20,6 +26,7 @@ contract AccessoriesToken is StandardToken {
   uint32 public space;
   // 0: horizontal, 1: vertical
   uint8 public orientation;
+  uint8 public rarity;
 
   function() payable{
     totalEthInWei = totalEthInWei + msg.value;
@@ -41,7 +48,8 @@ contract AccessoriesToken is StandardToken {
     string _variety,
     uint32[] _material,
     uint32 _space,
-    uint32 _orientation,
+    uint8 _orientation,
+    uint8 _rarity,
     uint256 _amount,
     uint256 _price) {
     _name = name;
@@ -51,6 +59,7 @@ contract AccessoriesToken is StandardToken {
     _material = material;
     _space = space;
     _orientation = orientation;
+    _rarity = rarity;
     _amount = allowance(msg.sender, this);
     _price = pricePerToken[msg.sender];
   }
@@ -119,4 +128,5 @@ contract AccessoriesToken is StandardToken {
     }
     return (values, prices, owners);
   }
+
 }

@@ -13,6 +13,7 @@ contract WoodenDesk is AccessoriesToken {
     material = [0];
     space = 2;
     orientation = 0;
+    rarity = 1;
 
     fundsWallet = msg.sender;
     balances[msg.sender] = 10;
