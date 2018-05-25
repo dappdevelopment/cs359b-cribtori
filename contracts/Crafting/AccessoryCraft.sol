@@ -1,6 +1,8 @@
 pragma solidity ^0.4.21;
 
-import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Ownable.sol';
+/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Ownable.sol'; */
+
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract AccessoryInterface {
   function balanceOf(address _owner) public view returns (uint256);
@@ -32,19 +34,18 @@ contract AccessoryCraft is Ownable {
   mapping (string => AccessoryInterface) tokenInterfaces;
   mapping (string => uint8) tokenRarity;
 
+  string[] hello;
+
   uint256 maxRarity = 1;
   uint256 minRarity = 1;
 
-  modifier hasEnough(string[] _symbols, uint256[] _amounts, address _owner) {
-    require(_symbols.length == _amount.length);
-    // TODO: Safe math for loop iteration.
-    for (uint256 i = 0; i < _symbols.length; i ++) {
-      string memory cs = _symbols[i];
-      uint256 memory ca = _amounts[i];
-
-      uint256 memory ba = tokenInterfaces[cs].balanceOf(_owner);
-      require(ba >= ca);
-    }
+  modifier hasEnough(
+    string _symbol,
+    uint256 _amount,
+    address _owner
+  ) {
+    uint256 balance = tokenInterfaces[_symbol].balanceOf(_owner);
+    require(balance >= _amount);
     _;
   }
 
@@ -55,16 +56,26 @@ contract AccessoryCraft is Ownable {
     (,,,,,, rarity,,) = tokenInterfaces[_symbol].retrieveAllInfo();
     tokenRarity[_symbol] = rarity;
 
-    maxRarity = max(maxRarity, rarity);
+    if (rarity > maxRarity) {
+      maxRarity = rarity;
+    }
   }
 
-  function craftAccessory(string[] _symbols, uint256 _amounts, address _owner)
-    hasEnough(_symbols, _amounts, _owner)
-    public returns (bool result) {
-    require(_symbols.length > 1 && _amounts.length > 1);
+  function craftAccessory(
+    string _sym1,
+    string _sym2,
+    string _sym3,
+    uint256 _am1,
+    uint256 _am2,
+    uint256 _am3,
+    address _owner
+  ) hasEnough(_sym1, _am1, _owner)
+    hasEnough(_sym2, _am2, _owner)
+    hasEnough(_sym3, _am3, _owner)
+  public returns (bool result) {
 
     // Get all tokens rarity info
-    uint256 rarityScore = 0;
+    /* uint256 rarityScore = 0;
     uint256 limitIdx = 0;
     for (uint256 i = 0; i < _symbols.length; i++) {
       // TODO: SafeMath
@@ -76,12 +87,12 @@ contract AccessoryCraft is Ownable {
         // No need to process the rest
         break;
       }
-    }
+    } */
 
     // Randomly choose which token to craft
     // For ex. given 1-1 acc --> 1: 15%, 2: 80%, 3: 5%
     // TODO:
-
-    return true;
+    // TODO
+    return false;
   }
 }
