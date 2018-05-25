@@ -12,6 +12,7 @@ contract ToriTokenInterface {
   function getTokenInfo(uint256 _toriId) public view returns
                     (uint256 toriId,
                       uint256 toriDna,
+                      uint256 _level,
                       string name,
                       uint32 proficiency,
                       uint32 personality,
@@ -22,8 +23,11 @@ contract ToriTokenInterface {
   function burnTori(address _owner, uint256 _tokenId) public returns (bool success);
 
   function generateNewTori(uint256 _dna,
+                            uint256 _level,
                             uint32 _proficiency,
                             uint32 _personality,
+                            uint256 _parent1,
+                            uint256 _parent2,
                             string _name,
                             address _owner) public returns (bool success);
 
@@ -38,16 +42,14 @@ contract ToriVisit is DnaCore, Ownable {
   // TODO change this!
   uint256 private TIME_LIMIT = 5 minutes;
 
+  uint256 private BREED_RANDOMNESS = 4;
+  uint256 private FUSE_RANDOMNESS = 0;
+
   struct VisitTicket {
     uint256 toriId;
     uint256 otherId;
+    uint256 maxLevel;
     uint256 submitTime;
-    uint256 dna;
-    uint256 otherDna;
-    uint32 proficiency;
-    uint32 otherProficiency;
-    uint32 personality;
-    uint32 otherPersonality;
     address owner;
     bool claimed;
   }
@@ -66,24 +68,31 @@ contract ToriVisit is DnaCore, Ownable {
     require(toriTokenInterface.ownerOf(_toriId) == msg.sender &&
             toriTokenInterface.ownerOf(_otherToriId) == msg.sender &&
             !occupied[_toriId] && !occupied[_otherToriId]);
-    // Get the dna, personality, and proficiency of each tori.
-    uint256 dna;
-    uint32 proficiency;
-    uint32 personality;
-    (, dna, , proficiency, personality, , , ) = toriTokenInterface.getTokenInfo(_toriId);
-    uint256 otherDna;
-    uint32 otherProficiency;
-    uint32 otherPersonality;
-    (, otherDna, , otherProficiency, otherPersonality, , , ) = toriTokenInterface.getTokenInfo(_otherToriId);
+    // Get the level information.
+    uint256 level;
+    (, , level, , , , , , ) = toriTokenInterface.getTokenInfo(_toriId);
+    uint256 otherLevel;
+    (, , otherLevel, , , , , , ) = toriTokenInterface.getTokenInfo(_otherToriId);
+    require(level == otherLevel);
 
     uint256 newDna;
     uint32 newProficiency;
     uint32 newPersonality;
-    (newDna, newProficiency, newPersonality) = _combineTwoTraits(dna, proficiency,
-                                                                 personality, otherDna,
-                                                                 otherProficiency, otherPersonality,
-                                                                 msg.sender);
-    success = toriTokenInterface.generateNewTori(newDna, newProficiency, newPersonality, _name, msg.sender);
+
+    (newDna, newProficiency, newPersonality) = _combineTwoToris(_toriId,
+                                                                _otherToriId,
+                                                                _name,
+                                                                FUSE_RANDOMNESS);
+
+    success = toriTokenInterface.generateNewTori(
+      newDna,
+      level + 1,
+      newProficiency,
+      newPersonality,
+      _toriId,
+      _otherToriId,
+      _name,
+      msg.sender);
     if (success) {
       // Burn the tokens
       // TODO: Evaluate gas
@@ -106,20 +115,14 @@ contract ToriVisit is DnaCore, Ownable {
     require(toriTokenInterface.ownerOf(_toriId) == msg.sender &&
             toriTokenInterface.ownerOf(_otherToriId) != msg.sender &&
             !occupied[_toriId]);
-    // Get the dna, personality, and proficiency of each tori.
-    uint256 dna;
-    uint32 proficiency;
-    uint32 personality;
-    (, dna, , proficiency, personality, , , ) = toriTokenInterface.getTokenInfo(_toriId);
-    uint256 otherDna;
-    uint32 otherProficiency;
-    uint32 otherPersonality;
-    (, otherDna, , otherProficiency, otherPersonality, , , ) = toriTokenInterface.getTokenInfo(_otherToriId);
-
+    // Get level information
+    uint256 level;
+    (, , , , , , , , ) = toriTokenInterface.getTokenInfo(_toriId);
+    uint256 otherLevel;
+    (, , otherLevel, , , , , , ) = toriTokenInterface.getTokenInfo(_otherToriId);
+    require(otherLevel <= level);
     id = tickets.push(VisitTicket(_toriId, _otherToriId,
-                                  now, dna, otherDna,
-                                  proficiency, otherProficiency,
-                                  personality, otherPersonality,
+                                  otherLevel, now,
                                   msg.sender, false)) - 1;
 
     ticketOwner[id] = msg.sender;
@@ -130,6 +133,47 @@ contract ToriVisit is DnaCore, Ownable {
     // TODO: broadcast an event
   }
 
+  function _getToriMaterials(uint256 _toriId) private view returns (uint256[3] result) {
+    uint256 dna;
+    uint32 proficiency;
+    uint32 personality;
+    (, dna, , , proficiency, personality, , , ) = toriTokenInterface.getTokenInfo(_toriId);
+
+    result[0] = dna;
+    result[1] = uint256(proficiency);
+    result[2] = uint256(personality);
+  }
+
+  function _combineTwoToris(uint256 _toriId,
+                            uint256 _otherId,
+                            string _name,
+                            uint256 _threshold)
+                            private view returns (uint256, uint32, uint32) {
+    /* uint256 dna;
+    uint32 proficiency;
+    uint32 personality;
+    (, dna, , , proficiency, personality, , , ) = toriTokenInterface.getTokenInfo(_toriId);
+    uint256 otherDna;
+    uint32 otherProficiency;
+    uint32 otherPersonality;
+    (, otherDna, , , otherProficiency, otherPersonality, , , ) = toriTokenInterface.getTokenInfo(_otherId); */
+
+    /* return _combineTwoTraits(dna,
+                             proficiency,
+                             personality,
+                             otherDna,
+                             otherProficiency,
+                             otherPersonality,
+                             _name,
+                             msg.sender,
+                             _threshold); */
+     return _combineTwoTraits(_getToriMaterials(_toriId),
+                              _getToriMaterials(_otherId),
+                              _name,
+                              msg.sender,
+                              _threshold);
+  }
+
   function claimTori(uint256 _ticketId, string _name) public returns (bool result) {
     VisitTicket storage ticket = tickets[_ticketId];
     require((ticketOwner[_ticketId] == msg.sender) && (now - ticket.submitTime) >= TIME_LIMIT);
@@ -137,11 +181,22 @@ contract ToriVisit is DnaCore, Ownable {
     uint32 newProficiency;
     uint32 newPersonality;
 
-    (newDna, newProficiency, newPersonality) = _combineTwoTraits(ticket.dna, ticket.proficiency,
-                                                                 ticket.personality, ticket.otherDna,
-                                                                 ticket.otherProficiency, ticket.otherPersonality,
-                                                                 msg.sender);
-    result = toriTokenInterface.generateNewTori(newDna, newProficiency, newPersonality, _name, msg.sender);
+    (newDna, newProficiency, newPersonality) = _combineTwoToris(ticket.toriId,
+                                                                ticket.otherId,
+                                                                _name,
+                                                                BREED_RANDOMNESS);
+
+    // TODO decide on level
+    result = toriTokenInterface.generateNewTori(
+      newDna,
+      _randomLevel(ticket.maxLevel, msg.sender),
+      newProficiency,
+      newPersonality,
+      ticket.toriId,
+      ticket.otherId,
+      _name,
+      msg.sender
+    );
     if (result) {
       ticket.claimed = true;
       ticketCount[msg.sender] = ticketCount[msg.sender].sub(1);
@@ -181,14 +236,16 @@ contract ToriVisit is DnaCore, Ownable {
   }
 
   function getTicketInfo(uint256 _ticketId) public view returns (uint256 toriId,
-                                                                uint256 otherId,
-                                                                uint256 submitTime,
-                                                                uint256 dueTime,
-                                                                address owner,
-                                                                bool claimed) {
+                                                                 uint256 otherId,
+                                                                 uint256 maxLevel,
+                                                                 uint256 submitTime,
+                                                                 uint256 dueTime,
+                                                                 address owner,
+                                                                 bool claimed) {
     VisitTicket storage ticket = tickets[_ticketId];
     toriId = ticket.toriId;
     otherId = ticket.otherId;
+    maxLevel = ticket.maxLevel;
     submitTime = ticket.submitTime;
     dueTime = submitTime + TIME_LIMIT;
     owner = ticket.owner;

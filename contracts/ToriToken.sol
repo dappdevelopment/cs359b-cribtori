@@ -11,10 +11,14 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
 
   struct Tori {
     uint256 dna;
+    uint256 level;
     string name;
     uint32 proficiency;
     uint32 personality;
     uint32 readyTime;
+    // 0, 0 --> generation 1.
+    uint256 parent1;
+    uint256 parent2;
   }
 
   Tori[] toris;
@@ -69,7 +73,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
     uint32 proficiency;
     uint32 personality;
     (dna, proficiency, personality) = _generateRandomTraits(_quizzes, _name, _owner);
-    return Tori(dna, _name, proficiency, personality, uint32(now));
+    return Tori(dna, 1, _name, proficiency, personality, uint32(now), 0, 0);
   }
 
   function generateInitialTori(uint8[] _quizzes, string _name) public returns (bool success) {
@@ -85,8 +89,11 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
   }
 
   function _generateNewTori(uint256 _dna,
+                            uint256 _level,
                             uint32 _proficiency,
                             uint32 _personality,
+                            uint256 _parent1,
+                            uint256 _parent2,
                             string _name,
                             address _owner) onlyWhitelisted private returns (bool success) {
     require((_dna / DNA_LIMIT == 0) &&
@@ -95,7 +102,14 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
             (_personality >= 0) &&
             (_personality < PERSONALITY_THRESHOLD.length));
     // Generate three new toris.
-    Tori memory newTori = Tori(_dna, _name, _proficiency, _personality, uint32(now));
+    Tori memory newTori = Tori(_dna,
+                               _level,
+                               _name,
+                               _proficiency,
+                               _personality,
+                               uint32(now),
+                               _parent1,
+                               _parent2);
     // Push to the book keeping array.
     uint256 id = toris.push(newTori) - 1;
     _mint(_owner, id);
@@ -104,11 +118,23 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
   }
 
   function generateNewTori(uint256 _dna,
-                            uint32 _proficiency,
-                            uint32 _personality,
-                            string _name,
-                            address _owner) public returns (bool success) {
-    return _generateNewTori(_dna, _proficiency, _personality, _name, _owner);
+                           uint256 _level,
+                           uint32 _proficiency,
+                           uint32 _personality,
+                           uint256 _parent1,
+                           uint256 _parent2,
+                           string _name,
+                           address _owner) public returns (bool success) {
+    return _generateNewTori(
+      _dna,
+      _level,
+      _proficiency,
+      _personality,
+      _parent1,
+      _parent2,
+      _name,
+      _owner
+    );
   }
 
   function _burnTori(address _owner, uint256 _tokenId) onlyWhitelisted private returns (bool success) {
@@ -147,6 +173,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
   function getTokenInfo(uint256 _toriId) public view returns
                     (uint256 toriId,
                       uint256 toriDna,
+                      uint256 level,
                       string name,
                       uint32 proficiency,
                       uint32 personality,
@@ -155,6 +182,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
                       address toriOwner) {
     Tori memory tori = toris[_toriId];
     toriId = _toriId;
+    level = tori.level;
     toriDna = tori.dna;
     name = tori.name;
     proficiency = tori.proficiency;
@@ -162,6 +190,10 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
     readyTime = tori.readyTime;
     postingPrice = toriSale[_toriId];
     toriOwner = tokenOwner[_toriId];
+  }
+
+  function getParentIds(uint256 _tokenId) public view returns (uint256 parent1, uint256 parent2) {
+    return (toris[_tokenId].parent1, toris[_tokenId].parent2);
   }
 
   function getTokenCount() public view returns (uint256 toriCount) {

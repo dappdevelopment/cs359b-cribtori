@@ -1,8 +1,16 @@
 pragma solidity ^0.4.21;
 
+library Dna {
+  struct CoreInfo {
+    uint256 dna;
+    uint32 proficiency;
+    uint32 personality;
+  }
+}
+
 contract DnaCore {
 
-  uint256 private DNA_DIGIT = 23;
+  uint256 private DNA_DIGIT = 35;
   uint256 private PROFICIENCY_DIGIT = 3;
   uint256 private PERSONALITY_DIGIT = 6;
 
@@ -80,7 +88,7 @@ contract DnaCore {
                                                       uint32 proficiency,
                                                       uint32 personality){
     uint256 traitRandomness = uint(keccak256(now, _owner, _name));
-    
+
     dna = traitRandomness % DNA_LIMIT;
     if (dna / (10**(DNA_DIGIT - 1)) == 0) {
       dna += 10**(DNA_DIGIT - 1);
@@ -96,32 +104,94 @@ contract DnaCore {
     dna = dna / DNA_CUTOFF;
   }
 
-  function _combineTwoTraits(uint256 dna,
-                             uint32 proficiency,
-                             uint32 personality,
-                             uint256 otherDna,
-                             uint32 otherProficiency,
-                             uint32 otherPersonality,
-                             address _owner)
+
+  function _combineDna(uint256 _dna,
+                       uint256 _otherDna,
+                       uint256 _randomness,
+                       uint256 _threshold) internal view returns (uint256) {
+    uint256 newDna = 0;
+    uint256 randomDna = uint256((_randomness / DNA_LIMIT) % DNA_LIMIT);
+    if (randomDna / (10**(DNA_DIGIT - 1)) == 0) {
+      randomDna += 10**(DNA_DIGIT - 1);
+    }
+
+    uint256 thresholdCheck = uint256(_randomness % (DNA_LIMIT * 10) / DNA_LIMIT);
+    if (thresholdCheck < _threshold) {
+      // :( Dna is now just random.
+      return randomDna;
+    }
+
+    // Now, here's where things get interesting...
+    // The combined DNA has a change of 40% to get trait from each parent and 10% random PER DIGIT.
+    // Let's do this one-by-one.
+    uint256 curr;
+    uint256 digit;
+    for (uint256 i = 0; i < DNA_DIGIT; i++) {
+      curr = _randomness % 10;
+      _randomness = _randomness / 10;
+
+      // TODO: should we make this value adjustable?
+      if (curr < 4) {
+        digit = (_dna / 10**i) % 10;
+      } else if (curr < 8) {
+        digit = (_otherDna / 10**i) % 10;
+      } else {
+        digit = (randomDna / 10**i) % 10;
+      }
+      newDna += digit * (10 ** i);
+    }
+
+    return newDna;
+  }
+
+  function _combineTwoTraits(uint256[3] info,
+                             uint256[3] otherInfo,
+                             string _name,
+                             address _owner,
+                             uint256 _threshold)
                              internal view returns (uint256 newDna,
                                                    uint32 newProficiency,
                                                    uint32 newPersonality) {
     // TODO
-    uint256 ownerRandomness = uint(keccak256(now, _owner));
+    uint256 ownerRandomness = uint(keccak256(now, _owner, _name));
 
-    newDna = (dna + otherDna) / 2;
+    newDna = _combineDna(info[0], otherInfo[0], ownerRandomness, _threshold);
     uint8[] memory personalityQuizzes = new uint8[](PERSONALITY_THRESHOLD.length);
-    personalityQuizzes[personality] = 1;
-    personalityQuizzes[otherPersonality] = 1;
+    personalityQuizzes[info[2]] = 1;
+    personalityQuizzes[otherInfo[2]] = 1;
 
     newProficiency = uint32(ownerRandomness % PROFICIENCY_LIMIT);
     newPersonality = uint32(ownerRandomness % PERSONALITY_LIMIT / (PERSONALITY_LIMIT / PROFICIENCY_LIMIT));
 
     uint8[] memory proficiencyQuizzes = new uint8[](PROFICIENCY_THRESHOLD.length);
-    proficiencyQuizzes[proficiency] = 1;
-    proficiencyQuizzes[otherProficiency] = 1;
+    proficiencyQuizzes[info[1]] = 1;
+    proficiencyQuizzes[otherInfo[1]] = 1;
 
     newPersonality = _interpretPersonality(personalityQuizzes, newPersonality);
     newProficiency = _interpretProficiency(proficiencyQuizzes, newProficiency);
+  }
+
+
+  uint256 LEVEL_THRESHOLD = 75;
+
+  function _randomLevel(uint256 _maxLevel, address _owner) internal view returns (uint256) {
+    if (_maxLevel == 1) {
+      return _maxLevel;
+    }
+    uint256 ownerRandomness = uint(keccak256(now, _owner));
+    uint256 levelRandomness = uint256(ownerRandomness % (DNA_LIMIT * 100) / DNA_LIMIT);
+
+    // TODO: 3/4
+    if (levelRandomness <= LEVEL_THRESHOLD) {
+      return _maxLevel;
+    } else if ((levelRandomness - LEVEL_THRESHOLD) * 100 / (100 - LEVEL_THRESHOLD) <= LEVEL_THRESHOLD) {
+      return (_maxLevel - 1);
+    } else {
+      if (_maxLevel <= 2) {
+        return 1;
+      } else {
+        return (_maxLevel - 2);
+      }
+    }
   }
 }
