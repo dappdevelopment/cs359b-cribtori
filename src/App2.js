@@ -17,7 +17,7 @@ import getWeb3 from './utils/getWeb3';
 
 import Info from './Info/Info.js';
 import MyTori from './MyTori/MyTori.js';
-
+import Inventory from './Inventory/Inventory.js';
 
 
 import './css/oswald.css'
@@ -186,7 +186,7 @@ class App extends Component {
           <Switch>
             <Route exact path='/' component={Info} />
             <Route path='/mytoris' component={MyTori} />
-            <Route exact path='/inventory' component={Info} />
+            <Route exact path='/inventory' component={Inventory} />
             <Route exact path='/explore' component={Info} />
             <Route exact path='/market' component={Info} />
           </Switch>
