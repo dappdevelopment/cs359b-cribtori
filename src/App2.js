@@ -16,6 +16,8 @@ import getWeb3 from './utils/getWeb3';
 
 
 import Info from './Info/Info.js';
+import MyTori from './MyTori/MyTori.js';
+
 
 
 import './css/oswald.css'
@@ -162,16 +164,6 @@ class App extends Component {
     });
   }
 
-  /*
-  <Tab label="Inventories" component={Link} to={'/inventory'} />
-  <Tab label="Other Toris" component={Link} to={'/others'} />
-  <Tab label="Yard Sale" component={Link} to={'/trade'} />
-
-  <Route path='/inventory' component={Inventory} />
-  <Route path='/others' component={MyToriDisplay} />
-  <Route path='/trade' component={Trade} />
-  */
-
   render() {
     // this.state.currentDisplay
     return (
@@ -193,7 +185,7 @@ class App extends Component {
         {this.state.toriTokenInstance &&
           <Switch>
             <Route exact path='/' component={Info} />
-            <Route exact path='/mytoris' component={Info} />
+            <Route path='/mytoris' component={MyTori} />
             <Route exact path='/inventory' component={Info} />
             <Route exact path='/explore' component={Info} />
             <Route exact path='/market' component={Info} />
