@@ -70,13 +70,13 @@ class App extends Component {
     loc = loc.split('#')[1];
     loc = loc.split('/')[1];
 
-    const locMode = {'': 0, 'mytoris': 1, 'inventory': 2, 'explore': 3, 'market': 4}
+    const locMode = {'': 4, 'mytoris': 0, 'inventory': 1, 'explore': 2, 'market': 3}
     let currentMode = locMode[loc];
 
     this.state = {
       storageValue: 0,
       web3: null,
-      mode: currentMode === undefined ? 0 : currentMode,
+      mode: currentMode === undefined ? 4 : currentMode,
       accessoriesTokenInstances: [],
       accNum: 100,
     }
@@ -180,15 +180,16 @@ class App extends Component {
               Cribtori
             </Typography>
             <Tabs value={this.state.mode} onChange={this.switchDisplay} className={this.props.classes.tab}>
-              <Tab label="Info" component={Link} to={'/'} />
               <Tab label="My Toris" component={Link} to={'/mytoris'} />
               <Tab label="Inventory" component={Link} to={'/inventory'} />
               <Tab label="Explore" component={Link} to={'/explore'} />
               <Tab label="Marketplace" component={Link} to={'/market'} />
+              <Tab label="Info" component={Link} to={'/'} />
             </Tabs>
           </Toolbar>
         </AppBar>
-        {this.state.accessoriesTokenInstances.length === this.state.accNum &&
+        {(this.state.accessoriesTokenInstances.length === this.state.accNum) &&
+         (this.state.userAccount) &&
           <Switch>
             <Route exact path='/' component={Info} />
             <Route path='/mytoris' component={MyTori} />

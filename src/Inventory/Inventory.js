@@ -17,6 +17,9 @@ const styles = theme => ({
   },
   container: {
     padding: 32,
+  },
+  gridContainer: {
+    width: '100%'
   }
 });
 
@@ -83,16 +86,17 @@ class Inventory extends Component {
   }
 
   initToriItems(ids) {
+    let minSize = (ids.length >= 4) ? 3 : Math.floor(12 / ids.length);
     let items = ids.map((id) => {
       return (
-        <Grid item sm={3} key={id} >
+        <Grid item sm={minSize} key={id} >
           <TokenInfo id={id}/>
         </Grid>
       );
     });
     this.setState({
       toriItems: items,
-    })
+    });
   }
 
   initAccessoryItem(contract) {
@@ -129,7 +133,7 @@ class Inventory extends Component {
             </Grid>
           </div>
         </Grid>
-        <Grid item sm={12}>
+        <Grid item sm={12} className={this.props.classes.gridContainer}>
           <div className={this.props.classes.container} >
             <Typography className={this.props.classes.title}
                         variant="title"
