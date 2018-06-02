@@ -78,6 +78,7 @@ class App extends Component {
       web3: null,
       mode: currentMode === undefined ? 0 : currentMode,
       accessoriesTokenInstances: [],
+      accNum: 100,
     }
 
     this.switchDisplay = this.switchDisplay.bind(this);
@@ -132,6 +133,9 @@ class App extends Component {
     const cc = contract(ClothCushion);
 
     let accessories = [wd, wc, ws, wb, cc];
+    this.setState({
+      accNum: accessories.length,
+    });
     accessories.forEach((c) => c.setProvider(this.state.web3.currentProvider));
 
     // Get accounts.
@@ -149,14 +153,15 @@ class App extends Component {
       });
 
       // Tori Accessories
-      accessories.forEach((c) => {
-        c.deployed().then((instance) => {
+      Promise.all(accessories.map((c) => c.deployed()))
+      .then((instances) => {
+        instances.forEach((instance) =>
           this.setState({
             accessoriesTokenInstances: this.state.accessoriesTokenInstances.concat(instance),
-          });
-        });
-      });
-    })
+          })
+        );
+      })
+    });
   }
 
   switchDisplay(e, mode) {
@@ -183,7 +188,7 @@ class App extends Component {
             </Tabs>
           </Toolbar>
         </AppBar>
-        {this.state.toriTokenInstance &&
+        {this.state.accessoriesTokenInstances.length === this.state.accNum &&
           <Switch>
             <Route exact path='/' component={Info} />
             <Route path='/mytoris' component={MyTori} />
@@ -195,6 +200,7 @@ class App extends Component {
       </div>
     );
   }
+  //            <Route exact path='/inventory' render={(props) => (<Inventory {...props} contract={this.state.}/>)} />
 }
 
 export default withStyles(styles)(App)

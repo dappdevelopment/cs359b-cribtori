@@ -35,8 +35,9 @@ export function parseAccInfo(result) {
     material: result[3].map((m) => {return MATERIALS[m.toNumber()]}).join(', '),
     space: result[4].toNumber(),
     orientation: result[5].toNumber(),
-    amount: result[6].toNumber(),
-    price: result[7].toNumber(),
+    balance: result[6].toNumber(),
+    amount: result[7].toNumber(),
+    price: result[8].toNumber(),
   }
   return info;
 }
@@ -82,16 +83,18 @@ const PERSONALITY = ['Optimistic', 'Irritable', 'Melancholic', 'Placid'];
 export function parseToriResult(result) {
   let toriId = result[0].toNumber();
   let toriDna = result[1].toNumber();
-  let toriName = result[2];
-  let toriProficiency = result[3].toNumber();
-  let toriPersonality = result[4].toNumber();
-  let toriReadyTime = result[5].toNumber();
-  let toriSalePrice = result[6].toNumber();
-  let toriOwner = result[7];
+  let toriLevel = result[2].toNumber();
+  let toriName = result[3];
+  let toriProficiency = result[4].toNumber();
+  let toriPersonality = result[5].toNumber();
+  let toriReadyTime = result[6].toNumber();
+  let toriSalePrice = result[7].toNumber();
+  let toriOwner = result[8];
 
   let toriInfo = {
     id: toriId,
     dna: toriDna,
+    level: toriLevel,
     name: toriName,
     proficiency: toriProficiency,
     personality: toriPersonality,

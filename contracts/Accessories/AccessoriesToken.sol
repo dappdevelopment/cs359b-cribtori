@@ -50,6 +50,7 @@ contract AccessoriesToken is StandardToken, RBACMintableToken {
     uint32 _space,
     uint8 _orientation,
     uint8 _rarity,
+    uint256 _balance,
     uint256 _amount,
     uint256 _price) {
     _name = name;
@@ -60,6 +61,7 @@ contract AccessoriesToken is StandardToken, RBACMintableToken {
     _space = space;
     _orientation = orientation;
     _rarity = rarity;
+    _balance = balanceOf(msg.sender);
     _amount = allowance(msg.sender, this);
     _price = pricePerToken[msg.sender];
   }

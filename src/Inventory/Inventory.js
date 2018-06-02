@@ -5,6 +5,11 @@ import { Link, Switch, Route } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
+
+import TokenInfo from '../Components/TokenInfo.js';
+
+import * as util from '../utils.js';
 
 const styles = theme => ({
   title: {
@@ -16,9 +21,89 @@ const styles = theme => ({
 });
 
 class Inventory extends Component {
-  constructor(props) {
+
+  static contextTypes = {
+    web3: PropTypes.object,
+    toriToken: PropTypes.object,
+    accContracts: PropTypes.array,
+    userAccount: PropTypes.string
+  }
+
+  constructor(props, context) {
     super(props);
 
+    this.context = context;
+
+    this.state = {
+      toriItems: [],
+      accItems: [],
+    }
+
+    // Function BINDS
+    this.retrieveAccessories = this.retrieveAccessories.bind(this);
+    this.retrieveToris = this.retrieveToris.bind(this);
+    this.initToriItems = this.initToriItems.bind(this);
+    this.initAccessoryItem = this.initAccessoryItem.bind(this);
+
+  }
+
+  componentDidMount() {
+    this.retrieveAccessories();
+    this.retrieveToris();
+  }
+
+  retrieveAccessories() {
+    this.setState({
+      accItems: [],
+    }, () => {
+      this.context.accContracts.forEach((contract) => {
+        contract.balanceOf(this.context.userAccount)
+        .then((result) => {
+          let balance = result.toNumber();
+          if (balance !== 0) {
+            this.initAccessoryItem(contract);
+          }
+        })
+        .catch(console.error);
+      });
+    });
+  }
+
+  retrieveToris() {
+    this.setState({
+      toriItems: [],
+    }, () => {
+      util.retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
+      .then((toriIds) => {
+          toriIds = toriIds.map((id) => { return id.toNumber() });
+          this.initToriItems(toriIds);
+      })
+      .catch(console.error);
+    });
+  }
+
+  initToriItems(ids) {
+    let items = ids.map((id) => {
+      return (
+        <Grid item sm={3} key={id} >
+          <TokenInfo id={id}/>
+        </Grid>
+      );
+    });
+    this.setState({
+      toriItems: items,
+    })
+  }
+
+  initAccessoryItem(contract) {
+    let item = (
+      <Grid item sm={3} key={this.state.accItems.length}>
+        <TokenInfo contract={contract} />
+      </Grid>
+    );
+    this.setState({
+      accItems: this.state.accItems.concat(item),
+    })
   }
 
   render() {
@@ -35,19 +120,12 @@ class Inventory extends Component {
                         component="h1">
               Toris
             </Typography>
+            <Divider/>
             <Grid container spacing={8}
                             alignItems={'center'}
                             direction={'row'}
-                            justify={'space-around'}>
-              <Grid item sm={4}>
-                [ Item goes here ]
-              </Grid>
-              <Grid item sm={4}>
-                [ Item goes here ]
-              </Grid>
-              <Grid item sm={4}>
-                [ Item goes here ]
-              </Grid>
+                            justify={'center'}>
+              { this.state.toriItems }
             </Grid>
           </div>
         </Grid>
@@ -59,19 +137,12 @@ class Inventory extends Component {
                         component="h1">
               Accessories
             </Typography>
+            <Divider/>
             <Grid container spacing={8}
                             alignItems={'center'}
                             direction={'row'}
-                            justify={'space-around'}>
-              <Grid item sm={4}>
-                [ Item goes here ]
-              </Grid>
-              <Grid item sm={4}>
-                [ Item goes here ]
-              </Grid>
-              <Grid item sm={4}>
-                [ Item goes here ]
-              </Grid>
+                            justify={'center'}>
+              { this.state.accItems }
             </Grid>
           </div>
         </Grid>
