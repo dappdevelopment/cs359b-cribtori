@@ -46,18 +46,19 @@ class MyTori extends Component {
 
     // FUNCTION BIND
     this.renderActions = this.renderActions.bind(this);
+    this.renderGrid = this.renderGrid.bind(this);
     this.retrieveLayout = this.retrieveLayout.bind(this);
   }
 
   componentDidMount() {
     util.retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
     .then((toriIds) => {
-        toriIds = toriIds.map((id) => { return id.toNumber() });
+      toriIds = toriIds.map((id) => { return id.toNumber() });
 
-        this.setState({
-          loaded: true,
-          toriIds: toriIds,
-        });
+      this.setState({
+        loaded: true,
+        toriIds: toriIds,
+      });
     })
     .catch(console.error);
 
@@ -91,7 +92,7 @@ class MyTori extends Component {
     );
   }
 
-  render() {
+  renderGrid() {
     return (
       <Grid container className={this.props.classes.grid}
                       spacing={8}
@@ -130,6 +131,27 @@ class MyTori extends Component {
         </Grid>
       </Grid>
     );
+  }
+
+  render() {
+    let content = (<CircularProgress  color="secondary" />);
+    if (this.state.loaded) {
+      if (this.state.toriIds.length === 0) {
+        // TODO: show a more meaningful message
+        content = (
+          <Paper style={{
+            padding: 20,
+          }}>
+            <Typography variant="title" color="inherit" component="h3" align="center">
+              No Tori Found
+            </Typography>
+          </Paper>
+        );
+      } else {
+        content = this.renderGrid();
+      }
+    }
+    return content;
   }
 }
 

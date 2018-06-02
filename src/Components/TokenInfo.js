@@ -17,6 +17,7 @@ import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 
 import ToriImage from './ToriImage.js';
+import BuyInput from './BuyInput.js';
 
 import * as util from '../utils.js';
 import { assets } from '../assets.js';
@@ -78,6 +79,7 @@ class TokenInfo extends Component {
     // Function BINDS
     this.renderCardContext = this.renderCardContext.bind(this);
     this.renderAccessoryAction = this.renderAccessoryAction.bind(this);
+    this.renderAccessoryContext = this.renderAccessoryContext.bind(this);
   }
 
   componentDidMount() {
@@ -117,8 +119,24 @@ class TokenInfo extends Component {
   renderAccessoryAction() {
     if (this.props.forSale) {
       // Render all the offers.
+      let offer = this.props.sales.map((item, i) => {
+        return (
+          <ListItem key={`${this.state.info.symbol}_${i}`}>
+            <ListItemText primary={`${item.amount.toNumber()} for ${this.context.web3.fromWei(item.price, 'ether')} ETH/token`}/>
+            <BuyInput contract={this.props.contract}
+                      addr={item.addr}
+                      price={item.price.toNumber()}
+                      total={item.amount.toNumber()}
+                      custom={true} />
+          </ListItem>
+        );
+      });
       return (
-        <CardActions></CardActions>
+        <CardActions>
+          <List>
+            { offer }
+          </List>
+        </CardActions>
       );
     } else {
       // Render for owner.
@@ -142,6 +160,81 @@ class TokenInfo extends Component {
         </CardActions>
       );
     }
+  }
+
+  renderAccessoryContext() {
+    let content;
+    if (this.props.forSale) {
+      content = (
+        <Grid container className={this.props.classes.grid}
+                        spacing={32}
+                        alignItems={'center'}
+                        direction={'row'}
+                        justify={'center'} >
+          <Grid item sm={6}>
+            Size:
+          </Grid>
+          <Grid item sm={6}>
+            { this.state.info.space }
+          </Grid>
+        </Grid>
+      );
+    } else {
+      let saleInfo = 'None';
+      if (this.state.info.amount > 0) {
+        saleInfo = `${this.state.info.amount} for ${this.context.web3.fromWei(this.state.info.price, 'ether')} ETH / item`;
+      }
+      content = (
+        <Grid container className={this.props.classes.grid}
+                        spacing={32}
+                        alignItems={'center'}
+                        direction={'row'}
+                        justify={'center'} >
+          <Grid item sm={6}>
+            Size:
+          </Grid>
+          <Grid item sm={6}>
+            { this.state.info.space }
+          </Grid>
+          <Grid item sm={6}>
+            Balance:
+          </Grid>
+          <Grid item sm={6}>
+            { this.state.info.balance }
+          </Grid>
+          <Grid item sm={6}>
+            Currently placed:
+          </Grid>
+          <Grid item sm={6}>
+            { `${this.state.info.used}` }
+          </Grid>
+          <Grid item sm={6}>
+            Currently for sale:
+          </Grid>
+          <Grid item sm={6}>
+            { saleInfo }
+          </Grid>
+        </Grid>
+      );
+    }
+
+    return (
+      <Card className={this.props.classes.card}>
+        <CardHeader title={this.state.info.name}
+                    className={this.props.classes.cardHeaderAcc}/>
+        <Divider/>
+        <CardContent>
+          <div className={this.props.classes.imgContainer}>
+            <img src={assets.accessories[this.state.info.symbol]}
+                 alt={this.state.info.name}
+                 className={this.props.classes.img}/>
+          </div>
+          <Divider/>
+          { content }
+        </CardContent>
+        { this.renderAccessoryAction() }
+      </Card>
+    );
   }
 
   renderCardContext() {
@@ -181,57 +274,7 @@ class TokenInfo extends Component {
       );
     } else {
       // Accessory
-      let saleInfo = 'None';
-      if (this.state.info.amount > 0) {
-
-        saleInfo = `${this.state.info.amount} for ${this.context.web3.fromWei(this.state.info.price, 'ether')} ETH / item`;
-      }
-      return (
-        <Card className={this.props.classes.card}>
-          <CardHeader title={this.state.info.name}
-                      className={this.props.classes.cardHeaderAcc}/>
-          <Divider/>
-          <CardContent>
-            <div className={this.props.classes.imgContainer}>
-              <img src={assets.accessories[this.state.info.symbol]}
-                   alt={this.state.info.name}
-                   className={this.props.classes.img}/>
-            </div>
-            <Divider/>
-            <Grid container className={this.props.classes.grid}
-                            spacing={32}
-                            alignItems={'center'}
-                            direction={'row'}
-                            justify={'center'} >
-              <Grid item sm={6}>
-                Size:
-              </Grid>
-              <Grid item sm={6}>
-                { this.state.info.space }
-              </Grid>
-              <Grid item sm={6}>
-                Balance:
-              </Grid>
-              <Grid item sm={6}>
-                { this.state.info.balance }
-              </Grid>
-              <Grid item sm={6}>
-                Currently placed:
-              </Grid>
-              <Grid item sm={6}>
-                { `${this.state.info.used}` }
-              </Grid>
-              <Grid item sm={6}>
-                Currently for sale:
-              </Grid>
-              <Grid item sm={6}>
-                { saleInfo }
-              </Grid>
-            </Grid>
-          </CardContent>
-          { this.renderAccessoryAction() }
-        </Card>
-      );
+      return this.renderAccessoryContext();
     }
   }
 

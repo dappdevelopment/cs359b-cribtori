@@ -69,8 +69,7 @@ class App extends Component {
   constructor(props) {
     super(props)
 
-    let loc = window.location.href;
-    loc = loc.split('#')[1];
+    let loc = this.props.history.location.pathname;
     loc = loc.split('/')[1];
 
     const locMode = {'': 4, 'mytoris': 0, 'inventory': 1, 'explore': 2, 'market': 3}
@@ -116,7 +115,7 @@ class App extends Component {
       this.instantiateContract();
     })
     .catch(() => {
-      console.log('Error finding web3.')
+      this.onMessage('Error finding web3.');
     });
 
     // Periodically check if the metamask account has changed
@@ -127,8 +126,9 @@ class App extends Component {
             // Redirect ...
             this.setState({
               userAccount: accounts[0],
+              mode: 4,
             }, () => {
-              this.props.history.push('/');
+              if (this.props.history.location.pathname !== "/") this.props.history.push('/');
             });
           }
         });
