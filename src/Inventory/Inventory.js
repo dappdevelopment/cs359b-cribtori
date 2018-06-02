@@ -8,6 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 
 import TokenInfo from '../Components/TokenInfo.js';
+import TradeDialog from '../Components/TradeDialog.js';
 
 import * as util from '../utils.js';
 
@@ -29,7 +30,8 @@ class Inventory extends Component {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
     accContracts: PropTypes.array,
-    userAccount: PropTypes.string
+    userAccount: PropTypes.string,
+    onMessage: PropTypes.func,
   }
 
   constructor(props, context) {
@@ -40,6 +42,7 @@ class Inventory extends Component {
     this.state = {
       toriItems: [],
       accItems: [],
+      dialogOpen: false,
     }
 
     // Function BINDS
@@ -47,7 +50,10 @@ class Inventory extends Component {
     this.retrieveToris = this.retrieveToris.bind(this);
     this.initToriItems = this.initToriItems.bind(this);
     this.initAccessoryItem = this.initAccessoryItem.bind(this);
-
+    this.handleDialogSubmit = this.handleDialogSubmit.bind(this);
+    this.handleDialogClose = this.handleDialogClose.bind(this);
+    this.postAccForSale = this.postAccForSale.bind(this);
+    this.removeAccForSale = this.removeAccForSale.bind(this);
   }
 
   componentDidMount() {
@@ -102,13 +108,54 @@ class Inventory extends Component {
   initAccessoryItem(contract) {
     let item = (
       <Grid item sm={3} key={this.state.accItems.length}>
-        <TokenInfo contract={contract} />
+        <TokenInfo contract={contract}
+                   onRevokeSale={this.removeAccForSale}
+                   onPostSale={this.postAccForSale} />
       </Grid>
     );
     this.setState({
       accItems: this.state.accItems.concat(item),
     })
   }
+
+  handleDialogClose() {
+    this.setState({
+      dialogOpen: false,
+    })
+  }
+
+  handleDialogSubmit(contract, data, info) {
+    if (data.price === 0 || data.amount === 0) {
+      // TODO: show error
+      this.context.onMessage('Not a valid amount or price');
+    } else if (info.balance - info.used < data.amount) {
+      this.context.onMessage('Insufficient amount. Check if accessories are currently placed in room.');
+    } else {
+      util.postAccForSale(contract, data.amount, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
+      .then((result) => {
+        this.context.onMessage("Posting accessory for sale in progress...")
+        this.setState({
+          dialogOpen: false,
+        })
+      }).catch(console.error);
+    }
+  }
+
+  postAccForSale(contract, item, e) {
+    this.setState({
+      dialogOpen: true,
+      currContract: contract,
+      currItem: item,
+    })
+  }
+
+  removeAccForSale(contract, e) {
+    util.removeAccForSale(contract, this.context.userAccount)
+    .then((result) => {
+      this.context.onMessage("Revoking sale post in progress...")
+    }).catch(console.error);
+  }
+
 
   render() {
     return (
@@ -150,6 +197,12 @@ class Inventory extends Component {
             </Grid>
           </div>
         </Grid>
+        <TradeDialog open={this.state.dialogOpen}
+                     amountNeeded={true}
+                     contract={this.state.currContract}
+                     handleClose={this.handleDialogClose}
+                     handleSubmit={this.handleDialogSubmit}
+                     info={this.state.currItem}/>
       </Grid>
     );
   }

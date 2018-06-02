@@ -94,7 +94,8 @@ class Market extends Component {
     let items = ids.map((id) => {
       return (
         <Grid item sm={minSize} key={id} >
-          <TokenInfo id={id}/>
+          <TokenInfo id={id}
+                     forSale={true} />
         </Grid>
       );
     });
@@ -106,7 +107,9 @@ class Market extends Component {
   initAccessoryItem(contract, sales) {
     let item = (
       <Grid item sm={3} key={this.state.accItems.length}>
-        <TokenInfo contract={contract} sales={sales} />
+        <TokenInfo contract={contract}
+                   sales={sales}
+                   forSale={true} />
       </Grid>
     );
     this.setState({

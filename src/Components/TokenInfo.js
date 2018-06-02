@@ -14,6 +14,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Divider from '@material-ui/core/Divider';
+import Button from '@material-ui/core/Button';
 
 import ToriImage from './ToriImage.js';
 
@@ -76,6 +77,7 @@ class TokenInfo extends Component {
 
     // Function BINDS
     this.renderCardContext = this.renderCardContext.bind(this);
+    this.renderAccessoryAction = this.renderAccessoryAction.bind(this);
   }
 
   componentDidMount() {
@@ -84,10 +86,18 @@ class TokenInfo extends Component {
       util.retrieveAllTokenInfo(this.props.contract, this.context.userAccount)
       .then((result) => {
         let info = util.parseAccInfo(result);
-        this.setState({
-          mode: 1,
-          info: info,
-        });
+        // Need to know how many has been used for room.
+        util.retrieveRoomLayout(this.context.userAccount)
+        .then((result) => {
+          let layout = (result.locations) ? JSON.parse(result.locations) : [];
+          layout = layout.filter((item) => item.key === info.symbol);
+          info.used = layout.length;
+          this.setState({
+            mode: 1,
+            info: info,
+          });
+        })
+        .catch(console.error);
       })
       .catch(console.error);
     } else {
@@ -101,6 +111,36 @@ class TokenInfo extends Component {
         });
       })
       .catch(console.error);
+    }
+  }
+
+  renderAccessoryAction() {
+    if (this.props.forSale) {
+      // Render all the offers.
+      return (
+        <CardActions></CardActions>
+      );
+    } else {
+      // Render for owner.
+      let buttonDisabled = this.state.info.balance - this.state.info.used === 0;
+      return (
+        <CardActions>
+          {this.state.info.price > 0 ? (
+            <Button variant="raised"
+                    color="secondary"
+                    onClick={(e) => this.props.onRevokeSale(this.props.contract, e)}>
+              Revoke Sale Post
+            </Button>
+            ) : (
+            <Button disabled={buttonDisabled}
+                    variant="raised"
+                    color="primary"
+                    onClick={(e) => this.props.onPostSale(this.props.contract, this.state.info, e)}>
+              Sell Accessory
+            </Button>
+          )}
+        </CardActions>
+      );
     }
   }
 
@@ -141,6 +181,11 @@ class TokenInfo extends Component {
       );
     } else {
       // Accessory
+      let saleInfo = 'None';
+      if (this.state.info.amount > 0) {
+
+        saleInfo = `${this.state.info.amount} for ${this.context.web3.fromWei(this.state.info.price, 'ether')} ETH / item`;
+      }
       return (
         <Card className={this.props.classes.card}>
           <CardHeader title={this.state.info.name}
@@ -159,7 +204,7 @@ class TokenInfo extends Component {
                             direction={'row'}
                             justify={'center'} >
               <Grid item sm={6}>
-                Space:
+                Size:
               </Grid>
               <Grid item sm={6}>
                 { this.state.info.space }
@@ -170,10 +215,21 @@ class TokenInfo extends Component {
               <Grid item sm={6}>
                 { this.state.info.balance }
               </Grid>
+              <Grid item sm={6}>
+                Currently placed:
+              </Grid>
+              <Grid item sm={6}>
+                { `${this.state.info.used}` }
+              </Grid>
+              <Grid item sm={6}>
+                Currently for sale:
+              </Grid>
+              <Grid item sm={6}>
+                { saleInfo }
+              </Grid>
             </Grid>
           </CardContent>
-          <CardActions>
-          </CardActions>
+          { this.renderAccessoryAction() }
         </Card>
       );
     }
