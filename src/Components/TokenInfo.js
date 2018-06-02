@@ -78,6 +78,7 @@ class TokenInfo extends Component {
 
     // Function BINDS
     this.renderCardContext = this.renderCardContext.bind(this);
+    this.renderToriAction = this.renderToriAction.bind(this);
     this.renderAccessoryAction = this.renderAccessoryAction.bind(this);
     this.renderAccessoryContext = this.renderAccessoryContext.bind(this);
   }
@@ -237,6 +238,31 @@ class TokenInfo extends Component {
     );
   }
 
+  renderToriAction() {
+    let content;
+    if (this.props.forSale) {
+      // Show buy button and sale info
+      return (
+        <BuyInput contract={this.context.toriToken}
+                  addr={this.state.info.id}
+                  price={this.state.info.salePrice}
+                  total={1}
+                  custom={false} />
+      );
+    } else {
+      // Show visit button
+      let visitLink = '/tori/' + this.state.info.id;
+      return (
+        <Button variant="raised"
+                color="primary"
+                component={Link}
+                to={visitLink} >
+          Show details
+        </Button>
+      );
+    }
+  }
+
   renderCardContext() {
     if (this.state.mode === 0) {
       // Tori
@@ -269,6 +295,7 @@ class TokenInfo extends Component {
             </Grid>
           </CardContent>
           <CardActions>
+            { this.renderToriAction() }
           </CardActions>
         </Card>
       );

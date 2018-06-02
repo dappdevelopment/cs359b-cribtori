@@ -87,6 +87,10 @@ class BuyInput extends Component {
       })
       .catch(console.err);
     } else {
+      console.log(this.props.contract,
+                           this.props.addr,
+                           this.props.price,
+                           this.context.userAccount)
       util.buyTokenForSale(this.props.contract,
                            this.props.addr,
                            this.props.price,
@@ -94,7 +98,7 @@ class BuyInput extends Component {
       .then((result) => {
         let message = 'Buy transaction submitted';
         if (!result) message = 'Transaction failed :(';
-        this.conntext.onMessage(message);
+        this.context.onMessage(message);
         if (result && !this.props.custom) {
           // TODO: do a confirmation here from the smart contract side.
           let data = {
@@ -142,7 +146,7 @@ class BuyInput extends Component {
                 variant="raised"
                 color="primary"
                 onClick={this.handleBuy} >
-          Buy
+          Buy { !this.props.custom && (`for ${this.context.web3.fromWei(this.props.price, 'ether')} ETH`) }
         </Button>
       </div>
     );

@@ -13,6 +13,8 @@ import MenuList from '@material-ui/core/MenuList';
 
 import ToriImage from '../Components/ToriImage.js';
 import Hearts from '../Components/Hearts.js';
+import TradeDialog from '../Components/TradeDialog.js';
+import BuyInput from '../Components/BuyInput.js';
 
 import * as util from '../utils.js';
 
@@ -41,7 +43,8 @@ class ToriDetails extends Component {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
     accContracts: PropTypes.array,
-    userAccount: PropTypes.string
+    userAccount: PropTypes.string,
+    onMessage: PropTypes.func,
   }
 
   constructor(props, context) {
@@ -49,7 +52,8 @@ class ToriDetails extends Component {
     this.context = context;
 
     this.state = {
-      id: this.props.match.params.id
+      id: this.props.match.params.id,
+      dialogOpen: false,
     }
 
     // Function BINDS
@@ -57,6 +61,10 @@ class ToriDetails extends Component {
     this.renderDetails = this.renderDetails.bind(this);
     this.renderGreetings = this.renderGreetings.bind(this);
     this.renderActions = this.renderActions.bind(this);
+    this.handleDialogSubmit = this.handleDialogSubmit.bind(this);
+    this.handleDialogClose = this.handleDialogClose.bind(this);
+    this.postToriForSale = this.postToriForSale.bind(this);
+    this.removeToriForSale = this.removeToriForSale.bind(this);
   }
 
   componentDidMount() {
@@ -148,9 +156,19 @@ class ToriDetails extends Component {
     if (!this.state.info) return content;
 
     if (this.state.isOwned) {
-      let tradeAction = (<MenuItem className={this.props.classes.secondary}>Sell</MenuItem>);
+      let tradeAction = (
+        <MenuItem className={this.props.classes.secondary}
+                  onClick={this.postToriForSale}>
+          Sell
+        </MenuItem>
+      );
       if (this.state.info.salePrice > 0) {
-        tradeAction = (<MenuItem className={this.props.classes.secondary}>Revoke Sale Post</MenuItem>);
+        tradeAction = (
+          <MenuItem className={this.props.classes.secondary}
+                    onClick={this.removeToriForSale}>
+            Revoke Sale Post
+          </MenuItem>
+        );
       }
       return (
         <MenuList>
@@ -163,13 +181,50 @@ class ToriDetails extends Component {
     } else {
       return (
         <MenuList>
-          <MenuItem>Breed With</MenuItem>
+          <MenuItem>Breed With {this.state.info.name}</MenuItem>
           { this.state.info.salePrice > 0 && (
-            <MenuItem className={this.props.classes.secondary}>Buy</MenuItem>
+            <BuyInput contract={this.context.toriToken}
+                      addr={this.state.info.id}
+                      price={this.state.info.salePrice}
+                      total={1}
+                      custom={false} />
           )}
         </MenuList>
       );
     }
+  }
+
+  handleDialogClose() {
+    this.setState({
+      dialogOpen: false,
+    })
+  }
+
+  handleDialogSubmit(contract, data, info) {
+    if (data.price === 0) {
+      this.context.onMessage('Not a valid amount or price');
+    } else {
+      util.postTokenForSale(this.context.toriToken, this.state.id, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
+      .then((result) => {
+        this.context.onMessage("Posting Tori for sale in progress...")
+        this.setState({
+          dialogOpen: false,
+        })
+      }).catch(console.error);
+    }
+  }
+
+  postToriForSale() {
+    this.setState({
+      dialogOpen: true,
+    });
+  }
+
+  removeToriForSale() {
+    util.removeTokenForSale(this.context.toriToken, this.state.id, this.context.userAccount)
+    .then((result) => {
+      this.context.onMessage("Revoking sale post in progress...")
+    }).catch(console.error);
   }
 
   render() {
@@ -200,6 +255,12 @@ class ToriDetails extends Component {
               { this.renderActions() }
             </Paper>
           </Grid>
+          <TradeDialog open={this.state.dialogOpen}
+                       amountNeeded={false}
+                       contract={this.context.toriToken}
+                       handleClose={this.handleDialogClose}
+                       handleSubmit={this.handleDialogSubmit}
+                       info={this.state.currItem}/>
       </Grid>
     );
   }
