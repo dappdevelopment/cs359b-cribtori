@@ -20,6 +20,7 @@ import MyTori from './MyTori/MyTori.js';
 import EditRoom from './MyTori/EditRoom.js';
 import Inventory from './Inventory/Inventory.js';
 import OtherToris from './Explore/OtherToris.js';
+import ToriDetails from './Explore/ToriDetails.js';
 import Market from './Marketplace/Market.js';
 
 import './css/oswald.css'
@@ -231,6 +232,7 @@ class App extends Component {
             <Route exact path='/' component={Info} />
             <Route exact path='/mytoris' component={MyTori} />
             <Route exact path='/mytoris/edit' component={EditRoom} />
+            <Route exact path='/tori/:id' component={ToriDetails} />
             <Route exact path='/inventory' component={Inventory} />
             <Route exact path='/explore' component={OtherToris} />
             <Route exact path='/market' component={Market} />

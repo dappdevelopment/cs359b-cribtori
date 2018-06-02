@@ -73,11 +73,13 @@ class TokenItem extends Component {
     let disabled = false;
     if (this.state.mode === 0) {
       // Check for tori.
-      disabled = this.props.active.indexOf(this.state.info.id) !== -1;
+      if (this.props.active !== undefined) disabled = this.props.active.indexOf(this.state.info.id) !== -1;
     } else {
       // Check for accessory
       amount = this.state.info.balance - this.state.info.amount;
-      if (this.props.active[this.state.info.symbol] !== undefined) amount -= this.props.active[this.state.info.symbol];
+      if (this.props.active !== undefined) {
+        if (this.props.active[this.state.info.symbol] !== undefined) amount -= this.props.active[this.state.info.symbol];
+      }
       disabled = amount === 0;
     }
 
@@ -87,15 +89,13 @@ class TokenItem extends Component {
                 onClick={(e) => this.props.onItemSelected(this.state.info, e)}>
         { !this.state.mode ? (
           <ToriImage dna={this.state.info.dna}
-                     size={80} />
+                     size={80}
+                     still={true} />
         ) : (
           <Avatar alt={this.state.info.name} src={assets.accessories[this.state.info.symbol]} />
         )}
-        <ListItemText primary={ this.state.mode ? `x ${amount}` : this.state.info.name } />
-        <Typography variant="caption" gutterBottom>
-          Space: {space}
-        </Typography>
-
+        <ListItemText primary={ this.state.mode ? `x ${amount}` : this.state.info.name }
+                      secondary={this.props.showLevel ? `Level: ${this.state.info.level}` : `Size: ${space}`} />
       </MenuItem>
     );
   }

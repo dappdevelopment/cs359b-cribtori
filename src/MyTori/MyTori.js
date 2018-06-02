@@ -86,8 +86,6 @@ class MyTori extends Component {
         <MenuItem disabled >Craft</MenuItem>
         <Divider />
         <MenuItem component={Link} to={'/mytoris/edit'}>Edit Room</MenuItem>
-        <Divider />
-        <MenuItem>Fusion</MenuItem>
       </MenuList>
     );
   }

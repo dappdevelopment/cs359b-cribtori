@@ -71,6 +71,8 @@ class ToriImage extends Component {
     let baseTime = 0.5;
     let secTime = 0.6;
 
+    let shouldAnimate = !this.props.still;
+
     // Handle sharing posiiton.
     let pos = (this.props.sharing) ? 'absolute' : 'relative';
     // Handle transform.
@@ -95,7 +97,7 @@ class ToriImage extends Component {
             zIndex: 50,
             width: `100%`,
             filter: `hue-rotate(${baseHue}deg) saturate(${baseSaturate}%) sepia(${baseSephia})`,
-            animation: `animatedTori ${baseTime}s infinite alternate`,
+            animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
           }} />
         <img
           src={cheek}
@@ -104,7 +106,7 @@ class ToriImage extends Component {
             position: 'absolute',
             zIndex: 200,
             width: `100%`,
-            animation: `animatedTori ${baseTime}s infinite alternate`,
+            animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
           }} />
         <img
           src={shadow}
@@ -122,7 +124,7 @@ class ToriImage extends Component {
             zIndex: 150,
             width: `100%`,
             filter: `hue-rotate(${baseHue}deg) saturate(${baseSaturate}%) sepia(${baseSephia})`,
-            animation: `animatedTori ${baseTime}s infinite alternate`,
+            animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
           }} />
         <img
           src={eyes}
@@ -131,7 +133,7 @@ class ToriImage extends Component {
             position: 'absolute',
             zIndex: 200,
             width: `100%`,
-            animation: `animatedTori ${baseTime}s infinite alternate`,
+            animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
           }} />
         <img
           src={mouth}
@@ -140,7 +142,7 @@ class ToriImage extends Component {
             position: 'absolute',
             zIndex: 200,
             width: `100%`,
-            animation: `animatedTori ${baseTime}s infinite alternate`,
+            animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
           }} />
         <img
           src={hand}
@@ -150,7 +152,7 @@ class ToriImage extends Component {
             zIndex: 200,
             width: `100%`,
             filter: `hue-rotate(${secHue}deg) saturate(${secSaturate}%) sepia(${secSephia})`,
-            animation: `animatedTori ${secTime}s infinite alternate`,
+            animation: shouldAnimate ? `animatedTori ${secTime}s infinite alternate` : '',
           }} />
         <img
           src={feet}
@@ -169,7 +171,7 @@ class ToriImage extends Component {
               zIndex: 200,
               width: `100%`,
               filter: `hue-rotate(${decorHue}deg) saturate(${decorSaturate}%) sepia(${decorSephia})`,
-              animation: `animatedTori ${baseTime}s infinite alternate`,
+              animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
             }} />
         }
       </div>
