@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link, Switch, Route } from 'react-router-dom';
+import { Link, Switch, Route, withRouter } from 'react-router-dom';
 
 // Tori contracts
 import ToriToken from '../build/contracts/ToriToken.json';
@@ -94,7 +94,7 @@ class App extends Component {
     };
   }
 
-  componentWillMount() {
+  async componentDidMount() {
     // Get network provider and web3 instance.
     // See utils/getWeb3 for more info.
 
@@ -109,7 +109,23 @@ class App extends Component {
     })
     .catch(() => {
       console.log('Error finding web3.')
-    })
+    });
+
+    // Periodically check if the metamask account has changed
+    var intervalId = setInterval( async () => {
+      if (this.state.web3 !== undefined) {
+        this.state.web3.eth.getAccounts((error, accounts) => {
+          if (this.state.userAccount !== accounts[0]) {
+            // Redirect ...
+            this.setState({
+              userAccount: accounts[0],
+            }, () => {
+              this.props.history.push('/');
+            });
+          }
+        });
+      }
+    }, 1000);
   }
 
   instantiateContract() {
@@ -201,7 +217,6 @@ class App extends Component {
       </div>
     );
   }
-  //            <Route exact path='/inventory' render={(props) => (<Inventory {...props} contract={this.state.}/>)} />
 }
 
-export default withStyles(styles)(App)
+export default withStyles(styles)(withRouter(App))
