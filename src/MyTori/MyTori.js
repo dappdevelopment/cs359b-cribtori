@@ -14,6 +14,9 @@ import Typography from '@material-ui/core/Typography';
 import Status from '../Components/Status.js';
 import Room from '../Components/Room.js';
 
+import * as util from '../utils.js';
+
+
 const styles = theme => ({
   paper: {
     margin: '16px 32px 16px 0',
@@ -22,11 +25,36 @@ const styles = theme => ({
 });
 
 class MyTori extends Component {
+
+  static contextTypes = {
+    web3: PropTypes.object,
+    toriToken: PropTypes.object,
+    accContracts: PropTypes.array,
+    userAccount: PropTypes.string
+  }
+
   constructor(props) {
     super(props);
 
+    this.state = {
+      loaded: false,
+    }
+
     // FUNCTION BIND
     this.renderActions = this.renderActions.bind(this);
+  }
+
+  componentDidMount() {
+    util.retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
+    .then((toriIds) => {
+        toriIds = toriIds.map((id) => { return id.toNumber() });
+
+        this.setState({
+          loaded: true,
+          toriIds: toriIds,
+        });
+    })
+    .catch(console.error);
   }
 
   renderActions() {
@@ -60,7 +88,10 @@ class MyTori extends Component {
           </Paper>
         </Grid>
         <Grid item sm={6}>
-          <Room />
+          { this.state.loaded &&
+            <Room width={3}
+                  height={2} />
+          }
         </Grid>
         <Grid item sm={3}>
           <Paper className={this.props.classes.paper}

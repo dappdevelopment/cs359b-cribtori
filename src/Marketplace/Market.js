@@ -52,6 +52,7 @@ class Market extends Component {
       toriIds = toriIds.map((id) => { return id.toNumber() });
       util.retrieveAllTokensForSale(this.context.toriToken, this.context.userAccount)
       .then((saleIds) => {
+        saleIds = saleIds.map((id) => { return id.toNumber() })
         saleIds = saleIds.filter((id) => toriIds.indexOf(id) === -1);
         // Contruct the display.
         this.initToriItems(saleIds);
