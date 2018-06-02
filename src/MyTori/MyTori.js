@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link, Switch, Route } from 'react-router-dom';
+import { Link, Switch, Route, withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -9,6 +9,7 @@ import MenuList from '@material-ui/core/MenuList';
 import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 import Status from '../Components/Status.js';
@@ -18,6 +19,9 @@ import * as util from '../utils.js';
 
 
 const styles = theme => ({
+  grid: {
+    padding: 50,
+  },
   paper: {
     margin: '16px 32px 16px 0',
     padding: 16
@@ -42,6 +46,7 @@ class MyTori extends Component {
 
     // FUNCTION BIND
     this.renderActions = this.renderActions.bind(this);
+    this.retrieveLayout = this.retrieveLayout.bind(this);
   }
 
   componentDidMount() {
@@ -55,6 +60,21 @@ class MyTori extends Component {
         });
     })
     .catch(console.error);
+
+    this.retrieveLayout();
+  }
+
+  retrieveLayout() {
+    util.retrieveRoomLayout(this.context.userAccount)
+    .then((result) => {
+      let layout = (result.locations) ? JSON.parse(result.locations) : [];
+      // TODO: Check which tori is currently active.
+
+      this.setState({
+        roomLayout: layout,
+      });
+    })
+    .catch(console.error);
   }
 
   renderActions() {
@@ -64,7 +84,7 @@ class MyTori extends Component {
         <MenuItem>Clean</MenuItem>
         <MenuItem disabled >Craft</MenuItem>
         <Divider />
-        <MenuItem>Edit Room</MenuItem>
+        <MenuItem component={Link} to={'/mytoris/edit'}>Edit Room</MenuItem>
         <Divider />
         <MenuItem>Fusion</MenuItem>
       </MenuList>
@@ -73,7 +93,8 @@ class MyTori extends Component {
 
   render() {
     return (
-      <Grid container spacing={8}
+      <Grid container className={this.props.classes.grid}
+                      spacing={8}
                       alignItems={'center'}
                       direction={'row'}
                       justify={'center'}>
@@ -88,10 +109,14 @@ class MyTori extends Component {
           </Paper>
         </Grid>
         <Grid item sm={6}>
-          { this.state.loaded &&
+          { (this.state.loaded && this.state.roomLayout && this.state.toriIds) ? (
             <Room width={3}
-                  height={2} />
-          }
+                  height={2}
+                  layout={this.state.roomLayout}
+                  firstTori={this.state.toriIds[0]} />
+          ) : (
+            <CircularProgress  color="secondary" />
+          )}
         </Grid>
         <Grid item sm={3}>
           <Paper className={this.props.classes.paper}
@@ -108,4 +133,4 @@ class MyTori extends Component {
   }
 }
 
-export default withStyles(styles)(MyTori)
+export default withStyles(styles)(withRouter(MyTori))

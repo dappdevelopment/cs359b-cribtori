@@ -43,14 +43,24 @@ const styles = theme => ({
 });
 
 class Room extends Component {
-  constructor(props) {
+
+  static contextTypes = {
+    onMessage: PropTypes.func,
+  }
+
+  constructor(props, context) {
     super(props);
+    this.context = context;
 
     // Function BINDS
     this.constructGrid = this.constructGrid.bind(this);
+    this.constructEmptyGrid = this.constructEmptyGrid.bind(this);
     this.constructWall = this.constructWall.bind(this);
     this.constructTori = this.constructTori.bind(this);
+    this.constructAccessory = this.constructAccessory.bind(this);
     this.reassignLayout = this.reassignLayout.bind(this);
+    this.onEmptyTileClick = this.onEmptyTileClick.bind(this);
+    this.onFullTileClick = this.onFullTileClick.bind(this);
   }
 
   constructWall(o, key) {
@@ -63,6 +73,26 @@ class Room extends Component {
         }
       </GridListTile>
     );
+  }
+
+  constructEmptyGrid(x, y) {
+    if (this.props.isEdit && this.props.selectedItem && this.props.selectedItem.name) {
+      return (
+        <GridListTile key={`cell_${x}_${y}`}
+                      onClick={(e) => this.onEmptyTileClick(x, y, e)}
+                      className={this.props.classes.gridTile}
+                      cols={1}>
+          <div className={this.props.classes.gridEmpty}></div>
+        </GridListTile>
+      );
+    } else {
+      return (
+        <GridListTile key={`cell_${x}_${y}`}
+                      className={this.props.classes.gridTile}
+                      cols={1}>
+        </GridListTile>
+      );
+    }
   }
 
   constructGrid() {
@@ -89,12 +119,7 @@ class Room extends Component {
           cells.push(this.constructWall(o, `wall_${o}_${y}`));
         } else {
           // Empty Grid.
-          cells.push(
-            <GridListTile key={`cell_${x - 1}_${y}`}
-                          className={this.props.classes.gridTile}
-                          cols={1}>
-            </GridListTile>
-          );
+          cells.push(this.constructEmptyGrid(x - 1, y));
         }
       }
     }
@@ -113,36 +138,77 @@ class Room extends Component {
   }
 
   constructTori(id, x, y) {
-    return (
-      <GridListTile key={`tori_${x}_${y}`}
-                    className={this.props.classes.gridTile}
-                    cols={1}
-                    rows={1} >
-        <ToriCell id={id} unit={unit} />
-      </GridListTile>
-    );
+    if (this.props.isEdit && (!this.props.selectedItem || !this.props.selectedItem.name)) {
+      return (
+        <GridListTile key={`tori_${x}_${y}`}
+                      onClick={(e) => this.onFullTileClick(x, y, e)}
+                      className={this.props.classes.gridTile}
+                      cols={1}
+                      rows={1} >
+          <ToriCell id={id} unit={unit} />
+        </GridListTile>
+      );
+    } else {
+      return (
+        <GridListTile key={`tori_${x}_${y}`}
+                      className={this.props.classes.gridTile}
+                      cols={1}
+                      rows={1} >
+          <ToriCell id={id} unit={unit} />
+        </GridListTile>
+      );
+    }
+  }
+
+  constructAccessory(key, space, x, y) {
+    if (this.props.isEdit && (!this.props.selectedItem || !this.props.selectedItem.name)) {
+      return (
+        <GridListTile key={`${key}_${x}_${y}`}
+                      onClick={(e) => this.onFullTileClick(x, y, e)}
+                      className={this.props.classes.gridTile}
+                      cols={space}
+                      rows={1} >
+          <img src={assets.accessories[key]} alt={key} />
+        </GridListTile>
+      );
+    } else {
+      return (
+        <GridListTile key={`${key}_${x}_${y}`}
+                      className={this.props.classes.gridTile}
+                      cols={space}
+                      rows={1} >
+          <img src={assets.accessories[key]} alt={key} />
+        </GridListTile>
+      );
+    }
   }
 
   reassignLayout(cells) {
-    // TODO: remove this
-    let layout = [{
-      c: 0,
-      r: 0,
-      key: 'tori',
-      id: 0,
-    }];
+    // Check the layout.
+    let layout = this.props.layout;
+    if (!this.props.isEdit &&
+        this.props.layout.length === 0 &&
+        this.props.firstTori !== undefined) {
+        // Fill in with the first tori, if any.)
+        layout = [{
+          c: this.props.width - Math.floor(this.props.width / 2) - 1,
+          r: 0,
+          key: 'tori',
+          id: this.props.firstTori,
+        }];
+    }
 
     layout.forEach((content) => {
       let x = content.c;
       let y = content.r;
       let key = content.key;
+      let space = content.s;
 
       let c;
       if (key === 'tori') {
         c = this.constructTori(content.id, x, y);
       } else {
-        // TODO
-        c = this.constructTori(content.id, x, y);
+        c = this.constructAccessory(content.key, space, x, y);
       }
 
       // Filterout the cells
@@ -162,9 +228,85 @@ class Room extends Component {
           }
         }
       });
+
+      if (space > 1) {
+        // Horizontal by default
+        let nX = x + 1;
+        let nY = y;
+
+        cells = cells.filter((c) => {
+          let oKey = c.key;
+          let temp = oKey.split('_');
+          if (temp[0] === 'wall') {
+            return true;
+          }
+          let oX = parseInt(temp[1], 10);
+          let oY = parseInt(temp[2], 10);
+
+          return (oY !== nY || oX !== nX);
+        });
+      }
     });
 
     return cells;
+  }
+
+  onEmptyTileClick(x, y, e) {
+    // Update cell.
+    let key = this.props.selectedItem.key;
+    let space = this.props.selectedItem.space;
+    let layout = this.props.layout;
+
+    // TODO: support different orientation.
+    if (space > 1) {
+      let valid = true;
+      // Check if on edge
+      // TODO: give error message, for now, just ignore.
+      if (x === this.props.width - 1) valid = false;
+
+      let nX = x + 1;
+      let nY = y;
+
+      // Check if it collides with entrane
+      if (nX === this.props.width - Math.floor(this.props.width / 2) - 1 &&
+          nY === this.props.height - 1) {
+        valid = false;
+      }
+
+      // Check if collide with other accessories.
+      layout.forEach((l) => {
+        if (l.c === nX && l.r === nY) {
+          valid = false;
+        }
+      });
+
+      if (!valid) {
+        this.context.onMessage('Not a valid placement.');
+        return;
+      }
+    }
+
+    let l = {
+      key: key,
+      id: (this.props.selectedItem.id === undefined) ? -1 : this.props.selectedItem.id,
+      c: x,
+      r: y,
+      s: space,
+    };
+
+    layout = layout.concat(l);
+    this.props.onItemPlaced(layout, l);
+  }
+
+  onFullTileClick(x, y, e) {
+    // Get the item we're selecting.
+    let item;
+    let filtered = this.props.layout.filter((l) => {
+      if (l.c === x && l.r === y) item = l;
+      return !(l.c === x && l.r === y);
+    });
+
+    this.props.onItemRemoved(filtered, item);
   }
 
   render() {

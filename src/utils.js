@@ -35,10 +35,12 @@ export function parseAccInfo(result) {
     material: result[3].map((m) => {return MATERIALS[m.toNumber()]}).join(', '),
     space: result[4].toNumber(),
     orientation: result[5].toNumber(),
-    balance: result[6].toNumber(),
-    amount: result[7].toNumber(),
-    price: result[8].toNumber(),
+    rarity: result[6].toNumber(),
+    balance: result[7].toNumber(),
+    amount: result[8].toNumber(),
+    price: result[9].toNumber(),
   }
+
   return info;
 }
 

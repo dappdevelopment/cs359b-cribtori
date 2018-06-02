@@ -17,6 +17,7 @@ import getWeb3 from './utils/getWeb3';
 
 import Info from './Info/Info.js';
 import MyTori from './MyTori/MyTori.js';
+import EditRoom from './MyTori/EditRoom.js';
 import Inventory from './Inventory/Inventory.js';
 import OtherToris from './Explore/OtherToris.js';
 import Market from './Marketplace/Market.js';
@@ -32,6 +33,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Toolbar from '@material-ui/core/Toolbar';
+import Snackbar from '@material-ui/core/Snackbar';
 
 function TabContainer(props) {
   return (
@@ -61,6 +63,7 @@ class App extends Component {
     toriVisit: PropTypes.object,
     accContracts: PropTypes.array,
     userAccount: PropTypes.string,
+    onMessage: PropTypes.func,
   }
 
   constructor(props) {
@@ -79,9 +82,13 @@ class App extends Component {
       mode: currentMode === undefined ? 4 : currentMode,
       accessoriesTokenInstances: [],
       accNum: 100,
+      openSnackBar: false,
     }
 
+    // Function BINDS
     this.switchDisplay = this.switchDisplay.bind(this);
+    this.handleCloseSnackBar = this.handleCloseSnackBar.bind(this);
+    this.handleMessage = this.handleMessage.bind(this);
   }
 
   getChildContext() {
@@ -91,6 +98,7 @@ class App extends Component {
       toriVisit: this.state.toriVisitInstance,
       accContracts: this.state.accessoriesTokenInstances,
       userAccount: this.state.userAccount,
+      onMessage: this.handleMessage
     };
   }
 
@@ -186,6 +194,19 @@ class App extends Component {
     });
   }
 
+  handleCloseSnackBar() {
+    this.setState({
+      openSnackBar: false,
+    });
+  }
+
+  handleMessage(message) {
+    this.setState({
+      openSnackBar: true,
+      snackBarMessage: message,
+    });
+  }
+
   render() {
     // this.state.currentDisplay
     return (
@@ -208,12 +229,22 @@ class App extends Component {
          (this.state.userAccount) &&
           <Switch>
             <Route exact path='/' component={Info} />
-            <Route path='/mytoris' component={MyTori} />
+            <Route exact path='/mytoris' component={MyTori} />
+            <Route exact path='/mytoris/edit' component={EditRoom} />
             <Route exact path='/inventory' component={Inventory} />
             <Route exact path='/explore' component={OtherToris} />
             <Route exact path='/market' component={Market} />
           </Switch>
         }
+        <Snackbar
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          open={this.state.openSnackBar}
+          onClose={this.handleCloseSnackBar}
+          snackbarcontentprops={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">{this.state.snackBarMessage}</span>}
+        />
       </div>
     );
   }

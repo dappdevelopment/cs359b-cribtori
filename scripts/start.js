@@ -326,11 +326,11 @@ function createEndpoints(devServer) {
   // Retrieving room arrangements.
   devServer.get('/cribtori/api/room/:id', function(req, res) {
     var id = req.params.id;
-    var query = 'SELECT * from arrangement where tori_id = ?';
+    var query = 'SELECT * from arrangement where public_key = ?';
     var inserts = [id];
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
-      if (err) return res.status(400).send({ message: 'invalid tori ID' });
+      if (err) return res.status(400).send({ message: 'invalid key' });
 
       if (rows.length > 0) {
         var data = {
@@ -346,7 +346,7 @@ function createEndpoints(devServer) {
   // Posting arrangements.
   devServer.post('/cribtori/api/room', function(req, res) {
     // TODO: room validation and authentication.
-    var query = 'INSERT INTO arrangement (tori_id, locations) VALUES (?, ?) ON DUPLICATE KEY UPDATE locations = ?';
+    var query = 'INSERT INTO arrangement (public_key, locations) VALUES (?, ?) ON DUPLICATE KEY UPDATE locations = ?';
     var inserts = [req.body.id, req.body.locations, req.body.locations];
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
