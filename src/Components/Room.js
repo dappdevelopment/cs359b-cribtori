@@ -151,6 +151,7 @@ class Room extends Component {
     } else {
       return (
         <GridListTile key={`tori_${x}_${y}`}
+                      onClick={ () => this.props.onToriClick(id) }
                       className={this.props.classes.gridTile}
                       cols={1}
                       rows={1} >

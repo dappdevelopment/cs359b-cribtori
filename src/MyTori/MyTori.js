@@ -11,12 +11,11 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-
 import Status from '../Components/Status.js';
 import Room from '../Components/Room.js';
 
 import * as util from '../utils.js';
-
+import { assets } from '../assets.js';
 
 const styles = theme => ({
   grid: {
@@ -25,6 +24,18 @@ const styles = theme => ({
   paper: {
     margin: '16px 32px 16px 0',
     padding: 16
+  },
+  primary: {
+    backgroundColor: theme.palette.primary.light,
+  },
+  secondary: {
+    backgroundColor: theme.palette.secondary.light,
+  },
+  feed: {
+    cursor: `url(${assets.food}), auto`,
+  },
+  clean: {
+    cursor: `url(${assets.clean}), auto`,
   }
 });
 
@@ -34,7 +45,8 @@ class MyTori extends Component {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
     accContracts: PropTypes.array,
-    userAccount: PropTypes.string
+    userAccount: PropTypes.string,
+    onMessage: PropTypes.func,
   }
 
   constructor(props) {
@@ -42,12 +54,20 @@ class MyTori extends Component {
 
     this.state = {
       loaded: false,
+      feeding: false,
+      cleaning: false,
     }
 
     // FUNCTION BIND
     this.renderActions = this.renderActions.bind(this);
     this.renderGrid = this.renderGrid.bind(this);
     this.retrieveLayout = this.retrieveLayout.bind(this);
+    this.feedTori = this.feedTori.bind(this);
+    this.feedingSwitch = this.feedingSwitch.bind(this);
+    this.cleanTori = this.cleanTori.bind(this);
+    this.cleaningSwitch = this.cleaningSwitch.bind(this);
+    this.onToriClick = this.onToriClick.bind(this);
+    this.postActivity = this.postActivity.bind(this);
   }
 
   componentDidMount() {
@@ -58,11 +78,9 @@ class MyTori extends Component {
       this.setState({
         loaded: true,
         toriIds: toriIds,
-      });
+      }, this.retrieveLayout);
     })
     .catch(console.error);
-
-    this.retrieveLayout();
   }
 
   retrieveLayout() {
@@ -71,6 +89,54 @@ class MyTori extends Component {
       let layout = (result.locations) ? JSON.parse(result.locations) : [];
       // TODO: Check which tori is currently active.
 
+      // Check the layout. If the layout is empty, then this is the very first
+      // time the user has ever visited their tori.
+      // First, check if the user has any tori at all.
+      if (layout.length === 0 && this.state.toriIds.length > 0) {
+        // Okay, there's at least one tori. Let's default to this.
+        // Let's save the layout for this one tori.
+        // TODO: customizable width and height.
+        layout.push({
+          c: 3 - Math.floor(2 / 2) - 1,
+          r: 0,
+          key: 'tori',
+          id: this.state.toriIds[0],
+        });
+
+        // Now, save the layout (silently)...
+        let data = {
+          id: this.context.userAccount,
+          locations: JSON.stringify(layout),
+        }
+        fetch('/cribtori/api/room', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data),
+        })
+        .then(function(response) {
+          return response.status;
+        })
+        .then(function(status) {
+          if (status !== 200) {
+            let message = 'Uh oh, some error occurred. Some functions might not work properly. Please try again later.';
+            this.context.onMessage(message);
+            return;
+          }
+          // TODO: set the tori to active.
+          util.activateTori(this.state.toriIds[0], util.getBaseHearts())
+          .then((status) => {
+            let message = 'Welcome! Your tori has already been waiting for you!';
+            if (status !== 200) {
+              message = 'Uh oh, some error occurred. Some functions might not work properly. Please try again later.';
+            }
+            this.context.onMessage(message);
+          })
+          .catch(console.err);
+        }.bind(this))
+        .catch(console.err);
+      }
       this.setState({
         roomLayout: layout,
       });
@@ -78,19 +144,120 @@ class MyTori extends Component {
     .catch(console.error);
   }
 
+  postActivity(id, type) {
+    // Construct the POST body.
+    util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount)
+    .then((result) => {
+      let info = util.parseToriResult(result);
+
+      let data = {
+        id: id,
+        activity_type: type,
+        description: '',
+        info: info
+      };
+
+      fetch('/cribtori/api/activity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
+      })
+      .then(function(response) {
+        return response.status;
+      })
+      .then(function(status) {
+        // Get the name.
+        let message;
+        if (type === 'feed') {
+          message = this.feedTori(info, status);
+        } else {
+          message = this.cleanTori(info, status);
+        }
+        this.setState({
+          feeding: false,
+          cleaning: false
+        });
+        this.context.onMessage(message);
+      }.bind(this))
+      .catch(console.err);
+    })
+    .catch(console.error);
+  }
+
+  feedTori(info, status) {
+    let message = 'Yum! ' + info.name + ' is full!';
+    if (status === 406) {
+      message = info.name + ' has been recently fed!';
+    } else if (status === 400) {
+      message = 'Feeding ' + info.name + ' failed, try again later';
+    }
+    return message;
+  }
+
+  cleanTori(info, status) {
+    let message = info.name + '\'s room is clean!';
+    if (status === 406) {
+      message = info.name + '\'s is still clean!';
+    } else if (status === 400) {
+      message = 'Cleaning ' + info.name + '\'s room failed, try again later';
+    }
+    return message;
+  }
+
+  feedingSwitch() {
+    this.setState({
+      feeding: !this.state.feeding,
+      cleaning: false,
+    });
+  }
+
+  cleaningSwitch() {
+    this.setState({
+      cleaning: !this.state.cleaning,
+      feeding: false,
+    });
+  }
+
+  onToriClick(id) {
+    // Check if feeding or cleaning.
+    if (this.state.feeding) {
+      this.postActivity(id, 'feed');
+    } else if (this.state.cleaning) {
+      this.postActivity(id, 'clean');
+    }
+  }
+
   renderActions() {
+    let feedingText = this.state.feeding ? 'Feed - Click again to cancel' : 'Feed';
+    let cleaningText = this.state.cleaning ? 'Clean - Click again to cancel' : 'Clean';
     return (
       <MenuList>
-        <MenuItem>Feed</MenuItem>
-        <MenuItem>Clean</MenuItem>
+        <MenuItem onClick={ this.feedingSwitch }>{ feedingText }</MenuItem>
+        <MenuItem onClick={ this.cleaningSwitch }>{ cleaningText }</MenuItem>
         <MenuItem disabled >Craft</MenuItem>
         <Divider />
-        <MenuItem component={Link} to={'/mytoris/edit'}>Edit Room</MenuItem>
+        <MenuItem component={Link}
+                  to={'/mytoris/edit'}
+                  className={ this.props.classes.primary }>
+          Edit Room
+        </MenuItem>
       </MenuList>
     );
   }
 
   renderGrid() {
+    let actionCursor = (
+      this.state.feeding ?
+        this.props.classes.feed
+      :
+        this.state.cleaning ?
+          this.props.classes.clean
+        :
+          ''
+      );
+
     return (
       <Grid container className={this.props.classes.grid}
                       spacing={8}
@@ -107,12 +274,13 @@ class MyTori extends Component {
             <Status />
           </Paper>
         </Grid>
-        <Grid item sm={6}>
+        <Grid item sm={6} className={actionCursor}>
           { (this.state.loaded && this.state.roomLayout && this.state.toriIds) ? (
             <Room width={3}
                   height={2}
                   layout={this.state.roomLayout}
-                  firstTori={this.state.toriIds[0]} />
+                  firstTori={this.state.toriIds[0]}
+                  onToriClick={this.onToriClick} />
           ) : (
             <CircularProgress  color="secondary" />
           )}
@@ -141,7 +309,7 @@ class MyTori extends Component {
             padding: 20,
           }}>
             <Typography variant="title" color="inherit" component="h3" align="center">
-              No Tori Found
+              "Oh.. You don't have any Tori :( *sad*"
             </Typography>
           </Paper>
         );

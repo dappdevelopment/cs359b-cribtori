@@ -53,7 +53,7 @@ const styles = theme => ({
     position: 'absolute',
     right: 0,
     marginRight: 20,
-  }
+  },
 });
 
 class App extends Component {
@@ -209,7 +209,6 @@ class App extends Component {
   }
 
   render() {
-    // this.state.currentDisplay
     return (
       <div className="App">
         <AppBar position="static">
@@ -217,7 +216,9 @@ class App extends Component {
             <Typography variant="title" color="inherit">
               Cribtori
             </Typography>
-            <Tabs value={this.state.mode} onChange={this.switchDisplay} className={this.props.classes.tab}>
+            <Tabs value={this.state.mode}
+                  onChange={this.switchDisplay}
+                  className={this.props.classes.tab}>
               <Tab label="My Toris" component={Link} to={'/mytoris'} />
               <Tab label="Inventory" component={Link} to={'/inventory'} />
               <Tab label="Explore" component={Link} to={'/explore'} />

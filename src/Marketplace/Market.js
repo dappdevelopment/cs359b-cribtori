@@ -5,6 +5,7 @@ import { Link, Switch, Route } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
 
 import TokenInfo from '../Components/TokenInfo.js';
 
@@ -131,6 +132,7 @@ class Market extends Component {
                         component="h1">
               Toris for Sale
             </Typography>
+            <Divider />
             <Grid container spacing={8}
                             alignItems={'center'}
                             direction={'row'}
@@ -147,6 +149,7 @@ class Market extends Component {
                         component="h1">
               Accessories for Sale
             </Typography>
+            <Divider />
             <Grid container spacing={8}
                             alignItems={'center'}
                             direction={'row'}

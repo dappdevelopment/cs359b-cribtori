@@ -129,7 +129,6 @@ export function retrieveRoomLayout(id) {
 
 /* TORI VISIT */
 export function fuseToris(contract, id, otherId, name, addr) {
-  console.log(contract, id, otherId, name, addr)
   return contract.fuseToris(id, otherId, name, {from: addr});
 }
 
@@ -170,4 +169,36 @@ export function parseTicketResult(result) {
     claimed: claimed,
   }
   return ticketInfo;
+}
+
+
+/* HEARTS UTILITIES */
+export function getBaseHearts(personality) {
+  return 2.5;
+}
+
+export function activateTori(id, hearts) {
+  return saveHearts(id, hearts, true);
+}
+
+export function deactivateTori(id, hearts) {
+  return saveHearts(id, hearts, false);
+}
+
+export function saveHearts(id, hearts, active) {
+  let data = {
+    id: id,
+    hearts: hearts,
+    active: active,
+  }
+  return fetch('/cribtori/api/hearts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data),
+  })
+  .then(function(response) {
+    return response.status;
+  });
 }

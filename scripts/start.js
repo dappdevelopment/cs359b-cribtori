@@ -235,6 +235,8 @@ function createEndpoints(devServer) {
   devServer.use(bodyParser.urlencoded({ extended: false }));
   devServer.use(bodyParser.json());
 
+  var ONE_HOUR = 6 * 60 * 60 * 1000;
+
   devServer.get('/cribtori/api/hello', function(req, res) {
     res.status(200).send('hello world');
   });
@@ -276,51 +278,136 @@ function createEndpoints(devServer) {
     })
   });
 
+  let checkActive = function(req, res, next) {
+    let id = req.body.id;
+
+    var query = "SELECT * FROM hearts WHERE tori_id = ?";
+    var inserts = [id];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) return res.status(400).send({ message: 'invalid id' });
+
+      if (rows.length > 0 && rows[0].active) {
+        req.body.lastUpdate = rows[0].last_update;
+        req.body.hearts = rows[0].hearts;
+        next();
+      } else {
+        return res.status(400).send({ message: 'Tori is not currently active' });
+      }
+    })
+  }
+
+  let calculateHearts = function(hearts, type, personality, lastUpdate, currentTime) {
+    // Check how much we should decrement the hearts.
+    // For every 4 HOURS (TODO: ?)
+    // Optimistic:   +1    -0.5
+    // Irritable:    +0.5  -1
+    // Melancholic:  +1    -1
+    // Placid:       +0.5  -0.5
+    let increment = [1, 0.5, 1, 0.5];
+    let decrement = [0.5, 1, 1, 0.5];
+
+    let denom = (type === 'feed') ? 2 : 1;
+
+    let hourPassed = (currentTime - lastUpdate) / ONE_HOUR;
+
+    hearts = hearts + increment[personality] / denom - decrement[personality] * (hourPassed / 4);
+    hearts = Math.max(0, Math.max(5, hearts));
+
+    return hearts;
+  }
+
+  // TODO: what if this failed?
+  let updateHearts = function(req, res) {
+    let info = req.body.info;
+    let personality = info.personality;
+    let lastUpdate = new Date(req.body.lastUpdate);
+    let hearts = req.body.hearts;
+    let actTime = req.body.actTime;
+
+    hearts = calculateHearts(hearts, req.activity_type, personality, lastUpdate, actTime);
+
+    // We're updating the hearts!
+    var query = 'UPDATE hearts SET hearts = ?, last_update = ? WHERE tori_id = ?';
+    var inserts = [hearts, actTime, req.body.id];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) {
+        return connection.rollback(function() {
+          throw error;
+        });
+      }
+      connection.commit(function(err) {
+        if (err) {
+          return connection.rollback(function() {
+            throw err;
+          });
+        }
+        res.status(200).end();
+      });
+    });
+  }
+
   // Posting activities.
-  devServer.post('/cribtori/api/activity', function(req, res) {
+  devServer.post('/cribtori/api/activity', checkActive, function(req, res) {
     // TODO: activity validation and authentication.
-    var ONE_HOUR = 6 * 60 * 60 * 1000;
-    var PERIOD = (req.activity_type === 'feed') ? 1 : 2;
+    var PERIOD = (req.activity_type === 'feed') ? 2 : 4;
 
     var actTime = new Date();
+    req.body.actTime = actTime;
 
     if ((req.body.activity_type !== 'feed') && (req.body.activity_type !== 'clean')) {
       return res.status(400).send({ message: 'activity not recognized' });
     }
 
-    var query = 'SELECT * from activity WHERE tori_id = ? AND activity_type = ? ORDER BY time DESC';
-    var inserts = [req.body.id, req.body.activity_type];
-    query = mysql.format(query, inserts);
-    connection.query(query, function (err, rows, fields) {
-      if (err) return res.status(400).send({ message: 'activity log failed, Error: ' + err });
+    connection.beginTransaction(function(err) {
+      if (err) { return res.status(400).send({ message: 'activity log failed, Error: ' + err }); }
 
-      if (rows.length > 0) {
-        var prevTime = new Date(rows[0].time);
-        if (actTime - prevTime < PERIOD * ONE_HOUR) {
-          return res.status(406).send({ message: 'Previous activity occur less than allowed period!'});
+      var query = 'SELECT * from activity WHERE tori_id = ? AND activity_type = ? ORDER BY time DESC';
+      var inserts = [req.body.id, req.body.activity_type];
+      query = mysql.format(query, inserts);
+      connection.query(query, function (err, rows, fields) {
+        if (err) {
+          return connection.rollback(function() {
+            throw error;
+          });
         }
-      }
+        if (rows.length > 0) {
+          var prevTime = new Date(rows[0].time);
+          if (actTime - prevTime < PERIOD * ONE_HOUR) {
+            return res.status(406).send({ message: 'Previous activity occur less than allowed period!'});
+          }
+        }
 
-      // Check if more than 10
-      if (rows.length > 20) {
-        query = 'UPDATE activity SET time = ?, activity_type = ?, description = ? WHERE tori_id = ? AND ' +
-                'time = (SELECT time from activity WHERE tori_id = ? ORDER BY time ASC);'
-        inserts = [actTime, req.body.activity_type, req.body.description, req.body.id, req.body.id];
-        query = mysql.format(query, inserts);
-        connection.query(query, function (err, rows, fields) {
-          if (err) return res.status(400).send({ message: 'activity log failed, Error: ' + err });
-          return res.status(200).end();
-        });
-      } else {
-        query = 'INSERT INTO activity (tori_id, time, activity_type, description) VALUES (?, ?, ?, ?)';
-        inserts = [req.body.id, actTime, req.body.activity_type, req.body.description];
-        query = mysql.format(query, inserts);
-        connection.query(query, function (err, rows, fields) {
-          if (err) return res.status(400).send({ message: 'activity log failed, Error: ' + err });
-          return res.status(200).end();
-        });
-      }
-    })
+        // Check if more than 10
+        if (rows.length > 20) {
+          query = 'UPDATE activity SET time = ?, activity_type = ?, description = ? WHERE tori_id = ? AND ' +
+                  'time = (SELECT time from activity WHERE tori_id = ? ORDER BY time ASC);'
+          inserts = [actTime, req.body.activity_type, req.body.description, req.body.id, req.body.id];
+          query = mysql.format(query, inserts);
+          connection.query(query, function (err, rows, fields) {
+            if (err) {
+              return connection.rollback(function() {
+                throw error;
+              });
+            }
+            updateHearts(req, res);
+          });
+        } else {
+          query = 'INSERT INTO activity (tori_id, time, activity_type, description) VALUES (?, ?, ?, ?)';
+          inserts = [req.body.id, actTime, req.body.activity_type, req.body.description];
+          query = mysql.format(query, inserts);
+          connection.query(query, function (err, rows, fields) {
+            if (err) {
+              return connection.rollback(function() {
+                throw error;
+              });
+            }
+            updateHearts(req, res);
+          });
+        }
+      });
+    });
   });
 
   // Retrieving room arrangements.
@@ -375,16 +462,33 @@ function createEndpoints(devServer) {
     })
   });
 
-  // Posting hearts.
+  // Only for activating and deactivating Toris + saving initial hearts.
   devServer.post('/cribtori/api/hearts', function(req, res) {
-    // TODO: room validation and authentication.
-    var query = 'INSERT INTO hearts (tori_id, hearts) VALUES (?, ?) ON DUPLICATE KEY UPDATE hearts = ?';
-    var inserts = [req.body.id, req.body.hearts, req.body.hearts];
-    query = mysql.format(query, inserts);
-    connection.query(query, function (err, rows, fields) {
-      if (err) res.status(400).send({ message: 'saving hearts failed, Error: ' + err });
-      res.status(200).end();
-    })
+    // If user is deactivating tori, we want to freeze the heart.
+    // When the user is activating the tori, we want to start the counter from now --> so update the last_update.
+    // User can only update the hearts for active tori.
+    let now = new Date();
+    // Check if we're activating or deactivating.
+    if (req.body.hearts !== undefined) {
+      // We're activating or deactivating. So no need to update the hearts.
+      // When we're activating, we want to reset the last update to now.
+      var query;
+      var inserts;
+      if (req.body.active) {
+        // Activating.
+        query = 'INSERT INTO hearts (tori_id, hearts, last_update, active) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE active = ?, last_update = ?';
+        inserts = [req.body.id, req.body.hearts, now, req.body.active, req.body.active, now];
+      } else {
+        // Deactivating.
+        query = 'INSERT INTO hearts (tori_id, hearts, active) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE active = ?';
+        inserts = [req.body.id, req.body.hearts, req.body.active, req.body.active];
+      }
+      query = mysql.format(query, inserts);
+      connection.query(query, function (err, rows, fields) {
+        if (err) res.status(400).send({ message: 'hearts activation failed, Error: ' + err });
+        res.status(200).end();
+      });
+    }
   });
 
   // Retrieving visit.
