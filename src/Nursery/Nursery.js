@@ -83,19 +83,19 @@ class Nursery extends Component {
           </Card>
         </Grid>
         <Grid item sm={6} className={this.props.classes.infoItem}>
-        <Card className={this.props.classes.card} onClick={()=> this.props.history.push('/nursery/breed')}>
-          <CardMedia className={this.props.classes.media}
-                     image={assets.breed}
-                     title="Breeding diagram"
-          />
-          <CardHeader title={"Breed"} className={this.props.classes.cardHeaderBreed} />
-          <Divider/>
-          <CardContent>
-            <Typography variant="body2" color="inherit" component="h3" align="center">
-              {"Breed your Toris with other owners' Toris and get more unique Toris!"}
-            </Typography>
-          </CardContent>
-        </Card>
+          <Card className={this.props.classes.card} onClick={()=> this.props.history.push('/nursery/breed')}>
+            <CardMedia className={this.props.classes.media}
+                       image={assets.breed}
+                       title="Breeding diagram"
+            />
+            <CardHeader title={"Breed"} className={this.props.classes.cardHeaderBreed} />
+            <Divider/>
+            <CardContent>
+              <Typography variant="body2" color="inherit" component="h3" align="center">
+                {"Breed your Toris with other owners' Toris and get more unique Toris!"}
+              </Typography>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
     );

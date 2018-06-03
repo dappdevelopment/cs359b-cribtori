@@ -15,7 +15,9 @@ import * as util from '../utils.js';
 import { assets } from '../assets.js';
 
 const styles = theme => ({
-
+  selected: {
+    backgroundColor: theme.palette.secondary.light,
+  }
 });
 
 class TokenItem extends Component {
@@ -32,7 +34,7 @@ class TokenItem extends Component {
     this.context = context;
 
     this.state = {
-      info: {}
+      info: {},
     }
 
     // Function BINDS
@@ -84,9 +86,10 @@ class TokenItem extends Component {
     }
 
     return (
-      <MenuItem key={key}
+      <MenuItem className={this.props.selected ? this.props.classes.selected : ''}
+                key={key}
                 disabled={disabled}
-                onClick={(e) => this.props.onItemSelected(this.state.info, e)}>
+                onClick={(e) => this.props.onItemSelected(this.state.info, e) }>
         { !this.state.mode ? (
           <ToriImage dna={this.state.info.dna}
                      size={80}
