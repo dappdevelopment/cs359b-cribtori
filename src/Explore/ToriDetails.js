@@ -130,8 +130,7 @@ class ToriDetails extends Component {
   renderDetails() {
     let content = (<CircularProgress  color="secondary" />);
     if (!this.state.info) return content;
-    // style={{backgroundColor: theme.palette.secondary.light}}
-    console.log(this)
+
     return (
       <Paper className={this.props.classes.paper + ' ' + this.props.classes.secondary}
              elevation={4} >

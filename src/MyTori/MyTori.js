@@ -87,7 +87,6 @@ class MyTori extends Component {
     util.retrieveRoomLayout(this.context.userAccount)
     .then((result) => {
       let layout = (result.locations) ? JSON.parse(result.locations) : [];
-      // TODO: Check which tori is currently active.
 
       // Check the layout. If the layout is empty, then this is the very first
       // time the user has ever visited their tori.
@@ -119,26 +118,19 @@ class MyTori extends Component {
           return response.status;
         })
         .then(function(status) {
+          let message = 'Welcome! Your tori has already been waiting for you!';
           if (status !== 200) {
-            let message = 'Uh oh, some error occurred. Some functions might not work properly. Please try again later.';
-            this.context.onMessage(message);
-            return;
+            message = 'Uh oh, some error occurred. Some functions might not work properly. Please try again later.';
           }
-          // TODO: set the tori to active.
-          util.activateTori(this.state.toriIds[0], util.getBaseHearts())
-          .then((status) => {
-            let message = 'Welcome! Your tori has already been waiting for you!';
-            if (status !== 200) {
-              message = 'Uh oh, some error occurred. Some functions might not work properly. Please try again later.';
-            }
-            this.context.onMessage(message);
-          })
-          .catch(console.err);
+          this.context.onMessage(message);
         }.bind(this))
         .catch(console.err);
       }
+      // Get active toris.
+      let activeToris = layout.filter((l) => l.key === 'tori').map((l) => { return l.id; });
       this.setState({
         roomLayout: layout,
+        activeToris: activeToris,
       });
     })
     .catch(console.error);
@@ -175,13 +167,20 @@ class MyTori extends Component {
         } else {
           message = this.cleanTori(info, status);
         }
+
+        let ids = this.state.toriIds;
         this.setState({
           feeding: false,
-          cleaning: false
+          cleaning: false,
+          toriIds: []
+        }, () => {
+          this.setState({
+            toriIds: ids
+          });
         });
         this.context.onMessage(message);
       }.bind(this))
-      .catch(console.err);
+      .catch(console.error);
     })
     .catch(console.error);
   }
@@ -271,7 +270,9 @@ class MyTori extends Component {
               Status
             </Typography>
             <Divider />
-            <Status />
+            { this.state.activeToris && (
+              <Status ids={this.state.activeToris}/>
+            )}
           </Paper>
         </Grid>
         <Grid item sm={6} className={actionCursor}>

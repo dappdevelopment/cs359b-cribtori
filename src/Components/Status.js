@@ -14,8 +14,20 @@ const styles = theme => ({
 });
 
 class Status extends Component {
-  constructor(props) {
+  constructor(props, context) {
     super(props);
+    this.context = context;
+
+    // Function BINDS
+    this.renderStatusItem = this.renderStatusItem.bind(this);
+  }
+
+  renderStatusItem() {
+    return this.props.ids.map((id) => {
+      return (
+        <StatusItem id={id} key={`item_${id}`}/>
+      );
+    });
   }
 
   render() {
@@ -24,9 +36,7 @@ class Status extends Component {
                       alignItems={'center'}
                       direction={'column'}
                       justify={'center'}>
-        <StatusItem id={0} />
-        <StatusItem id={1} />
-        <StatusItem id={2} />
+        { this.renderStatusItem() }
       </Grid>
     );
   }

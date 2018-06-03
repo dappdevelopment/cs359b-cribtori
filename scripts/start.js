@@ -29,7 +29,7 @@ var prompt = require('react-dev-utils/prompt');
 var pathExists = require('path-exists');
 var config = require('../config/webpack.config.dev');
 var paths = require('../config/paths');
-
+var async = require("async");
 
 var useYarn = pathExists.sync(paths.yarnLockFile);
 var cli = useYarn ? 'yarn' : 'npm';
@@ -312,7 +312,7 @@ function createEndpoints(devServer) {
     let hourPassed = (currentTime - lastUpdate) / ONE_HOUR;
 
     hearts = hearts + increment[personality] / denom - decrement[personality] * (hourPassed / 4);
-    hearts = Math.max(0, Math.max(5, hearts));
+    hearts = Math.max(0, Math.min(5, hearts));
 
     return hearts;
   }
@@ -432,17 +432,114 @@ function createEndpoints(devServer) {
 
   // Posting arrangements.
   devServer.post('/cribtori/api/room', function(req, res) {
-    // TODO: room validation and authentication.
-    var query = 'INSERT INTO arrangement (public_key, locations) VALUES (?, ?) ON DUPLICATE KEY UPDATE locations = ?';
-    var inserts = [req.body.id, req.body.locations, req.body.locations];
+    let actTime = new Date();
+
+    var query = 'SELECT * FROM arrangement WHERE public_key = ?';
+    var inserts = [req.body.id];
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
       if (err) res.status(400).send({ message: 'saving room failed, Error: ' + err });
-      res.status(200).end();
+
+      let layout = (rows.length === 0) ? [] : JSON.parse(rows[0].locations);
+      layout = layout.filter((l) => l.key === 'tori').map((l) => { return l.id });
+      let newLayout = JSON.parse(req.body.locations);
+      newLayout = newLayout.filter((l) => l.key === 'tori').map((l) => { return l.id });
+
+      // Filter out the list.
+      layout = layout.filter((l) => newLayout.indexOf(l) === -1);     // Set in active
+      newLayout = newLayout.filter((l) => layout.indexOf(l) === -1);  // Set active
+
+      connection.beginTransaction(function(err) {
+        if (err) { return res.status(400).send({ message: 'saving room failed, Error: ' + err }); }
+
+        query = 'INSERT INTO arrangement (public_key, locations) VALUES (?, ?) ON DUPLICATE KEY UPDATE locations = ?';
+        inserts = [req.body.id, req.body.locations, req.body.locations];
+        query = mysql.format(query, inserts);
+        connection.query(query, function (err, rows, fields) {
+          if (err) {
+            return connection.rollback(function() {
+              throw error;
+            });
+          }
+          // Now, set inactive and active.
+          // First, set inactive.
+          async.forEach(layout, function(id_old, callback_old) {
+            query = 'UPDATE hearts SET active = ? WHERE tori_id = ?';
+            inserts = [0, id_old];
+            query = mysql.format(query, inserts);
+            connection.query(query, function (err, rows, fields) {
+              if (err) {
+                return connection.rollback(function() {
+                  throw error;
+                });
+              }
+              callback_old();
+            });
+          }, function(err, result) {
+            if (err) {
+              return connection.rollback(function() {
+                throw error;
+              });
+            }
+            // Second, set active.
+            async.forEach(newLayout, function(id, callback) {
+              query = 'INSERT INTO hearts (tori_id, hearts, last_update, active) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE active = ?, last_update = ?';
+              inserts = [id, 2.5, actTime, 1, 1, actTime];
+              query = mysql.format(query, inserts);
+              connection.query(query, function (err, rows, fields) {
+                if (err) {
+                  return connection.rollback(function() {
+                    throw err;
+                  });
+                }
+                callback();
+              });
+            }, function(err, result) {
+              if (err) {
+                return connection.rollback(function() {
+                  throw err;
+                });
+              }
+              connection.commit(function(err) {
+                if (err) {
+                  return connection.rollback(function() {
+                    throw err;
+                  });
+                }
+                res.status(200).end();
+              });
+            });
+          });
+        });
+      });
     })
   });
 
   // Retrieving hearts.
+  devServer.get('/cribtori/api/hearts', function(req, res) {
+    // Check if there's extra query.
+    let limit = req.query.limit;
+    let active = req.query.active;
+
+    var query = 'SELECT * from hearts';
+    var inserts = [];
+    if (active !== undefined) {
+      query += ' WHERE active = ?';
+      inserts.push(active);
+    }
+    if (limit !== undefined) {
+      query += ' ORDER BY tori_id LIMIT ?';
+      inserts.push(parseInt(limit, 10));
+    }
+
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) return res.status(400).send({ message: 'failed in retrieving hearts, Error: ' + err });
+
+      return res.status(200).send(rows);
+    })
+  });
+
   devServer.get('/cribtori/api/hearts/:id', function(req, res) {
     var id = req.params.id;
     var query = 'SELECT * from hearts where tori_id = ?';

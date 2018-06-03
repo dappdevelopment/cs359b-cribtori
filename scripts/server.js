@@ -4,6 +4,7 @@ var path = require('path');
 var chalk = require('chalk');
 var mysql = require('mysql');
 var bodyParser = require('body-parser');
+var async = require("async");
 
 var devServer = express();
 
