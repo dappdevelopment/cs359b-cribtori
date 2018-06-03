@@ -60,6 +60,10 @@ import S_TREE from './img/tori/special/tree.png';
 import FOOD from './img/sample.png';
 import CLEAN from './img/sample.png';
 
+
+import FUSE from './img/accessories/TPP.png';
+import BREED from './img/accessories/TPP.png';
+
 export const assets = {
   background: {
     floor: [
@@ -108,4 +112,6 @@ export const assets = {
   },
   food: FOOD,
   clean: CLEAN,
+  fuse: FUSE,
+  breed: BREED,
 };

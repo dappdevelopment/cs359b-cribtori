@@ -221,16 +221,14 @@ class TokenInfo extends Component {
 
     return (
       <Card className={this.props.classes.card}>
+        <div className={this.props.classes.imgContainer}>
+          <img src={assets.accessories[this.state.info.symbol]}
+               alt={this.state.info.name}
+               className={this.props.classes.img}/>
+        </div>
         <CardHeader title={this.state.info.name}
                     className={this.props.classes.cardHeaderAcc}/>
-        <Divider/>
         <CardContent>
-          <div className={this.props.classes.imgContainer}>
-            <img src={assets.accessories[this.state.info.symbol]}
-                 alt={this.state.info.name}
-                 className={this.props.classes.img}/>
-          </div>
-          <Divider/>
           { content }
         </CardContent>
         { this.renderAccessoryAction() }
@@ -251,7 +249,7 @@ class TokenInfo extends Component {
       );
     } else {
       // Show visit button
-      let visitLink = '/tori/' + this.state.info.id;
+      let visitLink = '/explore/' + this.state.info.id;
       return (
         <Button variant="raised"
                 color="primary"
@@ -268,13 +266,11 @@ class TokenInfo extends Component {
       // Tori
       return (
         <Card className={this.props.classes.card}>
+          <ToriImage dna={this.state.info.dna}
+                     size={150} />
           <CardHeader title={this.state.info.name}
                       className={this.props.classes.cardHeaderTori}/>
-          <Divider/>
           <CardContent>
-            <ToriImage dna={this.state.info.dna}
-                       size={150} />
-            <Divider/>
             <Grid container className={this.props.classes.grid}
                             spacing={32}
                             alignItems={'center'}

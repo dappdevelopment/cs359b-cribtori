@@ -4,13 +4,17 @@ import { Link, Switch, Route } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 
 import TokenInfo from '../Components/TokenInfo.js';
 
 import * as util from '../utils.js';
 
 const styles = theme => ({
-
+  root: {
+    backgroundColor: theme.palette.background.paper,
+    flexGrow: 1,
+  },
 });
 
 class OtherToris extends Component {
@@ -83,7 +87,8 @@ class OtherToris extends Component {
 
   render() {
     return (
-      <Grid container spacing={8}
+      <Grid container className={this.props.classes.root}
+                      spacing={8}
                       alignItems={'center'}
                       direction={'row'}
                       justify={'center'}>

@@ -18,6 +18,9 @@ import getWeb3 from './utils/getWeb3';
 import Info from './Info/Info.js';
 import MyTori from './MyTori/MyTori.js';
 import EditRoom from './MyTori/EditRoom.js';
+import Nursery from './Nursery/Nursery.js';
+import Fuse from './Nursery/Fuse.js';
+import Breed from './Nursery/Breed.js';
 import Inventory from './Inventory/Inventory.js';
 import OtherToris from './Explore/OtherToris.js';
 import ToriDetails from './Explore/ToriDetails.js';
@@ -54,6 +57,11 @@ const styles = theme => ({
     right: 0,
     marginRight: 20,
   },
+  banner: {
+    backgroundColor: theme.palette.secondary.dark,
+    height: 20,
+    width: `100%`,
+  },
 });
 
 class App extends Component {
@@ -73,7 +81,7 @@ class App extends Component {
     let loc = this.props.history.location.pathname;
     loc = loc.split('/')[1];
 
-    const locMode = {'': 4, 'mytoris': 0, 'inventory': 1, 'explore': 2, 'market': 3}
+    const locMode = {'': 4, 'mytoris': 0, 'nursery': 1, 'inventory': 2, 'explore': 3, 'market': 4}
     let currentMode = locMode[loc];
 
     this.state = {
@@ -220,6 +228,7 @@ class App extends Component {
                   onChange={this.switchDisplay}
                   className={this.props.classes.tab}>
               <Tab label="My Toris" component={Link} to={'/mytoris'} />
+              <Tab label="Nursery" component={Link} to={'/nursery'} />
               <Tab label="Inventory" component={Link} to={'/inventory'} />
               <Tab label="Explore" component={Link} to={'/explore'} />
               <Tab label="Marketplace" component={Link} to={'/market'} />
@@ -227,15 +236,20 @@ class App extends Component {
             </Tabs>
           </Toolbar>
         </AppBar>
+        <div className={this.props.classes.banner}>
+        </div>
         {(this.state.accessoriesTokenInstances.length === this.state.accNum) &&
          (this.state.userAccount) &&
           <Switch>
             <Route exact path='/' component={Info} />
             <Route exact path='/mytoris' component={MyTori} />
             <Route exact path='/mytoris/edit' component={EditRoom} />
-            <Route exact path='/tori/:id' component={ToriDetails} />
+            <Route exact path='/nursery' component={Nursery} />
+            <Route exact path='/nursery/fuse' component={Fuse} />
+            <Route exact path='/nursery/breed' component={Breed} />
             <Route exact path='/inventory' component={Inventory} />
             <Route exact path='/explore' component={OtherToris} />
+            <Route exact path='/explore/:id' component={ToriDetails} />
             <Route exact path='/market' component={Market} />
           </Switch>
         }

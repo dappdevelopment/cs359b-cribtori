@@ -33,7 +33,7 @@ class StatusItem extends Component {
   }
 
   onToriSelected() {
-    this.props.history.push('/tori/' + this.props.id);
+    this.props.history.push('/explore/' + this.props.id);
   }
 
   render() {
