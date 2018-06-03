@@ -9,8 +9,6 @@ import Typography from '@material-ui/core/Typography';
 import Hearts from './Hearts.js';
 import TokenItem from './TokenItem.js';
 
-import * as util from '../utils.js';
-
 const styles = theme => ({
 
 });

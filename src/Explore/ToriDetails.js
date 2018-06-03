@@ -171,8 +171,7 @@ class ToriDetails extends Component {
       }
       return (
         <MenuList>
-          <MenuItem>Breed</MenuItem>
-          <MenuItem>Fuse</MenuItem>
+          <MenuItem>Visit Room</MenuItem>
           <Divider />
           { tradeAction }
         </MenuList>
@@ -180,7 +179,12 @@ class ToriDetails extends Component {
     } else {
       return (
         <MenuList>
-          <MenuItem>Breed With {this.state.info.name}</MenuItem>
+          <MenuItem>Visit Room</MenuItem>
+          <Divider />
+          <MenuItem component={Link}
+                    to={{ pathname: '/nursery/breed/' + this.state.info.id, state: { info: this.state.info} }}>
+            Breed With {this.state.info.name}
+          </MenuItem>
           { this.state.info.salePrice > 0 && (
             <BuyInput contract={this.context.toriToken}
                       addr={this.state.info.id}
@@ -205,7 +209,8 @@ class ToriDetails extends Component {
     } else {
       util.postTokenForSale(this.context.toriToken, this.state.id, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
       .then((result) => {
-        this.context.onMessage("Posting Tori for sale in progress...")
+        if (!result) this.context.onMessage("Uh oh, something went wrong. Please try again later");
+        this.context.onMessage("Posting Tori for sale in progress, TXHash: " + result.receipt.txhash);
         this.setState({
           dialogOpen: false,
         })

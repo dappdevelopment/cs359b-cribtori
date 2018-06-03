@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
+import { Link, Switch, Route, withRouter } from 'react-router-dom';
 
 import * as util from '../utils.js';
 
@@ -84,13 +85,16 @@ class BuyInput extends Component {
         let message = 'Buy transaction submitted';
         if (!result) message = 'Transaction failed :(';
         this.context.onMessage(message);
+
+        if (result) {
+          this.props.history.push({
+            pathname: '/confirmation',
+            state: {receipt: result.receipt}
+          })
+        }
       })
       .catch(console.err);
     } else {
-      console.log(this.props.contract,
-                           this.props.addr,
-                           this.props.price,
-                           this.context.userAccount)
       util.buyTokenForSale(this.props.contract,
                            this.props.addr,
                            this.props.price,
@@ -153,4 +157,4 @@ class BuyInput extends Component {
   }
 }
 
-export default withStyles(styles)(BuyInput)
+export default withStyles(styles)(withRouter(BuyInput))

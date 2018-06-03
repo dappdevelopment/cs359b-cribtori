@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link, Switch, Route } from 'react-router-dom';
+import { Link, Switch, Route, withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -91,7 +91,7 @@ class Fuse extends Component {
       this.setState({
         loaded: true,
         toriIds: toriIds,
-      }, this.retrieveLayout);
+      });
     })
     .catch(console.error);
   }
@@ -167,14 +167,18 @@ class Fuse extends Component {
                 this.state.offering.name.substring(0, Math.floor(this.state.offering.name.length / 2));
     util.fuseToris(this.context.toriVisit, this.state.base.id, this.state.offering.id, fuseName, this.context.userAccount)
     .then((result) => {
-      // TODO: Maybe update the DB?
-      let message = this.state.base.name + '\'s in progress';
+      let message = this.state.base.name + '\'s fusion is in progress';
       if (!result) {
         message = this.state.offering.name + '\'s fusion failed';
       }
       this.props.onMessage(message);
 
-      // TODO: Clear the lists.
+      if (result) {
+        this.props.history.push({
+          pathname: '/confirmation',
+          state: {receipt: result.receipt}
+        });
+      }
     })
     .catch(console.error);
   }
@@ -268,4 +272,4 @@ class Fuse extends Component {
   }
 }
 
-export default withStyles(styles)(Fuse)
+export default withStyles(styles)(withRouter(Fuse))

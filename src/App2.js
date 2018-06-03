@@ -20,11 +20,14 @@ import MyTori from './MyTori/MyTori.js';
 import EditRoom from './MyTori/EditRoom.js';
 import Nursery from './Nursery/Nursery.js';
 import Fuse from './Nursery/Fuse.js';
+import BreedHome from './Nursery/BreedHome.js';
 import Breed from './Nursery/Breed.js';
 import Inventory from './Inventory/Inventory.js';
 import OtherToris from './Explore/OtherToris.js';
 import ToriDetails from './Explore/ToriDetails.js';
 import Market from './Marketplace/Market.js';
+import Confirmation from './Components/Confirmation.js';
+
 
 import './css/oswald.css'
 import './css/open-sans.css'
@@ -87,7 +90,7 @@ class App extends Component {
     this.state = {
       storageValue: 0,
       web3: null,
-      mode: currentMode === undefined ? 4 : currentMode,
+      mode: currentMode === undefined ? locMode[''] : currentMode,
       accessoriesTokenInstances: [],
       accNum: 100,
       openSnackBar: false,
@@ -246,11 +249,13 @@ class App extends Component {
             <Route exact path='/mytoris/edit' component={EditRoom} />
             <Route exact path='/nursery' component={Nursery} />
             <Route exact path='/nursery/fuse' component={Fuse} />
-            <Route exact path='/nursery/breed' component={Breed} />
+            <Route exact path='/nursery/breed' component={BreedHome} />
+            <Route exact path='/nursery/breed/:id' component={Breed} />
             <Route exact path='/inventory' component={Inventory} />
             <Route exact path='/explore' component={OtherToris} />
             <Route exact path='/explore/:id' component={ToriDetails} />
             <Route exact path='/market' component={Market} />
+            <Route exact path='/confirmation' component={Confirmation} />
           </Switch>
         }
         <Snackbar
