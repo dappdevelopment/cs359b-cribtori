@@ -308,10 +308,10 @@ function createEndpoints(devServer) {
     let decrement = [0.5, 1, 1, 0.5];
 
     let denom = (type === 'feed') ? 2 : 1;
-
+    let plus = (type === -1) ? 0 : increment[personality] / denom;
     let hourPassed = (currentTime - lastUpdate) / ONE_HOUR;
 
-    hearts = hearts + increment[personality] / denom - decrement[personality] * (hourPassed / 4);
+    hearts = hearts + plus - decrement[personality] * (hourPassed / 4);
     hearts = Math.max(0, Math.min(5, hearts));
 
     return hearts;
@@ -483,8 +483,8 @@ function createEndpoints(devServer) {
             }
             // Second, set active.
             async.forEach(newLayout, function(id, callback) {
-              query = 'INSERT INTO hearts (tori_id, hearts, last_update, active) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE active = ?, last_update = ?';
-              inserts = [id, 2.5, actTime, 1, 1, actTime];
+              query = 'UPDATE hearts SET active = ?, last_update = ? WHERE tori_id = ?';
+              inserts = [1, actTime, id];
               query = mysql.format(query, inserts);
               connection.query(query, function (err, rows, fields) {
                 if (err) {
@@ -535,6 +535,12 @@ function createEndpoints(devServer) {
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
       if (err) return res.status(400).send({ message: 'failed in retrieving hearts, Error: ' + err });
+      let now = new Date();
+      rows = rows.map((r) => {
+        let rCopy = r;
+        rCopy.hearts = calculateHearts(r.hearts, -1, r.personality, r.last_update, now);
+        return rCopy;
+      });
 
       return res.status(200).send(rows);
     })
@@ -549,9 +555,12 @@ function createEndpoints(devServer) {
       if (err) return res.status(400).send({ message: 'invalid tori ID' });
 
       if (rows.length > 0) {
+        let now = new Date();
+        let hearts = calculateHearts(rows[0].hearts, -1, rows[0].personality, rows[0].last_update, now);
+
         var data = {
           tori_id: rows[0].tori_id,
-          hearts: rows[0].hearts,
+          hearts: hearts,
         }
         return res.status(200).send(data);
       }
@@ -566,26 +575,15 @@ function createEndpoints(devServer) {
     // User can only update the hearts for active tori.
     let now = new Date();
     // Check if we're activating or deactivating.
-    if (req.body.hearts !== undefined) {
-      // We're activating or deactivating. So no need to update the hearts.
-      // When we're activating, we want to reset the last update to now.
-      var query;
-      var inserts;
-      if (req.body.active) {
-        // Activating.
-        query = 'INSERT INTO hearts (tori_id, hearts, last_update, active) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE active = ?, last_update = ?';
-        inserts = [req.body.id, req.body.hearts, now, req.body.active, req.body.active, now];
-      } else {
-        // Deactivating.
-        query = 'INSERT INTO hearts (tori_id, hearts, active) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE active = ?';
-        inserts = [req.body.id, req.body.hearts, req.body.active, req.body.active];
-      }
-      query = mysql.format(query, inserts);
-      connection.query(query, function (err, rows, fields) {
-        if (err) res.status(400).send({ message: 'hearts activation failed, Error: ' + err });
-        res.status(200).end();
-      });
-    }
+    // We're activating or deactivating. So no need to update the hearts.
+    // When we're activating, we want to reset the last update to now.
+    var query = 'INSERT IGNORE INTO hearts (tori_id, hearts, personality, last_update, active) VALUES (?, ?, ?, ?, ?)';
+    var inserts = [req.body.id, 2.5, req.body.personality, now, req.body.active];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) res.status(400).send({ message: 'hearts activation failed, Error: ' + err });
+      res.status(200).end();
+    });
   });
 
   // Retrieving visit.

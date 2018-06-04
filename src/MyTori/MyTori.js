@@ -107,24 +107,24 @@ class MyTori extends Component {
           id: this.context.userAccount,
           locations: JSON.stringify(layout),
         }
-        fetch('/cribtori/api/room', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data),
-        })
-        .then(function(response) {
-          return response.status;
-        })
-        .then(function(status) {
-          let message = 'Welcome! Your tori has already been waiting for you!';
-          if (status !== 200) {
-            message = 'Uh oh, some error occurred. Some functions might not work properly. Please try again later.';
-          }
-          this.context.onMessage(message);
-        }.bind(this))
-        .catch(console.err);
+        // fetch('/cribtori/api/room', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json'
+        //   },
+        //   body: JSON.stringify(data),
+        // })
+        // .then(function(response) {
+        //   return response.status;
+        // })
+        // .then(function(status) {
+        //   let message = 'Welcome! Your tori has already been waiting for you!';
+        //   if (status !== 200) {
+        //     message = 'Uh oh, some error occurred. Some functions might not work properly. Please try again later.';
+        //   }
+        //   this.context.onMessage(message);
+        // }.bind(this))
+        // .catch(console.err);
       }
       // Get active toris.
       let activeToris = layout.filter((l) => l.key === 'tori').map((l) => { return l.id; });

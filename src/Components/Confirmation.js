@@ -75,7 +75,7 @@ class Confirmation extends Component {
   }
 
   render() {
-    let txhash = tthis.props.history.location.state.receipt.txhash;
+    let txhash = this.props.history.location.state.receipt.txhash;
     return (
       <Grid container className={this.props.classes.root}
                       spacing={16}

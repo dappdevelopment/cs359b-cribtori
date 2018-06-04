@@ -39,6 +39,7 @@ class TokenItem extends Component {
 
     // Function BINDS
     this.renderMenuItem = this.renderMenuItem.bind(this);
+    this.initTori = this.initTori.bind(this);
   }
 
   componentDidMount() {
@@ -62,9 +63,32 @@ class TokenItem extends Component {
           mode: 0,
           info: info,
         });
+
+        // Init tori if necessary
+        this.initTori(info);
       })
       .catch(console.error);
     }
+  }
+
+  initTori(info) {
+    info.active = 0;
+    fetch('/cribtori/api/hearts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(info),
+    })
+    .then(function(response) {
+      return response;
+    })
+    .then(function(response) {
+      if (response.status !== 200) {
+        throw "Tori initialization failed, Error: " + response.text()
+      }
+    }.bind(this))
+    .catch(console.err);
   }
 
   renderMenuItem() {
