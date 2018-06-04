@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link, Switch, Route, withRouter } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -22,7 +22,6 @@ import Save from '@material-ui/icons/Save';
 
 import Room from '../Components/Room.js';
 import TokenItem from '../Components/TokenItem.js';
-import ToriImage from '../Components/ToriImage.js';
 
 import * as util from '../utils.js';
 import { assets } from '../assets.js';

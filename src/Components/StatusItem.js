@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link, Switch, Route, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 
 import Hearts from './Hearts.js';
 import TokenItem from './TokenItem.js';

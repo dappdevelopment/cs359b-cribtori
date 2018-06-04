@@ -1,21 +1,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link, Switch, Route, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import List from '@material-ui/core/List';
-import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
 import TokenItem from './TokenItem.js';
 import Timer from './Timer.js';
 
-import { assets } from '../assets.js';
 import * as util from '../utils.js';
 
 const styles = theme => ({

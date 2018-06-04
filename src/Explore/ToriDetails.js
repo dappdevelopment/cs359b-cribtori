@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link, Switch, Route, withRouter } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -11,7 +11,6 @@ import Divider from '@material-ui/core/Divider';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import IconButton from '@material-ui/core/IconButton';
-import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
 import Edit from '@material-ui/icons/Edit';

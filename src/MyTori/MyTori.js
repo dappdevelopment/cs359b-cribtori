@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link, Switch, Route, withRouter } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -118,10 +118,10 @@ class MyTori extends Component {
         });
 
         // Now, save the layout (silently)...
-        let data = {
-          id: this.state.userAccount,
-          locations: JSON.stringify(layout),
-        }
+        // let data = {
+        //   id: this.state.userAccount,
+        //   locations: JSON.stringify(layout),
+        // }
       }
       // Get active toris.
       let activeToris = layout.filter((l) => l.key === 'tori').map((l) => { return l.id; });

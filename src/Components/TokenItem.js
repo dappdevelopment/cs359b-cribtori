@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link, Switch, Route } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
 import Avatar from '@material-ui/core/Avatar';
 import ListItemText from '@material-ui/core/ListItemText';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Typography from '@material-ui/core/Typography';
 
 import ToriImage from './ToriImage.js';
 
@@ -87,7 +85,7 @@ class TokenItem extends Component {
       if (response.status !== 200) {
         throw "Tori initialization failed, Error: " + response.text()
       }
-    }.bind(this))
+    })
     .catch(console.err);
   }
 

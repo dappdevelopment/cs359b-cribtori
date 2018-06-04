@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link, Switch, Route } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
@@ -13,7 +12,6 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 
 import ToriImage from './ToriImage.js';
@@ -21,10 +19,6 @@ import BuyInput from './BuyInput.js';
 
 import * as util from '../utils.js';
 import { assets } from '../assets.js';
-
-
-// TODO
-import sampleImg from '../img/accessories/TCC.png';
 
 const styles = theme => ({
   root: {
@@ -243,7 +237,6 @@ class TokenInfo extends Component {
   }
 
   renderToriAction() {
-    let content;
     if (this.props.forSale) {
       // Show buy button and sale info
       return (
