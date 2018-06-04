@@ -1,3 +1,4 @@
+import "babel-polyfill";
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link, Switch, Route, withRouter } from 'react-router-dom';
