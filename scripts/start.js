@@ -578,7 +578,7 @@ function createEndpoints(devServer) {
     // We're activating or deactivating. So no need to update the hearts.
     // When we're activating, we want to reset the last update to now.
     var query = 'INSERT IGNORE INTO hearts (tori_id, hearts, personality, last_update, active) VALUES (?, ?, ?, ?, ?)';
-    var inserts = [req.body.id, 2.5, req.body.personality, now, req.body.active];
+    var inserts = [req.body.id, 2.6, req.body.personality, now, req.body.active];
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
       if (err) res.status(400).send({ message: 'hearts activation failed, Error: ' + err });

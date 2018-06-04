@@ -61,6 +61,7 @@ class Fuse extends Component {
   static contextTypes = {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
+    toriVisit: PropTypes.object,
     accContracts: PropTypes.array,
     userAccount: PropTypes.string,
     onMessage: PropTypes.func,
@@ -145,6 +146,7 @@ class Fuse extends Component {
           <TokenItem key={id}
                      id={id}
                      selected={id === selectedCom}
+                     showLevel={true}
                      onItemSelected={callback} />
         );
       });
@@ -171,7 +173,7 @@ class Fuse extends Component {
       if (!result) {
         message = this.state.offering.name + '\'s fusion failed';
       }
-      this.props.onMessage(message);
+      this.context.onMessage(message);
 
       if (result) {
         this.props.history.push({

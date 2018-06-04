@@ -108,10 +108,16 @@ class TokenInfo extends Component {
       util.retrieveTokenInfo(this.context.toriToken, this.props.id, this.context.userAccount)
       .then((result) => {
         let info = util.parseToriResult(result);
-        this.setState({
-          mode: 0,
-          info: info,
-        });
+
+        let empty = '0x0000000000000000000000000000000000000000';
+        if (info.owner === empty) {
+          this.props.onEmpty(info.id);
+        } else {
+          this.setState({
+            mode: 0,
+            info: info,
+          });
+        }
       })
       .catch(console.error);
     }

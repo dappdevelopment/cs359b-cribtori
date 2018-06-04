@@ -31,7 +31,12 @@ class OtherToris extends Component {
 
     this.state = {
       otherToris: [],
+      empties: [],
     }
+
+    // Function BINDS
+    this.onEmpty = this.onEmpty.bind(this);
+    this.renderDisplay = this.renderDisplay.bind(this);
   }
 
   componentDidMount() {
@@ -62,7 +67,9 @@ class OtherToris extends Component {
             // Filter the toris.
             data = data.map((d) => { return d.tori_id; });
             otherIds = otherIds.filter((id) => data.indexOf(id) !== -1);
-            this.initDisplay(otherIds);
+            this.setState({
+              ids: otherIds
+            });
           }.bind(this))
           .catch(console.err);
         })
@@ -71,18 +78,29 @@ class OtherToris extends Component {
     .catch(console.error);
   }
 
-  initDisplay(ids) {
+  renderDisplay() {
+    if (this.state.ids === undefined) return (<div></div>);
+
+    let ids = this.state.ids;
+    ids = ids.filter((id) => this.state.empties.indexOf(id) === -1);
     let minSize = (ids.length >= 4) ? 3 : Math.floor(12 / ids.length);
     let items = ids.map((id) => {
       return (
         <Grid item sm={minSize} key={id} >
-          <TokenInfo id={id}/>
+          <TokenInfo id={id}
+                     onEmpty={this.onEmpty}/>
         </Grid>
       );
     });
+    return items;
+  }
+
+  onEmpty(id) {
+    let empties = this.state.empties;
+    if (empties.indexOf(id) === -1) empties.push(id);
     this.setState({
-      otherToris: items,
-    });
+      empties: empties,
+    })
   }
 
   render() {
@@ -92,7 +110,7 @@ class OtherToris extends Component {
                       alignItems={'center'}
                       direction={'row'}
                       justify={'center'}>
-        { this.state.otherToris }
+        { this.renderDisplay() }
       </Grid>
     );
   }

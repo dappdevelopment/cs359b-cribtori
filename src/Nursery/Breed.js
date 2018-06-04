@@ -145,6 +145,7 @@ class Breed extends Component {
             <TokenItem key={id}
                        id={id}
                        selected={id === selectedCom}
+                       showLevel={true}
                        onItemSelected={callback} />
           );
         });
@@ -167,7 +168,7 @@ class Breed extends Component {
       .then((result) => {
         if (!result) {
           let message = this.state.offering.name + '\'s breeding failed';
-          this.props.onMessage(message);
+          this.context.onMessage(message);
           return;
         }
 
@@ -263,7 +264,7 @@ class Breed extends Component {
               <CardContent>
                 <ExpansionPanel>
                   <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography>Choose your offering</Typography>
+                    <Typography>Choose your Tori</Typography>
                   </ExpansionPanelSummary>
                   { this.renderToriList() }
                 </ExpansionPanel>

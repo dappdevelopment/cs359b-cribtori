@@ -104,6 +104,8 @@ class EditRoom extends Component {
     .then((result) => {
       let layout = (result.locations) ? JSON.parse(result.locations) : [];
 
+      layout = layout.filter((l) => (l.key !== 'tori' || this.state.toriIds.indexOf(l.id) !== -1));
+
       // Check if layout is empty.
       if (layout.length === 0) {
         layout = layout.concat({
