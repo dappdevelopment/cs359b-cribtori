@@ -187,17 +187,17 @@ class Room extends Component {
   reassignLayout(cells) {
     // Check the layout.
     let layout = this.props.layout;
-    if (!this.props.isEdit &&
-        this.props.layout.length === 0 &&
-        this.props.firstTori !== undefined) {
-        // Fill in with the first tori, if any.)
-        layout = [{
-          c: this.props.width - Math.floor(this.props.width / 2) - 1,
-          r: 0,
-          key: 'tori',
-          id: this.props.firstTori,
-        }];
-    }
+    // if (!this.props.isEdit &&
+    //     this.props.layout.length === 0 &&
+    //     this.props.firstTori !== undefined) {
+    //     // Fill in with the first tori, if any.)
+    //     layout = [{
+    //       c: this.props.width - Math.floor(this.props.width / 2) - 1,
+    //       r: 0,
+    //       key: 'tori',
+    //       id: this.props.firstTori,
+    //     }];
+    // }
 
     layout.forEach((content) => {
       let x = content.c;
@@ -216,6 +216,7 @@ class Room extends Component {
       cells = cells.map((oldC) => {
         let oKey = oldC.key;
         let temp = oKey.split('_');
+
         if (temp[0] === 'wall') {
           return oldC;
         } else {

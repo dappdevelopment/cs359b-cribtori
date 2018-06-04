@@ -17,6 +17,7 @@ import Room from '../Components/Room.js';
 import * as util from '../utils.js';
 import { assets } from '../assets.js';
 
+
 const styles = theme => ({
   grid: {
     padding: 50,
@@ -77,13 +78,18 @@ class MyTori extends Component {
   }
 
   componentDidMount() {
-    util.retrieveTokenIndexes(this.context.toriToken, this.state.userAccount)
-    .then((toriIds) => {
+    util.retrieveTokenIndexesWithMaxLevel(this.context.toriToken, this.state.userAccount)
+    .then((results) => {
+      let toriIds = results[0];
+      let maxLevel = results[1];
+
       toriIds = toriIds.map((id) => { return id.toNumber() });
+      maxLevel = maxLevel.toNumber();
 
       this.setState({
         loaded: true,
         toriIds: toriIds,
+        sizes: util.getRoomSizes(maxLevel),
       }, this.retrieveLayout);
     })
     .catch(console.error);
@@ -105,7 +111,7 @@ class MyTori extends Component {
         // Let's save the layout for this one tori.
         // TODO: customizable width and height.
         layout.push({
-          c: 3 - Math.floor(2 / 2) - 1,
+          c: this.state.sizes[0] - Math.floor(this.state.sizes[0] / 2) - 1,
           r: 0,
           key: 'tori',
           id: this.state.toriIds[0],
@@ -222,11 +228,11 @@ class MyTori extends Component {
   renderActions() {
     let feedingText = this.state.feeding ? 'Feed - Click again to cancel' : 'Feed';
     let cleaningText = this.state.cleaning ? 'Clean - Click again to cancel' : 'Clean';
+    // TODO: <MenuItem disabled >Craft</MenuItem>
     return (
       <MenuList>
         <MenuItem onClick={ this.feedingSwitch }>{ feedingText }</MenuItem>
         <MenuItem onClick={ this.cleaningSwitch }>{ cleaningText }</MenuItem>
-        <MenuItem disabled >Craft</MenuItem>
         <Divider />
         <MenuItem component={Link}
                   to={'/mytoris/edit'}
@@ -268,8 +274,8 @@ class MyTori extends Component {
         </Grid>
         <Grid item sm={6} className={actionCursor}>
           { (this.state.loaded && this.state.roomLayout && this.state.toriIds) ? (
-            <Room width={3}
-                  height={2}
+            <Room width={this.state.sizes[0]}
+                  height={this.state.sizes[1]}
                   layout={this.state.roomLayout}
                   firstTori={this.state.toriIds[0]}
                   onToriClick={this.onToriClick} />

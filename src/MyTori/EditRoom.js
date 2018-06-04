@@ -73,14 +73,18 @@ class EditRoom extends Component {
   }
 
   componentDidMount() {
-    // Get all toris.
-    util.retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
-    .then((toriIds) => {
+    util.retrieveTokenIndexesWithMaxLevel(this.context.toriToken, this.context.userAccount)
+    .then((results) => {
+      let toriIds = results[0];
+      let maxLevel = results[1];
+
       toriIds = toriIds.map((id) => { return id.toNumber() });
+      maxLevel = maxLevel.toNumber();
 
       this.setState({
         loaded: true,
         toriIds: toriIds,
+        sizes: util.getRoomSizes(maxLevel),
       }, this.retrieveLayout);
     })
     .catch(console.error);
@@ -341,8 +345,8 @@ class EditRoom extends Component {
         </Grid>
         <Grid item sm={6}>
           { (this.state.loaded && this.state.roomLayout && this.state.toriIds) ? (
-            <Room width={3}
-                  height={2}
+            <Room width={this.state.sizes[0]}
+                  height={this.state.sizes[1]}
                   layout={this.state.roomLayout}
                   firstTori={this.state.toriIds[0]}
                   selectedItem={this.state.selectedItem}

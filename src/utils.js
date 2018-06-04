@@ -14,6 +14,10 @@ export function retrieveTokenIndexes(contract, addr) {
   return contract.getTokenIndexes.call(addr);
 }
 
+export function retrieveTokenIndexesWithMaxLevel(contract, addr) {
+  return contract.getTokenIndexesWithMaxLevel.call(addr);
+}
+
 
 export function generateInitialTori(contract, quiz, name, addr) {
   return contract.generateInitialTori(quiz, name, { from: addr });
@@ -22,6 +26,21 @@ export function generateInitialTori(contract, quiz, name, addr) {
 
 export function retrieveAllTokenInfo(contract, addr) {
   return contract.retrieveAllInfo({ from: addr });
+}
+
+
+export function getRoomSizes(maxLevel) {
+  // TODO: refactor this.
+  // 1 - 2: 3x2
+  // 3 - 4: 3x3
+  // 5 - ?: 3x4
+  let sizes = [3, 2];
+  if (maxLevel >= 5) {
+    sizes[1] = 4;
+  } else if (maxLevel >= 3) {
+    sizes[1] = 3;
+  }
+  return sizes;
 }
 
 

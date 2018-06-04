@@ -308,7 +308,7 @@ function createEndpoints(devServer) {
     let decrement = [0.5, 1, 1, 0.5];
 
     let denom = (type === 'feed') ? 2 : 1;
-    let plus = (type === -1) ? 0 : increment[personality] / denom;
+    let plus = (type === -1) ? 0 : (increment[personality] / denom);
     let hourPassed = (currentTime - lastUpdate) / ONE_HOUR;
 
     hearts = hearts + plus - decrement[personality] * (hourPassed / 4);
@@ -321,29 +321,43 @@ function createEndpoints(devServer) {
   let updateHearts = function(req, res) {
     let info = req.body.info;
     let personality = info.personality;
-    let lastUpdate = new Date(req.body.lastUpdate);
-    let hearts = req.body.hearts;
     let actTime = req.body.actTime;
 
-    hearts = calculateHearts(hearts, req.activity_type, personality, lastUpdate, actTime);
-
-    // We're updating the hearts!
-    var query = 'UPDATE hearts SET hearts = ?, last_update = ? WHERE tori_id = ?';
-    var inserts = [hearts, actTime, req.body.id];
+    var query = 'SELECT * from hearts where tori_id = ?';
+    var inserts = [req.body.id]
     query = mysql.format(query, inserts);
     connection.query(query, function (err, rows, fields) {
       if (err) {
         return connection.rollback(function() {
-          throw error;
+          throw err;
         });
       }
-      connection.commit(function(err) {
+
+      // TODO: assuming there's already an entry.
+      let hearts = rows[0].hearts;
+      let lastUpdate = rows[0].last_update;
+
+      hearts = calculateHearts(hearts, req.activity_type, personality, lastUpdate, actTime);
+
+      // We're updating the hearts!
+      query = 'UPDATE hearts SET hearts = ?, last_update = ? WHERE tori_id = ?';
+      inserts = [hearts, actTime, req.body.id];
+
+      query = mysql.format(query, inserts);
+      connection.query(query, function (err, rows, fields) {
         if (err) {
           return connection.rollback(function() {
             throw err;
           });
         }
-        res.status(200).end();
+        connection.commit(function(err) {
+          if (err) {
+            return connection.rollback(function() {
+              throw err;
+            });
+          }
+          res.status(200).end();
+        });
       });
     });
   }

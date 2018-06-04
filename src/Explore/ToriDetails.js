@@ -15,6 +15,7 @@ import ToriImage from '../Components/ToriImage.js';
 import Hearts from '../Components/Hearts.js';
 import TradeDialog from '../Components/TradeDialog.js';
 import BuyInput from '../Components/BuyInput.js';
+import LevelStepper from '../Components/LevelStepper.js';
 
 import * as util from '../utils.js';
 
@@ -171,7 +172,10 @@ class ToriDetails extends Component {
       }
       return (
         <MenuList>
-          <MenuItem>Visit Room</MenuItem>
+          <MenuItem component={Link}
+                    to={{ pathname: '/mytoris', state: { account: this.state.info.owner} }}>
+            Visit Room
+          </MenuItem>
           <Divider />
           { tradeAction }
         </MenuList>
@@ -261,6 +265,12 @@ class ToriDetails extends Component {
                    elevation={4}>
               { this.renderActions() }
             </Paper>
+          </Grid>
+          <Grid item sm={12}>
+            <Typography variant="body2" color="inherit" component="h3" align="center">
+              Abilities unlocked by level:
+            </Typography>
+            <LevelStepper />
           </Grid>
           <TradeDialog open={this.state.dialogOpen}
                        amountNeeded={false}
