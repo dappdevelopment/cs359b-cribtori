@@ -5,12 +5,18 @@ import { Link, Switch, Route, withRouter } from 'react-router-dom';
 // Tori contracts
 import ToriToken from '../build/contracts/ToriToken.json';
 import ToriVisit from '../build/contracts/ToriVisit.json';
+import ToriSimplePromo from '../build/contracts/ToriSimplePromo.json';
+
 // Accessories contract
-import WoodenDesk from '../build/contracts/WoodenDesk.json';
-import WoodenCabinet from '../build/contracts/WoodenCabinet.json';
-import WoodenStool from '../build/contracts/WoodenStool.json';
-import WoodenBed from '../build/contracts/WoodenBed.json';
 import ClothCushion from '../build/contracts/ClothCushion.json';
+import FoosballTable from '../build/contracts/FoosballTable.json';
+import PottedPlant from '../build/contracts/PottedPlant.json';
+import StandardTv from '../build/contracts/StandardTv.json';
+import WoodenBed from '../build/contracts/WoodenBed.json';
+import WoodenCabinet from '../build/contracts/WoodenCabinet.json';
+import WoodenDesk from '../build/contracts/WoodenDesk.json';
+import WoodenStool from '../build/contracts/WoodenStool.json';
+import WoodenTable from '../build/contracts/WoodenTable.json';
 
 import getWeb3 from './utils/getWeb3';
 
@@ -27,6 +33,7 @@ import OtherToris from './Explore/OtherToris.js';
 import ToriDetails from './Explore/ToriDetails.js';
 import Market from './Marketplace/Market.js';
 import Confirmation from './Components/Confirmation.js';
+import Promo from './Promo/Promo.js';
 
 
 import './css/oswald.css'
@@ -83,6 +90,7 @@ class App extends Component {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
     toriVisit: PropTypes.object,
+    toriPromo: PropTypes.object,
     accContracts: PropTypes.array,
     userAccount: PropTypes.string,
     onMessage: PropTypes.func,
@@ -117,6 +125,7 @@ class App extends Component {
       web3: this.state.web3,
       toriToken: this.state.toriTokenInstance,
       toriVisit: this.state.toriVisitInstance,
+      toriPromo: this.state.toriPromoInstance,
       accContracts: this.state.accessoriesTokenInstances,
       userAccount: this.state.userAccount,
       onMessage: this.handleMessage
@@ -168,17 +177,24 @@ class App extends Component {
 
     const contract = require('truffle-contract');
     const toriToken = contract(ToriToken);
-    toriToken.setProvider(this.state.web3.currentProvider);
     const toriVisit = contract(ToriVisit);
+    const toriPromo = contract(ToriSimplePromo);
+    toriToken.setProvider(this.state.web3.currentProvider);
     toriVisit.setProvider(this.state.web3.currentProvider);
-    // Accessories
-    const wd = contract(WoodenDesk);
-    const wc = contract(WoodenCabinet);
-    const ws = contract(WoodenStool);
-    const wb = contract(WoodenBed);
-    const cc = contract(ClothCushion);
+    toriPromo.setProvider(this.state.web3.currentProvider);
 
-    let accessories = [wd, wc, ws, wb, cc];
+    // Accessories
+    const cc = contract(ClothCushion);
+    const ft = contract(FoosballTable);
+    const pp = contract(PottedPlant);
+    const st = contract(StandardTv);
+    const wb = contract(WoodenBed);
+    const wc = contract(WoodenCabinet);
+    const wd = contract(WoodenDesk);
+    const ws = contract(WoodenStool);
+    const wt = contract(WoodenTable);
+
+    let accessories = [cc, ft, pp, st, wb, wc, wd, ws, wt];
     this.setState({
       accNum: accessories.length,
     });
@@ -196,6 +212,11 @@ class App extends Component {
       // Tori Visit
       toriVisit.deployed().then((instance) => {
         this.setState({toriVisitInstance: instance})
+      });
+
+      // Tori Promo
+      toriPromo.deployed().then((instance) => {
+        this.setState({toriPromoInstance: instance})
       });
 
       // Tori Accessories
@@ -268,6 +289,7 @@ class App extends Component {
             <Route exact path='/explore/:id' component={ToriDetails} />
             <Route exact path='/market' component={Market} />
             <Route exact path='/confirmation' component={Confirmation} />
+            <Route exact path='/promo' component={Promo} />
           </Switch>
         }
         <Snackbar

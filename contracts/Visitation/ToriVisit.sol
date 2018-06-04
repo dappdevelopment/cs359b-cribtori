@@ -17,6 +17,8 @@ contract ToriTokenInterface {
                       uint32 proficiency,
                       uint32 personality,
                       uint32 readyTime,
+                      uint256 generation,
+                      uint256 special,
                       uint postingPrice,
                       address toriOwner);
 
@@ -29,7 +31,8 @@ contract ToriTokenInterface {
                             uint256 _parent1,
                             uint256 _parent2,
                             string _name,
-                            address _owner) public returns (bool success);
+                            address _owner,
+                            uint256 _special) public returns (bool success);
 
   function ownerOf(uint256 _tokenId) public view returns (address);
 }
@@ -64,21 +67,22 @@ contract ToriVisit is DnaCore, Ownable {
     toriTokenInterface = ToriTokenInterface(_address);
   }
 
-  function _prepareFusion(uint256 _toriId, uint256 _otherToriId) private view returns (uint256 level) {
+  function _prepareFusion(uint256 _toriId, uint256 _otherToriId) private view returns (uint256 level, uint256 special) {
     require(toriTokenInterface.ownerOf(_toriId) == msg.sender &&
             toriTokenInterface.ownerOf(_otherToriId) == msg.sender &&
             !occupied[_toriId] && !occupied[_otherToriId]);
     uint256 price;
-    (, , level, , , , , price, ) = toriTokenInterface.getTokenInfo(_toriId);
+    (, , level, , , , , , special, price, ) = toriTokenInterface.getTokenInfo(_toriId);
     uint256 otherLevel;
     uint256 otherPrice;
-    (, , otherLevel, , , , , otherPrice, ) = toriTokenInterface.getTokenInfo(_otherToriId);
+    (, , otherLevel, , , , , , , otherPrice, ) = toriTokenInterface.getTokenInfo(_otherToriId);
     require(level == otherLevel && price == 0 && otherPrice == 0);
-    return level;
   }
 
   function fuseToris(uint256 _toriId, uint256 _otherToriId, string _name) public returns (bool success) {
-    uint256 level = _prepareFusion(_toriId, _otherToriId);
+    uint256 level;
+    uint256 special;
+    (level, special) = _prepareFusion(_toriId, _otherToriId);
 
     uint256 newDna;
     uint32 newProficiency;
@@ -97,7 +101,8 @@ contract ToriVisit is DnaCore, Ownable {
       _toriId,
       _otherToriId,
       _name,
-      msg.sender);
+      msg.sender,
+      special);
     if (success) {
       // Burn the tokens
       // TODO: Evaluate gas
@@ -122,9 +127,9 @@ contract ToriVisit is DnaCore, Ownable {
             !occupied[_toriId]);
     // Get level information
     uint256 level;
-    (, , level, , , , , ,) = toriTokenInterface.getTokenInfo(_toriId);
+    (, , level, , , , , , , ,) = toriTokenInterface.getTokenInfo(_toriId);
     uint256 otherLevel;
-    (, , otherLevel, , , , , , ) = toriTokenInterface.getTokenInfo(_otherToriId);
+    (, , otherLevel, , , , , , , ,) = toriTokenInterface.getTokenInfo(_otherToriId);
     require(otherLevel <= level);
     id = tickets.push(VisitTicket(_toriId, _otherToriId,
                                   otherLevel, now,
@@ -142,7 +147,7 @@ contract ToriVisit is DnaCore, Ownable {
     uint256 dna;
     uint32 proficiency;
     uint32 personality;
-    (, dna, , , proficiency, personality, , , ) = toriTokenInterface.getTokenInfo(_toriId);
+    (, dna, , , proficiency, personality, , , , , ) = toriTokenInterface.getTokenInfo(_toriId);
 
     result[0] = dna;
     result[1] = uint256(proficiency);
@@ -200,7 +205,8 @@ contract ToriVisit is DnaCore, Ownable {
       ticket.toriId,
       ticket.otherId,
       _name,
-      msg.sender
+      msg.sender,
+      0
     );
     if (result) {
       ticket.claimed = true;

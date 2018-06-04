@@ -16,8 +16,10 @@ contract WoodenTable is AccessoriesToken {
     rarity = 2;
 
     fundsWallet = msg.sender;
-    balances[msg.sender] = 10;
+    balances[msg.sender] = 55;
     totalSupply_ = 10000;
-    unitsOneEthCanBuy = 50;
+    unitsOneEthCanBuy = 500;
+
+    approveForSale(20, 2000000000000000);
   }
 }

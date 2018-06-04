@@ -25,7 +25,6 @@ contract DnaCore {
   // Sanguine >> choleric >> melancholic >> phlegmatic
   uint256[] internal PERSONALITY_THRESHOLD = [150, 200, 300, 350];
 
-
   function _interpretThreshold(uint32 _val, uint256[] threshold) private pure returns (uint32) {
     // 5 Proficiency type with *Talented* and *Fats-learner* as 'rare' trait.
     uint cumulative = 0;

@@ -23,11 +23,6 @@ export function changeToriName(contract, id, name, addr) {
 }
 
 
-export function generateInitialTori(contract, quiz, name, addr) {
-  return contract.generateInitialTori(quiz, name, { from: addr });
-}
-
-
 export function retrieveAllTokenInfo(contract, addr) {
   return contract.retrieveAllInfo({ from: addr });
 }
@@ -121,6 +116,8 @@ export function parseToriResult(result) {
   let toriProficiency = result[4].toNumber();
   let toriPersonality = result[5].toNumber();
   let toriReadyTime = result[6].toNumber();
+  let toriGeneration = result[7].toNumber();
+  let toriSpecial = result[8].toNumber();
   let toriSalePrice = result[7].toNumber();
   let toriOwner = result[8];
 
@@ -132,6 +129,8 @@ export function parseToriResult(result) {
     proficiency: toriProficiency,
     personality: toriPersonality,
     readyTime: toriReadyTime,
+    generation: toriGeneration,
+    special: toriSpecial,
     salePrice: toriSalePrice,
     owner: toriOwner,
   }
@@ -202,6 +201,16 @@ export function parseTicketResult(result) {
     claimed: claimed,
   }
   return ticketInfo;
+}
+
+
+/* PROMO Utilities */
+export function claimPromoCode(contract, quiz, name, addr, code) {
+  return contract.claimCode(quiz, name, code, {from: addr});
+}
+
+export function claimInitialTori(contract, quiz, name, addr) {
+  return contract.claimInitialTori(quiz, name, {from: addr});
 }
 
 

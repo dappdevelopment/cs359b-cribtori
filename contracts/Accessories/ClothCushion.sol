@@ -16,8 +16,10 @@ contract ClothCushion is AccessoriesToken {
     rarity = 1;
 
     fundsWallet = msg.sender;
-    balances[msg.sender] = 10;
+    balances[msg.sender] = 55;
     totalSupply_ = 10000;
-    unitsOneEthCanBuy = 80;
+    unitsOneEthCanBuy = 200;
+
+    approveForSale(30, 5000000000000000);
   }
 }
