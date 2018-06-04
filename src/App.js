@@ -42,6 +42,8 @@ import Typography from '@material-ui/core/Typography';
 import Toolbar from '@material-ui/core/Toolbar';
 import Snackbar from '@material-ui/core/Snackbar';
 
+import { assets } from './assets.js';
+
 function TabContainer(props) {
   return (
     <Typography component="div" style={{ padding: 8 * 3 }}>
@@ -55,6 +57,9 @@ TabContainer.propTypes = {
 };
 
 const styles = theme => ({
+  logo: {
+    height: '30px'
+  },
   tab: {
     position: 'absolute',
     right: 0,
@@ -65,6 +70,11 @@ const styles = theme => ({
     height: 20,
     width: `100%`,
   },
+  footer: {
+    backgroundColor: theme.palette.primary.dark,
+    height: 20,
+    width: `100%`,
+  }
 });
 
 class App extends Component {
@@ -84,7 +94,7 @@ class App extends Component {
     let loc = this.props.history.location.pathname;
     loc = loc.split('/')[1];
 
-    const locMode = {'': 4, 'mytoris': 0, 'nursery': 1, 'inventory': 2, 'explore': 3, 'market': 4}
+    const locMode = {'': 5, 'mytoris': 0, 'nursery': 1, 'inventory': 2, 'explore': 3, 'market': 4}
     let currentMode = locMode[loc];
 
     this.state = {
@@ -138,7 +148,7 @@ class App extends Component {
             // Redirect ...
             this.setState({
               userAccount: accounts[0],
-              mode: 4,
+              mode: 5,
             }, () => {
               if (this.props.history.location.pathname !== "/") this.props.history.push('/');
             });
@@ -224,9 +234,10 @@ class App extends Component {
       <div className="App">
         <AppBar position="static">
           <Toolbar>
-            <Typography variant="title" color="inherit">
-              Cribtori
-            </Typography>
+            <img src={assets.logoWhite}
+                 alt={"Cribtori"}
+                 className={this.props.classes.logo}
+                 onClick={() => { if (this.props.history.location.pathname !== "/") this.props.history.push('/'); }} />
             <Tabs value={this.state.mode}
                   onChange={this.switchDisplay}
                   className={this.props.classes.tab}>
@@ -267,6 +278,8 @@ class App extends Component {
           }}
           message={<span id="message-id">{this.state.snackBarMessage}</span>}
         />
+        <div className={this.props.classes.footer}>
+        </div>
       </div>
     );
   }
