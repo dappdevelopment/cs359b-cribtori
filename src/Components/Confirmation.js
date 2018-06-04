@@ -29,7 +29,7 @@ class Confirmation extends Component {
     }
 
     this.state ={
-      txhash: receipt.txhash
+      txhash: receipt.transactionHash
     }
   }
 

@@ -644,6 +644,34 @@ function createEndpoints(devServer) {
       res.status(200).end();
     })
   });
+
+
+  devServer.get('/cribtori/api/greetings/:id', function(req, res) {
+    var id = req.params.id;
+    var query = 'SELECT * from greetings where tori_id = ?';
+    var inserts = [id];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) return res.status(400).send({ message: 'invalid tori ID' });
+
+      if (rows.length > 0) {
+        return res.status(200).send({greetings: rows[0].greetings});
+      } else {
+        return res.status(200).send({});
+      }
+    })
+  });
+
+  // Posting greetings.
+  devServer.post('/cribtori/api/greetings', function(req, res) {
+    var query = 'INSERT INTO greetings (tori_id, greetings) VALUES (?, ?) ON DUPLICATE KEY UPDATE greetings = ?';
+    var inserts = [req.body.id, req.body.greetings, req.body.greetings];
+    query = mysql.format(query, inserts);
+    connection.query(query, function (err, rows, fields) {
+      if (err) res.status(400).send({ message: 'saving greetings failed, Error: ' + err });
+      res.status(200).end();
+    })
+  });
 }
 
 

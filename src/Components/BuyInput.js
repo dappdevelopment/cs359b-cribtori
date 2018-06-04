@@ -83,15 +83,16 @@ class BuyInput extends Component {
                          this.context.userAccount)
       .then((result) => {
         let message = 'Buy transaction submitted';
-        if (!result) message = 'Transaction failed :(';
-        this.context.onMessage(message);
-
-        if (result) {
-          this.props.history.push({
-            pathname: '/confirmation',
-            state: {receipt: result.receipt}
-          })
+        if (!result) {
+          message = 'Transaction failed :(';
+          this.context.onMessage(message);
+          return;
         }
+
+        this.props.history.push({
+          pathname: '/confirmation',
+          state: {receipt: result.receipt}
+        });
       })
       .catch(console.err);
     } else {

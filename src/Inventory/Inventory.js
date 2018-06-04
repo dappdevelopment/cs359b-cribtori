@@ -134,7 +134,7 @@ class Inventory extends Component {
       util.postAccForSale(contract, data.amount, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
       .then((result) => {
         if (!result) this.context.onMessage("Uh oh, something went wrong. Please try again later");
-        this.context.onMessage("Posting accessory for sale in progress, TXHash: " + result.receipt.txhash);
+        this.context.onMessage("Posting accessory for sale in progress, TXHash: " + result.receipt.transactionHash);
         this.setState({
           dialogOpen: false,
         });

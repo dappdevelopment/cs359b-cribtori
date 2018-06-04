@@ -100,6 +100,7 @@ class TokenItem extends Component {
     if (this.state.mode === 0) {
       // Check for tori.
       if (this.props.active !== undefined) disabled = this.props.active.indexOf(this.state.info.id) !== -1;
+      if (this.props.nursery !== undefined && this.props.nursery) disabled = this.state.info.salePrice > 0;
     } else {
       // Check for accessory
       amount = this.state.info.balance - this.state.info.amount;

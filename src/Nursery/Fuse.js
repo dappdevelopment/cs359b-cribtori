@@ -141,11 +141,13 @@ class Fuse extends Component {
         selectedCom = this.state.offering.id;
         ids = this.state.toriIds.filter((id) => id !== this.state.base.id);
       }
+
       content = ids.map((id) => {
         return (
           <TokenItem key={id}
                      id={id}
                      selected={id === selectedCom}
+                     nursery={true}
                      showLevel={true}
                      onItemSelected={callback} />
         );
@@ -187,11 +189,12 @@ class Fuse extends Component {
 
   renderFusionAction() {
     let valid = this.state.base.id !== undefined && this.state.offering.id !== undefined;
+    valid = valid && this.state.base.level === this.state.offering.level;
     return (
       <Paper className={this.props.classes.paper}>
         { !valid ? (
           <Typography variant="subheading" color="inherit" component="p" align="center">
-            Choose your two Toris to combine.
+            Choose your two Toris of the SAME level to combine.
           </Typography>
         ) : (
           <Button className={this.props.classes.fuseButton}

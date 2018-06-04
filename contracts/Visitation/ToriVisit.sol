@@ -64,16 +64,21 @@ contract ToriVisit is DnaCore, Ownable {
     toriTokenInterface = ToriTokenInterface(_address);
   }
 
-  function fuseToris(uint256 _toriId, uint256 _otherToriId, string _name) public returns (bool success) {
+  function _prepareFusion(uint256 _toriId, uint256 _otherToriId) private view returns (uint256 level) {
     require(toriTokenInterface.ownerOf(_toriId) == msg.sender &&
             toriTokenInterface.ownerOf(_otherToriId) == msg.sender &&
             !occupied[_toriId] && !occupied[_otherToriId]);
-    // Get the level information.
-    uint256 level;
-    (, , level, , , , , , ) = toriTokenInterface.getTokenInfo(_toriId);
+    uint256 price;
+    (, , level, , , , , price, ) = toriTokenInterface.getTokenInfo(_toriId);
     uint256 otherLevel;
-    (, , otherLevel, , , , , , ) = toriTokenInterface.getTokenInfo(_otherToriId);
-    require(level == otherLevel);
+    uint256 otherPrice;
+    (, , otherLevel, , , , , otherPrice, ) = toriTokenInterface.getTokenInfo(_otherToriId);
+    require(level == otherLevel && price == 0 && otherPrice == 0);
+    return level;
+  }
+
+  function fuseToris(uint256 _toriId, uint256 _otherToriId, string _name) public returns (bool success) {
+    uint256 level = _prepareFusion(_toriId, _otherToriId);
 
     uint256 newDna;
     uint32 newProficiency;

@@ -145,6 +145,7 @@ class Breed extends Component {
             <TokenItem key={id}
                        id={id}
                        selected={id === selectedCom}
+                       nursery={true}
                        showLevel={true}
                        onItemSelected={callback} />
           );
@@ -219,6 +220,7 @@ class Breed extends Component {
 
     renderBreedAction() {
       let disabled = this.state.offering.id === undefined;
+      disabled = disabled || (this.state.offering.level < this.state.info.level);
       return (
         <Button className={this.props.classes.fuseButton}
                 variant="raised"
@@ -251,9 +253,17 @@ class Breed extends Component {
                          animate={true} />
               <CardHeader title={"Base: " + this.state.info.name}
                           className={this.props.classes.cardHeaderOther} />
+              <CardContent>
+                <Typography variant="subheading" color="inherit" component="h1" align="center">
+                  Level: {this.state.info.level}
+                </Typography>
+              </CardContent>
             </Card>
           </Grid>
           <Grid item sm={2}>
+            <Typography variant="subheading" color="inherit" component="h1" align="center">
+              Choose your Tori with EQUAL or LARGER level.
+            </Typography>
             { this.renderBreedAction() }
           </Grid>
           <Grid item sm={5}>

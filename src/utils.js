@@ -18,6 +18,10 @@ export function retrieveTokenIndexesWithMaxLevel(contract, addr) {
   return contract.getTokenIndexesWithMaxLevel.call(addr);
 }
 
+export function changeToriName(contract, id, name, addr) {
+  return contract.updateName(id, name, {from: addr});
+}
+
 
 export function generateInitialTori(contract, quiz, name, addr) {
   return contract.generateInitialTori(quiz, name, { from: addr });
@@ -28,6 +32,14 @@ export function retrieveAllTokenInfo(contract, addr) {
   return contract.retrieveAllInfo({ from: addr });
 }
 
+
+export function canChangeName(level) {
+  return level >= 4;
+}
+
+export function canChangeGreetings(level) {
+  return level >= 2;
+}
 
 export function getRoomSizes(maxLevel) {
   // TODO: refactor this.

@@ -10,6 +10,13 @@ import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
+import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+
+import Edit from '@material-ui/icons/Edit';
+import Save from '@material-ui/icons/Save';
+import Cancel from '@material-ui/icons/Cancel';
 
 import ToriImage from '../Components/ToriImage.js';
 import Hearts from '../Components/Hearts.js';
@@ -38,6 +45,7 @@ const styles = theme => ({
   }
 });
 
+
 class ToriDetails extends Component {
 
   static contextTypes = {
@@ -55,6 +63,10 @@ class ToriDetails extends Component {
     this.state = {
       id: this.props.match.params.id,
       dialogOpen: false,
+      name: '',
+      isEditName: false,
+      greetings: '',
+      isEditGreetings: false,
     }
 
     // Function BINDS
@@ -66,6 +78,11 @@ class ToriDetails extends Component {
     this.handleDialogClose = this.handleDialogClose.bind(this);
     this.postToriForSale = this.postToriForSale.bind(this);
     this.removeToriForSale = this.removeToriForSale.bind(this);
+    this.nameEditSwitch = this.nameEditSwitch.bind(this);
+    this.greetingsEditSwitch = this.greetingsEditSwitch.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.changeName = this.changeName.bind(this);
+    this.changeGreetings = this.changeGreetings.bind(this);
   }
 
   componentDidMount() {
@@ -76,20 +93,136 @@ class ToriDetails extends Component {
         info: info,
         isOwned: info.owner === this.context.userAccount,
       });
+
+      // Get the greetings.
+      fetch('/cribtori/api/greetings/' + info.id)
+      .then(function(response) {
+        if (response.ok) {
+          return response.json();
+        }
+        throw response;
+      })
+      .then(function(data) {
+        let txt = data.greetings;
+        if (txt === undefined) txt = `Hi there! My name is ${info.name}`;
+
+        this.setState({
+          originalGreetings: txt,
+        });
+      }.bind(this))
+      .catch(console.err);
     })
     .catch(console.error);
   }
 
+  nameEditSwitch() {
+    this.setState({
+      isEditName: !this.state.isEditName,
+      name: ''
+    });
+  }
+
+  greetingsEditSwitch() {
+    this.setState({
+      isEditGreetings: !this.state.isEditGreetings,
+      greetings: ''
+    });
+  }
+
+  handleChange(prop, e) {
+    this.setState({
+      [prop]: e.target.value,
+    });
+  }
+
+  changeName() {
+    util.changeToriName(this.context.toriToken, this.state.info.id, this.state.name, this.context.userAccount)
+    .then((result) => {
+      let message = 'Name change is in progress';
+      if (!result) message = "Uh oh, error in changing name. Please try again later.";
+
+      let info = this.state.info;
+      if (result) {
+        info.name = this.state.name;
+      }
+      this.setState({
+        isEditName: false,
+        info: info
+      })
+      this.context.onMessage(message);
+    })
+  }
+
+  changeGreetings() {
+    let data = {
+      id: this.state.info.id,
+      greetings: this.state.greetings
+    };
+
+    fetch('/cribtori/api/greetings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data),
+    })
+    .then(function(response) {
+      return response.status;
+    })
+    .then(function(status) {
+      // Get the name.
+      let message = 'Greetings updated!';
+      if (status !== 200) message = "Uh oh, error in updating greetings. Please try again later.";
+
+      this.setState({
+        isEditGreetings: false,
+        originalGreetings: this.state.greetings,
+      })
+      this.context.onMessage(message);
+    }.bind(this))
+    .catch(console.error);
+  }
+
   renderGreetings() {
+    let content = (
+      <Typography variant="body2" color="inherit" component="h1" align="left">
+        { this.state.originalGreetings }
+      </Typography>
+    );
+    if (this.state.isEditGreetings && util.canChangeGreetings(this.state.info.level)) {
+      content = (
+        <div>
+          <TextField label={'Fill greetings here'}
+                     value={this.state.greetings}
+                     type="text"
+                     name={"greetings"}
+                     onChange={(e) => this.handleChange('greetings', e)} />
+          <IconButton variant="raised"
+                      color="primary"
+                      aria-label="Save"
+                      onClick={this.changeGreetings}>
+            <Save />
+          </IconButton>
+        </div>
+      );
+    }
     return (
       <Paper className={this.props.classes.paper + ' ' + this.props.classes.primary}>
         <Typography variant="subheading" color="inherit" component="h3" align="left">
           { this.state.info.name }:
+          { this.state.isOwned && util.canChangeGreetings(this.state.info.level) && (
+            <IconButton aria-label="Edit"
+                        onClick={this.greetingsEditSwitch}>
+              { !this.state.isEditGreetings ? (
+                <Edit />
+              ) : (
+                <Cancel />
+              )}
+            </IconButton>
+          )}
         </Typography>
         <Divider />
-        <Typography variant="body2" color="inherit" component="h1" align="left">
-          "Quis laborum ad nisi minim nam non laboris o constias."
-        </Typography>
+        { content }
       </Paper>
     );
   }
@@ -97,6 +230,38 @@ class ToriDetails extends Component {
   renderInfo() {
     let content = (<CircularProgress  color="secondary" />);
     if (this.state.info) {
+      let nameContent = (
+        <Typography variant="title" color="inherit" component="h3" align="center">
+          {this.state.info.name}
+          { this.state.isOwned && util.canChangeName(this.state.info.level) && (
+            <IconButton aria-label="Edit"
+                        onClick={this.nameEditSwitch}>
+              { !this.state.isEditName ? (
+                <Edit />
+              ) : (
+                <Cancel />
+              )}
+            </IconButton>
+          )}
+        </Typography>
+      );
+      if (this.state.isEditName) {
+        nameContent = (
+          <div>
+            <TextField label={'Fill name here'}
+                       value={this.state.name}
+                       type="text"
+                       name={"name"}
+                       onChange={(e) => this.handleChange('name', e)} />
+            <IconButton variant="raised"
+                        color="primary"
+                        aria-label="Save"
+                        onClick={this.changeName}>
+              <Save />
+            </IconButton>
+          </div>
+        );
+      }
       content = (
         <Grid container className={this.props.classes.grid}
                         spacing={8}
@@ -104,9 +269,7 @@ class ToriDetails extends Component {
                         direction={'column'}
                         justify={'center'}>
           <Grid item sm={12}>
-            <Typography variant="title" color="inherit" component="h3" align="center">
-              { this.state.info.name }
-            </Typography>
+            { nameContent }
             <Divider />
             <Typography variant="subheading" color="inherit" component="h3" align="center">
               Level: { this.state.info.level }
@@ -217,7 +380,7 @@ class ToriDetails extends Component {
       util.postTokenForSale(this.context.toriToken, this.state.id, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
       .then((result) => {
         if (!result) this.context.onMessage("Uh oh, something went wrong. Please try again later");
-        this.context.onMessage("Posting Tori for sale in progress, TXHash: " + result.receipt.txhash);
+        this.context.onMessage("Posting Tori for sale in progress, TXHash: " + result.receipt.transactionHash);
         this.setState({
           dialogOpen: false,
         })
@@ -270,7 +433,7 @@ class ToriDetails extends Component {
             <Typography variant="body2" color="inherit" component="h3" align="center">
               Abilities unlocked by level:
             </Typography>
-            <LevelStepper />
+            <LevelStepper level={this.state.info ? this.state.info.level : 1} />
           </Grid>
           <TradeDialog open={this.state.dialogOpen}
                        amountNeeded={false}

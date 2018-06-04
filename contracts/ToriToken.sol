@@ -269,4 +269,15 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
     }
     return result;
   }
+
+  modifier minLevel(uint256 _tokenId, uint256 _minLevel) {
+    require(toris[_tokenId].level >= _minLevel);
+    _;
+  }
+
+  function updateName(uint256 _tokenId, string _newName) public onlyOwnerOf(_tokenId) minLevel(_tokenId, 4) returns (bool) {
+    Tori storage tori = toris[_tokenId];
+    tori.name = _newName;
+    return true;
+  }
 }

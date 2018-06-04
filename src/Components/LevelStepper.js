@@ -17,10 +17,10 @@ const styles = theme => ({
 
 const LEVEL_DESC = [
   '',
-  'Change Tori\'s name',
+  'Change Tori\'s greetings',
   'Increase in room size',
   '',
-  'Change Tori\'s greetings',
+  'Change Tori\'s name',
   'Increase in room size'
 ];
 
@@ -30,11 +30,13 @@ class LevelStepper extends Component {
   constructor(props) {
     super(props);
 
-    let currentLevel = 4; // this.props.currentLevel
+    let currentLevel = this.props.level;
 
-    let start = Math.max(0, currentLevel - 1);
+    let start = currentLevel - 1;
     let levels = [];
+    if (currentLevel !== 1) levels.push(0);
     for (let i = start; i < start + 3; i++) levels.push(i);
+    levels.push(0);
 
     this.state = {
       levelDisplay: levels,
@@ -46,10 +48,17 @@ class LevelStepper extends Component {
 
   renderStep() {
     return this.state.levelDisplay.map((l, i) => {
-      let desc = LEVEL_DESC[l];
+      if (l < 1) {
+        return (
+          <Step key={`step_${i}`}>
+            <StepLabel icon={l === 0 ? '...' : 'X'}></StepLabel>
+          </Step>
+        );
+      }
+      let desc = LEVEL_DESC[l-1];
       if (desc === undefined) desc = DEFAULT_DESC;
       return (
-        <Step key={i}>
+        <Step key={`step_${i}`} active={l <= this.props.level}>
           <StepLabel icon={l}>{ desc }</StepLabel>
         </Step>
       );
@@ -58,14 +67,8 @@ class LevelStepper extends Component {
 
   render() {
     return (
-      <Stepper nonLinear activeStep={2} orientation="horizontal">
-        <Step>
-          <StepLabel icon={'...'}></StepLabel>
-        </Step>
+      <Stepper nonLinear orientation="horizontal">
         { this.renderStep() }
-        <Step>
-          <StepLabel icon={'...'}></StepLabel>
-        </Step>
       </Stepper>
     );
   }
