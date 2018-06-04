@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
-
-import * as util from './utils.js'
+import { Link, withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -16,6 +15,9 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 
+import * as util from '../utils.js'
+
+
 const styles = theme => ({
   root: theme.mixins.gutters({
     paddingTop: 16,
@@ -24,18 +26,28 @@ const styles = theme => ({
   }),
   formControl: {
     margin: theme.spacing.unit * 3,
+  },
+  retrieveButton: {
+    marginTop: 10,
+    backgroundColor: theme.palette.secondary.dark,
   }
 });
 
 
-class ToriWelcome extends Component {
+class Promo extends Component {
+
   static contextTypes = {
+    web3: PropTypes.object,
     toriToken: PropTypes.object,
-    userAccount: PropTypes.string
+    toriPromo: PropTypes.object,
+    accContracts: PropTypes.array,
+    userAccount: PropTypes.string,
+    onMessage: PropTypes.func,
   }
 
-  constructor(props) {
+  constructor(props, context) {
     super(props)
+    this.context = context;
 
     this.state = {
       q1: '',
@@ -43,26 +55,66 @@ class ToriWelcome extends Component {
       q3: '',
       q4: '',
       toriName: '',
+      promoCode: '',
     }
 
+    // Function BINDS
     this.generateInitToris = this.generateInitToris.bind(this);
     this.constructRadioGroup = this.constructRadioGroup.bind(this);
     this.handleChange = this.handleChange.bind(this);
   }
 
+  componentDidMount() {
+    // Check if this user already has a tori.
+    util.retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
+    .then((results) => {
+      let toriIds = results.map((id) => { return id.toNumber() });
+
+      if (toriIds.length > 0) {
+        // Hey.. you're not a new user!
+        this.props.history.push('/mytoris');
+      }
+    })
+    .catch(console.error);
+  }
+
   generateInitToris(e) {
     let quizzes = [this.state.q1, this.state.q2, this.state.q3, this.state.q4];
     quizzes = quizzes.map((q) => parseInt(q, 10));
-    util.generateInitialTori(this.context.toriToken, quizzes, this.state.toriName, this.context.userAccount)
-    .then((result) => {
-      console.log('After generating new tori:', result);
-      // TODO: Generate new accessories.
-      // TODO: reroute to tori display
-      // util.generateNewAccessories(this.context.accToken, this.context.userAccount)
-      // .then((result) => {
-      //   console.log('After generating new accessories:', result);
-      // })
-    })
+
+    if (this.state.promoCode !== '') {
+      util.claimPromoCode(this.context.toriPromo, quizzes, this.state.toriName, this.context.userAccount, this.state.promoCode)
+      .then((result) => {
+        let message = 'Transaction has been subitted';
+        if (!result) {
+          message = 'Uh oh, something went wrong. Please try again later.';
+        }
+        this.context.onMessage(message);
+
+        if (result) {
+          this.props.history.push({
+            pathname: '/confirmation',
+            state: {receipt: result.receipt}
+          });
+        }
+      })
+    } else {
+      util.claimInitialTori(this.context.toriPromo, quizzes, this.state.toriName, this.context.userAccount)
+      .then((result) => {
+        let message = 'Transaction has been subitted';
+        if (!result) {
+          message = 'Uh oh, something went wrong. Please try again later.';
+        }
+        this.context.onMessage(message);
+
+        if (result) {
+          this.props.history.push({
+            pathname: '/confirmation',
+            state: {receipt: result.receipt}
+          });
+        }
+      })
+    }
   }
 
   handleChange(e) {
@@ -116,9 +168,12 @@ class ToriWelcome extends Component {
               <Grid item sm={12}>
                 <Typography variant="body1" gutterBottom align="center">
                   Welcome to Cribtori. Before you explore all the features in Cribtori,
-                  you would need to get your very first tori! You can either buy
-                  any available tori from <b>Yard Sale</b> or generate a custom
-                  tori here! Please fill in the questions below and choose a name
+                  you would need to get your very first tori!
+                </Typography>
+                <Typography variant="body1" gutterBottom align="center">
+                  For a <b>limited number of first users</b>, {'we\'re'} offering
+                  free alpha-generation Tori.
+                  Please fill in the personality quiz below and choose a name
                   for your starter tori. Then, we will generate a suitable tori for you!
                 </Typography>
                 <Divider />
@@ -126,7 +181,7 @@ class ToriWelcome extends Component {
               <Grid item sm={12}>
                 <TextField
                   name={'toriName'}
-                  label="Tori name"
+                  label="Fill Tori name here *"
                   onChange={this.handleChange}
                 />
               </Grid>
@@ -143,10 +198,22 @@ class ToriWelcome extends Component {
                 { this.constructRadioGroup('Idle or Active?', 'q4', ['Idle', 'Active']) }
               </Grid>
               <Grid item sm={12}>
+                <Typography variant="subheading" color="primary" gutterBottom align="center">
+                  Do you have a special promo code?
+                </Typography>
+                <TextField
+                  name={'promoCode'}
+                  label="Fill in promo code here (if any)"
+                  onChange={this.handleChange}
+                  fullWidth
+                  align="center"
+                />
+              </Grid>
+              <Grid item sm={12}>
                 <Button disabled={buttonDisabled}
                         variant="raised"
                         color="primary"
-                        className="retrieve-button"
+                        className={this.props.classes.retrieveButton}
                         onClick={this.generateInitToris} >
                   Retrieve starter Tori
                 </Button>
@@ -159,4 +226,4 @@ class ToriWelcome extends Component {
   }
 }
 
-export default withStyles(styles)(ToriWelcome)
+export default withStyles(styles)(withRouter(Promo))

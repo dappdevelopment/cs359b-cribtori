@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import { assets } from './assets.js';
+import { assets } from '../assets.js';
 
 
 class WallImage extends Component {

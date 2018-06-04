@@ -57,6 +57,18 @@ import MOUTH_3 from './img/tori/mouth/3.png';
 import S_KITTY from './img/tori/special/kitty.png';
 import S_TREE from './img/tori/special/tree.png';
 
+import FOOD from './img/sample.png';
+import CLEAN from './img/sample.png';
+
+
+import FUSE from './img/accessories/TPP.png';
+import BREED from './img/accessories/TPP.png';
+
+import LOGO from './img/Logo.png';
+import LOGO_WHITE from './img/Logo_white.png';
+import INFO1 from './img/info1.png';
+import INFO2 from './img/info2.png';
+
 export const assets = {
   background: {
     floor: [
@@ -102,5 +114,12 @@ export const assets = {
       'kitty': S_KITTY,
       'tree': S_TREE
     }
-  }
+  },
+  food: FOOD,
+  clean: CLEAN,
+  fuse: FUSE,
+  breed: BREED,
+  logo: LOGO,
+  logoWhite: LOGO_WHITE,
+  info: [INFO1, INFO2]
 };

@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
+import { withRouter } from 'react-router-dom';
 
-import * as util from './utils.js';
+import * as util from '../utils.js';
 
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -34,11 +35,16 @@ const styles = theme => ({
 class BuyInput extends Component {
 
   static contextTypes = {
-    userAccount: PropTypes.string
+    web3: PropTypes.object,
+    toriToken: PropTypes.object,
+    accContracts: PropTypes.array,
+    userAccount: PropTypes.string,
+    onMessage: PropTypes.func,
   }
 
-  constructor(props) {
+  constructor(props, context) {
     super(props)
+    this.context = context;
 
     this.state = {
       amount: 0,
@@ -77,15 +83,19 @@ class BuyInput extends Component {
                          this.context.userAccount)
       .then((result) => {
         let message = 'Buy transaction submitted';
-        if (!result) message = 'Transaction failed :(';
-        this.props.onMessage(message);
+        if (!result) {
+          message = 'Transaction failed :(';
+          this.context.onMessage(message);
+          return;
+        }
+
+        this.props.history.push({
+          pathname: '/confirmation',
+          state: {receipt: result.receipt}
+        });
       })
       .catch(console.err);
     } else {
-      console.log(this.props.contract,
-                           this.props.addr,
-                           this.props.price,
-                           this.context.userAccount)
       util.buyTokenForSale(this.props.contract,
                            this.props.addr,
                            this.props.price,
@@ -93,8 +103,7 @@ class BuyInput extends Component {
       .then((result) => {
         let message = 'Buy transaction submitted';
         if (!result) message = 'Transaction failed :(';
-        this.props.onMessage(message);
-        console.log(result)
+        this.context.onMessage(message);
         if (result && !this.props.custom) {
           // TODO: do a confirmation here from the smart contract side.
           let data = {
@@ -142,11 +151,11 @@ class BuyInput extends Component {
                 variant="raised"
                 color="primary"
                 onClick={this.handleBuy} >
-          Buy
+          Buy { !this.props.custom && (`for ${this.context.web3.fromWei(this.props.price, 'ether')} ETH`) }
         </Button>
       </div>
     );
   }
 }
 
-export default withStyles(styles)(BuyInput)
+export default withStyles(styles)(withRouter(BuyInput))

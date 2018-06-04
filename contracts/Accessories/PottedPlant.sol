@@ -16,8 +16,10 @@ contract PottedPlant is AccessoriesToken {
     rarity = 1;
 
     fundsWallet = msg.sender;
-    balances[msg.sender] = 10;
+    balances[msg.sender] = 55;
     totalSupply_ = 10000;
-    unitsOneEthCanBuy = 100;
+    unitsOneEthCanBuy = 500;
+
+    approveForSale(35, 2000000000000000);
   }
 }

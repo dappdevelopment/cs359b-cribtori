@@ -16,8 +16,11 @@ contract FoosballTable is AccessoriesToken {
     rarity = 3;
 
     fundsWallet = msg.sender;
-    balances[msg.sender] = 5;
+    balances[msg.sender] = 50;
     totalSupply_ = 10000;
-    unitsOneEthCanBuy = 25;
+    unitsOneEthCanBuy = 130;
+
+    approveForSale(15, 7500000000000000);
+
   }
 }

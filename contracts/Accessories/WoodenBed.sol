@@ -16,8 +16,10 @@ contract WoodenBed is AccessoriesToken {
     rarity = 2;
 
     fundsWallet = msg.sender;
-    balances[msg.sender] = 10;
+    balances[msg.sender] = 55;
     totalSupply_ = 10000;
-    unitsOneEthCanBuy = 40;
+    unitsOneEthCanBuy = 300;
+
+    approveForSale(30, 3000000000000000);
   }
 }

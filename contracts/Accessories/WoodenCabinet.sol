@@ -16,8 +16,10 @@ contract WoodenCabinet is AccessoriesToken {
     rarity = 1;
 
     fundsWallet = msg.sender;
-    balances[msg.sender] = 10;
+    balances[msg.sender] = 55;
     totalSupply_ = 10000;
-    unitsOneEthCanBuy = 100;
+    unitsOneEthCanBuy = 1000;
+
+    approveForSale(40, 1000000000000000);
   }
 }
