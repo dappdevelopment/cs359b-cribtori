@@ -72,10 +72,7 @@ class Promo extends Component {
 
       if (toriIds.length > 0) {
         // Hey.. you're not a new user!
-        this.props.history.push({
-          pathname: '/mytoris',
-          state: {receipt: result.receipt}
-        });
+        this.props.history.push('/mytoris');
       }
     })
     .catch(console.error);

@@ -1,12 +1,12 @@
 pragma solidity ^0.4.21;
 
-/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC20/BurnableToken.sol'; */
-/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/rbac/RBAC.sol'; */
-/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Ownable.sol'; */
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC20/BurnableToken.sol';
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/rbac/RBAC.sol';
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Ownable.sol';
 
-import 'openzeppelin-solidity/contracts/token/ERC20/BurnableToken.sol';
-import 'openzeppelin-solidity/contracts/ownership/rbac/RBAC.sol';
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+//import 'openzeppelin-solidity/contracts/token/ERC20/BurnableToken.sol';
+//import 'openzeppelin-solidity/contracts/ownership/rbac/RBAC.sol';
+//import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 /**
  * @title RBACBurnableToken
