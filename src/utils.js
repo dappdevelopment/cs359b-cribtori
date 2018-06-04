@@ -155,14 +155,16 @@ export function getTicketInfo(contract, ticketId, addr) {
 export function parseTicketResult(result) {
   let toriId = result[0].toNumber();
   let otherId = result[1].toNumber();
-  let submitTime = result[2].toNumber();
-  let dueTime = result[3].toNumber();
-  let owner = result[4];
-  let claimed = result[5]; // TODO
+  let maxLevel = result[2].toNumber();
+  let submitTime = result[3].toNumber();
+  let dueTime = result[4].toNumber();
+  let owner = result[5];
+  let claimed = result[6];
 
   let ticketInfo = {
     toriId: toriId,
     otherId: otherId,
+    maxLevel: maxLevel,
     submitTime: submitTime,
     dueTime: dueTime,
     owner: owner,

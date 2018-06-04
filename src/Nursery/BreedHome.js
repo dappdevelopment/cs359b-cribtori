@@ -10,11 +10,18 @@ import StepLabel from '@material-ui/core/StepLabel';
 import StepContent from '@material-ui/core/StepContent';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
+import List from '@material-ui/core/List';
+
+import TicketItem from '../Components/TicketItem.js';
+
+import { assets } from '../assets.js';
+import * as util from '../utils.js';
 
 const styles = theme => ({
   root: {
     backgroundColor: theme.palette.background.paper,
     flexGrow: 1,
+    marginTop: 10,
   },
   primary: {
     backgroundColor: theme.palette.primary.light
@@ -22,12 +29,47 @@ const styles = theme => ({
 });
 
 class BreedHome extends Component {
+
+  static contextTypes = {
+    web3: PropTypes.object,
+    toriToken: PropTypes.object,
+    toriVisit: PropTypes.object,
+    accContracts: PropTypes.array,
+    userAccount: PropTypes.string,
+    onMessage: PropTypes.func,
+  }
+
   constructor(props, context) {
     super(props, context);
     this.context = context;
 
+    this.state = {
+      tickets: [],
+    }
+
     // Function BINDS
     this.renderStepper = this.renderStepper.bind(this);
+    this.renderTickets = this.renderTickets.bind(this);
+  }
+
+  componentDidMount() {
+    util.getTicketIndexes(this.context.toriVisit, this.context.userAccount)
+    .then((result) => {
+      let indexes = result.map((r) => { return r.toNumber() });
+      this.setState({
+        tickets: indexes,
+      })
+    })
+    .catch(console.error);
+  }
+
+  renderTickets() {
+    let items = this.state.tickets.map((id) => {
+      return (
+        <TicketItem key={id} id={id} />
+      );
+    });
+    return items;
   }
 
   renderStepper() {
@@ -64,6 +106,13 @@ class BreedHome extends Component {
             Currently In Progress
           </Typography>
           <Divider />
+          <Grid container className={this.props.classes.root}
+                          spacing={16}
+                          alignItems={'flex-start'}
+                          direction={'column'}
+                          justify={'center'}>
+            { this.renderTickets() }
+          </Grid>
         </Grid>
         <Grid item sm={4} className={this.props.classes.primary}>
           <Typography variant="subheading" component="h1" align="center">

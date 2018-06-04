@@ -49,13 +49,19 @@ class MyTori extends Component {
     onMessage: PropTypes.func,
   }
 
-  constructor(props) {
+  constructor(props, context) {
     super(props);
+    this.context = context;
+
+    let acc = this.context.userAccount;
+    let locationState = this.props.history.location.state
+    if (locationState != null && locationState.account !== undefined) acc = locationState.account;
 
     this.state = {
       loaded: false,
       feeding: false,
       cleaning: false,
+      userAccount: acc
     }
 
     // FUNCTION BIND
@@ -71,7 +77,7 @@ class MyTori extends Component {
   }
 
   componentDidMount() {
-    util.retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
+    util.retrieveTokenIndexes(this.context.toriToken, this.state.userAccount)
     .then((toriIds) => {
       toriIds = toriIds.map((id) => { return id.toNumber() });
 
@@ -84,7 +90,7 @@ class MyTori extends Component {
   }
 
   retrieveLayout() {
-    util.retrieveRoomLayout(this.context.userAccount)
+    util.retrieveRoomLayout(this.state.userAccount)
     .then((result) => {
       let layout = (result.locations) ? JSON.parse(result.locations) : [];
 
@@ -107,7 +113,7 @@ class MyTori extends Component {
 
         // Now, save the layout (silently)...
         let data = {
-          id: this.context.userAccount,
+          id: this.state.userAccount,
           locations: JSON.stringify(layout),
         }
       }
@@ -272,14 +278,16 @@ class MyTori extends Component {
           )}
         </Grid>
         <Grid item sm={3}>
-          <Paper className={this.props.classes.paper}
-                 elevation={4}>
-            <Typography variant="title" color="inherit" component="h3">
-              Actions
-            </Typography>
-            <Divider />
-            { this.renderActions() }
-          </Paper>
+          { this.state.userAccount === this.context.userAccount && (
+            <Paper className={this.props.classes.paper}
+                   elevation={4}>
+              <Typography variant="title" color="inherit" component="h3">
+                Actions
+              </Typography>
+              <Divider />
+              { this.renderActions() }
+            </Paper>
+          )}
         </Grid>
       </Grid>
     );

@@ -179,7 +179,10 @@ class ToriDetails extends Component {
     } else {
       return (
         <MenuList>
-          <MenuItem>Visit Room</MenuItem>
+          <MenuItem component={Link}
+                    to={{ pathname: '/mytoris', state: { account: this.state.info.owner} }}>
+            Visit Room
+          </MenuItem>
           <Divider />
           <MenuItem component={Link}
                     to={{ pathname: '/nursery/breed/' + this.state.info.id, state: { info: this.state.info} }}>
@@ -244,7 +247,7 @@ class ToriDetails extends Component {
             <Paper className={this.props.classes.paper}
                    elevation={4}>
               <Typography variant="title" color="inherit" component="h3">
-                History
+                Logs
               </Typography>
               <Divider />
               [ TBA ]

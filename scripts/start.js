@@ -349,7 +349,7 @@ function createEndpoints(devServer) {
   }
 
   // Posting activities.
-  devServer.post('/cribtori/api/activity', checkActive, function(req, res) {
+  devServer.post('/cribtori/api/activity', /*checkActive,*/ function(req, res) {
     // TODO: activity validation and authentication.
     var PERIOD = (req.activity_type === 'feed') ? 2 : 4;
 

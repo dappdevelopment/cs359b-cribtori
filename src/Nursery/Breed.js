@@ -172,38 +172,47 @@ class Breed extends Component {
           return;
         }
 
-        let data = {
-          id: this.state.offering.id,
-          targetId: this.state.info.id,
-          claimed: 0
+        let message = this.state.offering.name + '\'s breeding is in progress';
+        this.context.onMessage(message);
+        if (result) {
+          this.props.history.push({
+            pathname: '/confirmation',
+            state: {receipt: result.receipt}
+          });
         }
 
-        fetch('/cribtori/api/visit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data),
-        })
-        .then(function(response) {
-          return response.status;
-        })
-        .then(function(status) {
-          let message = this.state.offering.name + '\'s breeding is in progress';
-
-          if (status === 400) {
-            message = this.state.offering.name + '\'s breeding failed';
-          }
-          this.props.onMessage(message);
-
-          if (result) {
-            this.props.history.push({
-              pathname: '/confirmation',
-              state: {receipt: result.receipt}
-            });
-          }
-        }.bind(this))
-        .catch(console.err);
+        // let data = {
+        //   id: this.state.offering.id,
+        //   targetId: this.state.info.id,
+        //   claimed: 0
+        // }
+        //
+        // fetch('/cribtori/api/visit', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json'
+        //   },
+        //   body: JSON.stringify(data),
+        // })
+        // .then(function(response) {
+        //   return response.status;
+        // })
+        // .then(function(status) {
+        //   let message = this.state.offering.name + '\'s breeding is in progress';
+        //
+        //   if (status === 400) {
+        //     message = this.state.offering.name + '\'s breeding failed';
+        //   }
+        //   this.context.onMessage(message);
+        //
+        //   if (result) {
+        //     this.props.history.push({
+        //       pathname: '/confirmation',
+        //       state: {receipt: result.receipt}
+        //     });
+        //   }
+        // }.bind(this))
+        // .catch(console.err);
       })
       .catch(console.error);
     }

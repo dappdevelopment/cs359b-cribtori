@@ -117,7 +117,7 @@ contract ToriVisit is DnaCore, Ownable {
             !occupied[_toriId]);
     // Get level information
     uint256 level;
-    (, , , , , , , , ) = toriTokenInterface.getTokenInfo(_toriId);
+    (, , level, , , , , ,) = toriTokenInterface.getTokenInfo(_toriId);
     uint256 otherLevel;
     (, , otherLevel, , , , , , ) = toriTokenInterface.getTokenInfo(_otherToriId);
     require(otherLevel <= level);
