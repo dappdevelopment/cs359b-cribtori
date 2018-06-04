@@ -17,7 +17,7 @@ const styles = theme => ({
     flexGrow: 1,
   },
   banner: {
-    backgroundColor: theme.palette.primary.light,
+    backgroundColor: theme.palette.secondary.dark,
     color: 'white',
     width: '100%',
     textAlign: 'center',
@@ -41,7 +41,7 @@ const styles = theme => ({
   },
   bannerImage: {
     marginTop: 10,
-    height: '75%'
+    height: 150
   }
 });
 
@@ -64,7 +64,7 @@ class Info extends Component {
                           direction={'row'}
                           justify={'center'}>
             <Grid item sm={12}>
-              <img src={assets.logo} alt={"Cribtori"} className={this.props.classes.bannerImage} />
+              <img src={assets.logoWhite} alt={"Cribtori"} className={this.props.classes.bannerImage} />
             </Grid>
           </Grid>
         </Grid>

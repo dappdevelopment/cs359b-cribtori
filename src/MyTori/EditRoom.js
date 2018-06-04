@@ -357,22 +357,18 @@ class EditRoom extends Component {
           )}
         </Grid>
         <Grid item sm={3}>
-          <Paper className={this.props.classes.paper + ' ' + this.props.classes.paperBlue}
-                 elevation={4}>
-           <Typography variant="title" color="inherit" component="h3">
-             Manual
-           </Typography>
-           <Divider />
-           <Typography variant="body2" color="inherit">
-             Veniam cupidatat et senserit, quo iis elit probant non qui eu praesentibus se
-             doctrina amet commodo, officia ita labore mandaremus o summis commodo quo
-             nostrud, sed nisi legam te appellat sed aut ubi quis malis veniam. Probant id
-             minim, se sunt probant quibusdam te esse do pariatur an quis, irure o vidisse te
-             eram. Qui quorum possumus imitarentur e magna coniunctione incididunt tamen
-             incurreret.Iudicem ut elit proident, aute voluptate de amet aliqua, ad arbitror
-             senserit.
-           </Typography>
-          </Paper>
+          { false /* TODO */&& (
+            <Paper className={this.props.classes.paper + ' ' + this.props.classes.paperBlue}
+                   elevation={4}>
+             <Typography variant="title" color="inherit" component="h3">
+               Manual
+             </Typography>
+             <Divider />
+             <Typography variant="body2" color="inherit">
+               [ TBA ]
+             </Typography>
+            </Paper>
+          )}
           <Button variant="raised"
                   color="secondary"
                   component={Link}

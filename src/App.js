@@ -234,10 +234,11 @@ class App extends Component {
       <div className="App">
         <AppBar position="static">
           <Toolbar>
-            <img src={assets.logoWhite}
-                 alt={"Cribtori"}
-                 className={this.props.classes.logo}
-                 onClick={() => { if (this.props.history.location.pathname !== "/") this.props.history.push('/'); }} />
+            <Link to={'/'}>
+              <img src={assets.logoWhite}
+                   alt={"Cribtori"}
+                   className={this.props.classes.logo} />
+            </Link>
             <Tabs value={this.state.mode}
                   onChange={this.switchDisplay}
                   className={this.props.classes.tab}>

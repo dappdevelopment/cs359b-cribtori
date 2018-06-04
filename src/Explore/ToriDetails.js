@@ -410,14 +410,16 @@ class ToriDetails extends Component {
           <Grid item sm={4}>
             { this.renderDetails() }
             <Divider />
-            <Paper className={this.props.classes.paper}
-                   elevation={4}>
-              <Typography variant="title" color="inherit" component="h3">
-                Logs
-              </Typography>
-              <Divider />
-              [ TBA ]
-            </Paper>
+            { false /* TODO */ && (
+              <Paper className={this.props.classes.paper}
+                     elevation={4}>
+                <Typography variant="title" color="inherit" component="h3">
+                  Logs
+                </Typography>
+                <Divider />
+                [ TBA ]
+              </Paper>
+            )}
           </Grid>
           <Grid item sm={4}>
             { this.renderInfo() }
