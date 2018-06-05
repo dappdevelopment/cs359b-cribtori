@@ -33,7 +33,7 @@ contract AccessoriesToken is StandardToken, RBACMintableToken {
   uint8 public rarity;
 
   function() payable{
-    totalEthInWei = totalEthInWei.add(msg.value;
+    totalEthInWei = totalEthInWei.add(msg.value);
     uint256 amount = msg.value * unitsOneEthCanBuy;
     require(balances[fundsWallet] >= amount);
 

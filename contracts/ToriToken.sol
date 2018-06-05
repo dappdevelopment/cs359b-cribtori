@@ -1,6 +1,7 @@
 pragma solidity ^0.4.21;
 
 import './DnaCore.sol';
+
 import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
 import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Whitelist.sol';
 import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';

@@ -11,7 +11,7 @@ contract FoosballTable is AccessoriesToken {
 
     variety = "Desk";
     material = [0, 2];
-    space = 1;
+    space = 2;
     orientation = 0;
     rarity = 3;
 

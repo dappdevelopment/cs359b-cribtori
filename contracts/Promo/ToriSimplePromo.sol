@@ -32,9 +32,8 @@ contract ToriSimplePromo is DnaCore, Ownable {
   function setToriTokenAddress(address _address) external onlyOwner {
     toriTokenInterface = ToriTokenInterface(_address);
 
-    // Default to 1000.
     // Code 0 is for initial Tori.
-    limit[0] = 1000;
+    limit[0] = 30;
     special[0] = 0;
   }
 
@@ -65,13 +64,13 @@ contract ToriSimplePromo is DnaCore, Ownable {
     // Update the counter.
     if (result) {
       counter[_hashCode] = counter[_hashCode].add(1);
-      claim[msg.sender][_hashCode] = claim[msg.sender][_hashCode].add(1);
+      claim[msg.sender][_hashCode] = 1;
     }
   }
 
   function claimInitialTori(uint8[] _quizzes, string _name) public returns (bool result) {
     uint256 currentBalance = toriTokenInterface.balanceOf(msg.sender);
-    require (currentBalance == 0);
+    require (currentBalance == 0 && claim[msg.sender][0] == 0);
     // Valid code!
     result = _claimPromoTori(_quizzes, _name, 0, 0);
   }

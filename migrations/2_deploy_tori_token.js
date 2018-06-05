@@ -55,7 +55,7 @@ module.exports = function(deployer) {
   })
   .then((promoInstance) => {
     console.log('ToriToken:', ToriToken.address);
-    return promoInstance.addPromoCode("Cryptotrees", 35, 1);
+    return promoInstance.addPromoCode("Cryptotrees", 30, 1);
   })
   .then((result) => {
     if (result) {

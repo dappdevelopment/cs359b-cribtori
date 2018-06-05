@@ -169,7 +169,7 @@ contract ToriVisit is DnaCore, Ownable {
                               _threshold);
   }
 
-  function _getTimeLimit(uint256 _toriId, uint256 _level) private returns (uint256 limit) {
+  function _getTimeLimit(uint256 _toriId, uint256 _level) private view returns (uint256 limit) {
     limit = _level * TIME_LIMIT;
 
     uint256 divider = (_level - 1);
@@ -185,7 +185,7 @@ contract ToriVisit is DnaCore, Ownable {
 
   function claimTori(uint256 _ticketId, string _name) public returns (bool result) {
     VisitTicket storage ticket = tickets[_ticketId];
-    uint256 timeLimit = _getTimeLimit(ticket.toriId, ticket.level);
+    uint256 timeLimit = _getTimeLimit(ticket.toriId, ticket.maxLevel);
     require((ticketOwner[_ticketId] == msg.sender) && (now.sub(ticket.submitTime)) >= timeLimit);
     uint256 newDna;
     uint32 newProficiency;
