@@ -47,6 +47,14 @@ contract ToriSimplePromo is DnaCore, Ownable {
     special[hashCode] = _specialCode;
   }
 
+  function increaseLimit(string _code, uint256 _limitAddition) onlyOwner public {
+    uint256 hashCode = uint256(keccak256(_code));
+    // We don't want to add the same code.
+    require(limit[hashCode] > 0);
+
+    limit[hashCode] = limit[hashCode].add(_limitAddition);
+  }
+
   function _claimPromoTori(uint8[] _quizzes,
                            string _name,
                            uint256 _hashCode,

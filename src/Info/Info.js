@@ -133,6 +133,56 @@ class Info extends Component {
                 <img src={assets.info[1]} alt={"Accessories sample"} className={this.props.classes.sampleImage}/>
               </Grid>
             </Grid>
+          </Paper>
+        </Grid>
+        <Grid item sm={12} className={this.props.classes.infoItem}>
+        </Grid>
+        <Grid item sm={12} className={this.props.classes.infoItem}>
+          <Paper className={this.props.classes.paper}>
+            <Grid container className={this.props.classes.fullHeight}
+                            spacing={16}
+                            alignItems={'center'}
+                            direction={'row'}
+                            justify={'center'}>
+              <Grid item sm={5}>
+                <img src={assets.info[2]} alt={"Breeding sample"} className={this.props.classes.sampleImage}/>
+              </Grid>
+              <Grid item sm={7}>
+                <Typography variant="title" color="primary">
+                  Breed Toris to Multiply, Fuse to Level up
+                </Typography>
+                <Divider/>
+                <Typography variant="subheading" color="inherit">
+                  {"Breed with other owners' Toris to add more to you Tori family."}
+                  Fuse your Toris together to level up your Toris and unlock hidden features in Cribtori.
+                </Typography>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Grid>
+        <Grid item sm={12} className={this.props.classes.infoItem}>
+        </Grid>
+        <Grid item sm={12} className={this.props.classes.infoItem}>
+          <Paper className={this.props.classes.paper}>
+            <Grid container className={this.props.classes.fullHeight}
+                            spacing={16}
+                            alignItems={'center'}
+                            direction={'row'}
+                            justify={'center'}>
+              <Grid item sm={7}>
+                <Typography variant="title" color="secondary">
+                  Level up and go beyond!
+                </Typography>
+                <Divider/>
+                <Typography variant="subheading" color="inherit">
+                  Unlock hidden potentials in your Toris.
+                  Witness as more abilities are unlocked as your Tori grows.
+                </Typography>
+              </Grid>
+              <Grid item sm={5}>
+                <img src={assets.info[3]} alt={"Level sample"} className={this.props.classes.sampleImage}/>
+              </Grid>
+            </Grid>
             <Grid item sm={12} className={this.props.classes.infoItem}>
               <Paper className={this.props.classes.paper}>
                 <Typography variant="title" color="inherit">
