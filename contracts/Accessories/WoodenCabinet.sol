@@ -20,6 +20,6 @@ contract WoodenCabinet is AccessoriesToken {
     totalSupply_ = 10000;
     unitsOneEthCanBuy = 1000;
 
-    approveForSale(40, 1000000000000000);
+    approveForSale(25, 1000000000000000);
   }
 }

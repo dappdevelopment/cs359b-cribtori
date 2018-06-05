@@ -137,6 +137,10 @@ class Room extends Component {
   }
 
   constructTori(id, x, y) {
+    let bubble;
+    if (this.props.bubbles !== undefined) {
+      bubble = this.props.bubbles[id];
+    }
     if (this.props.isEdit && (!this.props.selectedItem || !this.props.selectedItem.name)) {
       return (
         <GridListTile key={`tori_${x}_${y}`}
@@ -144,7 +148,9 @@ class Room extends Component {
                       className={this.props.classes.gridTile}
                       cols={1}
                       rows={1} >
-          <ToriCell id={id} unit={unit} />
+          <ToriCell id={id}
+                    unit={unit}
+                    bubble={bubble} />
         </GridListTile>
       );
     } else {
@@ -154,7 +160,9 @@ class Room extends Component {
                       className={this.props.classes.gridTile}
                       cols={1}
                       rows={1} >
-          <ToriCell id={id} unit={unit} />
+          <ToriCell id={id}
+                    unit={unit}
+                    bubble={bubble} />
         </GridListTile>
       );
     }

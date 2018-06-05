@@ -20,7 +20,7 @@ contract FoosballTable is AccessoriesToken {
     totalSupply_ = 10000;
     unitsOneEthCanBuy = 130;
 
-    approveForSale(15, 7500000000000000);
+    approveForSale(10, 7500000000000000);
 
   }
 }

@@ -118,8 +118,8 @@ export function parseToriResult(result) {
   let toriReadyTime = result[6].toNumber();
   let toriGeneration = result[7].toNumber();
   let toriSpecial = result[8].toNumber();
-  let toriSalePrice = result[7].toNumber();
-  let toriOwner = result[8];
+  let toriSalePrice = result[9].toNumber();
+  let toriOwner = result[10];
 
   let toriInfo = {
     id: toriId,

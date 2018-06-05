@@ -20,6 +20,6 @@ contract StandardTv is AccessoriesToken {
     totalSupply_ = 10000;
     unitsOneEthCanBuy = 200;
 
-    approveForSale(30, 5000000000000000);
+    approveForSale(15, 5000000000000000);
   }
 }

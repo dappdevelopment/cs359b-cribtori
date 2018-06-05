@@ -235,7 +235,7 @@ function createEndpoints(devServer) {
   devServer.use(bodyParser.urlencoded({ extended: false }));
   devServer.use(bodyParser.json());
 
-  var ONE_HOUR = 6 * 60 * 60 * 1000;
+  var ONE_HOUR = 60 * 60 * 1000;
 
   devServer.get('/cribtori/api/hello', function(req, res) {
     res.status(200).send('hello world');

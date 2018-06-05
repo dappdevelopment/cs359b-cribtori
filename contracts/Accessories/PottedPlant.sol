@@ -20,6 +20,6 @@ contract PottedPlant is AccessoriesToken {
     totalSupply_ = 10000;
     unitsOneEthCanBuy = 500;
 
-    approveForSale(35, 2000000000000000);
+    approveForSale(20, 2000000000000000);
   }
 }

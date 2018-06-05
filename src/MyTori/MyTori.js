@@ -62,7 +62,8 @@ class MyTori extends Component {
       loaded: false,
       feeding: false,
       cleaning: false,
-      userAccount: acc
+      userAccount: acc,
+      bubbles: {},
     }
 
     // FUNCTION BIND
@@ -165,12 +166,27 @@ class MyTori extends Component {
           message = this.cleanTori(info, status);
         }
 
+        let bubbles = this.state.bubbles;
+        if (status === 200) {
+          bubbles[id] = assets.reactions.smile;
+        } else {
+          bubbles[id] = assets.reactions.surprised;
+        }
+
         let ids = this.state.toriIds;
         this.setState({
           feeding: false,
           cleaning: false,
-          toriIds: []
+          toriIds: [],
+          bubbles: bubbles,
         }, () => {
+          // Disable the bubble.
+          setTimeout(function() {
+            this.setState({
+              bubbles: {}
+            });
+          }.bind(this), 1500);
+
           this.setState({
             toriIds: ids
           });
@@ -278,7 +294,8 @@ class MyTori extends Component {
                   height={this.state.sizes[1]}
                   layout={this.state.roomLayout}
                   firstTori={this.state.toriIds[0]}
-                  onToriClick={this.onToriClick} />
+                  onToriClick={this.onToriClick}
+                  bubbles={this.state.bubbles} />
           ) : (
             <CircularProgress  color="secondary" />
           )}

@@ -20,6 +20,6 @@ contract WoodenBed is AccessoriesToken {
     totalSupply_ = 10000;
     unitsOneEthCanBuy = 300;
 
-    approveForSale(30, 3000000000000000);
+    approveForSale(20, 3000000000000000);
   }
 }

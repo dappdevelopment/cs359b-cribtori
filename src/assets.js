@@ -57,9 +57,9 @@ import MOUTH_3 from './img/tori/mouth/3.png';
 import S_KITTY from './img/tori/special/kitty.png';
 import S_TREE from './img/tori/special/tree.png';
 
-import FOOD from './img/sample.png';
-import CLEAN from './img/sample.png';
 
+import FEED from './img/food.png';
+import CLEAN from './img/clean.png';
 
 import FUSE from './img/accessories/TPP.png';
 import BREED from './img/accessories/TPP.png';
@@ -68,6 +68,17 @@ import LOGO from './img/Logo.png';
 import LOGO_WHITE from './img/Logo_white.png';
 import INFO1 from './img/info1.png';
 import INFO2 from './img/info2.png';
+import INFO3 from './img/info3.png';
+import INFO4 from './img/info4.png';
+
+import BUBBLE from './img/reactions/bubble.png';
+import HEARTS from './img/reactions/hearts.png';
+import FOOD from './img/reactions/food.png';
+import NOTE from './img/reactions/note.png';
+import SAD from './img/reactions/sad.png';
+import SMILE from './img/reactions/smile.png';
+import SURPRISED from './img/reactions/surprised.png';
+import WATER from './img/reactions/water.png';
 
 export const assets = {
   background: {
@@ -115,11 +126,21 @@ export const assets = {
       'tree': S_TREE
     }
   },
-  food: FOOD,
+  food: FEED,
   clean: CLEAN,
   fuse: FUSE,
   breed: BREED,
   logo: LOGO,
   logoWhite: LOGO_WHITE,
-  info: [INFO1, INFO2]
+  info: [INFO1, INFO2, INFO3, INFO4],
+  reactions: {
+    'bubble': BUBBLE,
+    'food': FOOD,
+    'hearts': HEARTS,
+    'note': NOTE,
+    'sad': SAD,
+    'smile': SMILE,
+    'surprised': SURPRISED,
+    'water': WATER,
+  }
 };

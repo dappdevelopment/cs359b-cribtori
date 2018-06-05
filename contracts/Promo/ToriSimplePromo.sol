@@ -56,8 +56,8 @@ contract ToriSimplePromo is DnaCore, Ownable {
 
     // Update the counter.
     if (result) {
-      counter[_hashCode] += 1;
-      claim[msg.sender][_hashCode] += 1;
+      counter[_hashCode] = counter[_hashCode].add(1);
+      claim[msg.sender][_hashCode] = claim[msg.sender][_hashCode].add(1);
     }
   }
 

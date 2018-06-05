@@ -265,7 +265,9 @@ class TokenInfo extends Component {
       // Tori
       return (
         <Card className={this.props.classes.card}>
-          <ToriImage dna={this.state.info.dna}
+          <ToriImage special={this.state.info.special}
+                     generation={this.state.info.generation}
+                     dna={this.state.info.dna}
                      size={150} />
           <CardHeader title={this.state.info.name}
                       className={this.props.classes.cardHeaderTori}/>

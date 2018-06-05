@@ -245,7 +245,9 @@ class Breed extends Component {
           </Grid>
           <Grid item sm={5}>
             <Card className={this.props.classes.card}>
-              <ToriImage dna={this.state.info.dna}
+              <ToriImage special={this.state.info.special}
+                         generation={this.state.info.generation}
+                         dna={this.state.info.dna}
                          size={100}
                          animate={true} />
               <CardHeader title={"Base: " + this.state.info.name}
@@ -271,7 +273,9 @@ class Breed extends Component {
                            title="Offering Tori"
                 />
               ) : (
-                <ToriImage dna={this.state.offering.dna}
+                <ToriImage special={this.state.offering.special}
+                           generation={this.state.offering.generation}
+                           dna={this.state.offering.dna}
                            size={100}
                            animate={true} />
               )}

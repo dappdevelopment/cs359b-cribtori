@@ -20,6 +20,6 @@ contract WoodenDesk is AccessoriesToken {
     totalSupply_ = 10000;
     unitsOneEthCanBuy = 300;
 
-    approveForSale(40, 3000000000000000);
+    approveForSale(25, 3000000000000000);
   }
 }

@@ -7,6 +7,8 @@ class ToriImage extends Component {
   render() {
     let dna = this.props.dna;
     let size = this.props.size;
+    let special = this.props.special;
+    let generation = this.props.generation;
 
     let tori = assets.tori;
 
@@ -66,7 +68,15 @@ class ToriImage extends Component {
     let decorSephia = (Math.max(idx - 360 - 200, 1)) / (1000 - 360 - 200);
     dna = Math.floor(dna / 1000);
 
+    // Whether to show decor or not.
     let isSpecial = (dna % 3) <= 1;
+
+    // Whether it's a special tori or not.
+    let specialDecor;
+
+    if (special === 1) specialDecor = assets.tori.special.tree;
+    if (special === 2) specialDecor = assets.tori.special.kitty;
+
 
     let baseTime = 0.5;
     let secTime = 0.6;
@@ -173,6 +183,37 @@ class ToriImage extends Component {
               filter: `hue-rotate(${decorHue}deg) saturate(${decorSaturate}%) sepia(${decorSephia})`,
               animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
             }} />
+        }
+        { special !== 0 &&
+          <img
+            src={specialDecor}
+            alt="Special decoration"
+            style={{
+              position: 'absolute',
+              zIndex: 250,
+              width: `100%`,
+              animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : ''
+            }} />
+        }
+        { this.props.bubble !== undefined &&
+          <div>
+            <img
+              src={assets.reactions.bubble}
+              alt="Bubble"
+              style={{
+                position: 'absolute',
+                zIndex: 300,
+                width: `100%`,
+              }} />
+            <img
+              src={this.props.bubble}
+              alt="Bubble-content"
+              style={{
+                position: 'absolute',
+                zIndex: 320,
+                width: `100%`,
+              }} />
+          </div>
         }
       </div>
     );

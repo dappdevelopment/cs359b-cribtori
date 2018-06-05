@@ -88,6 +88,7 @@ class ToriDetails extends Component {
     util.retrieveTokenInfo(this.context.toriToken, this.state.id, this.context.userAccount)
     .then((result) => {
       let info = util.parseToriResult(result);
+      
       this.setState({
         info: info,
         isOwned: info.owner === this.context.userAccount,
@@ -277,7 +278,9 @@ class ToriDetails extends Component {
           </Grid>
           <Grid item sm={12}>
             { this.state.info && (
-              <ToriImage dna={this.state.info.dna}
+              <ToriImage special={this.state.info.special}
+                         generation={this.state.info.generation}
+                         dna={this.state.info.dna}
                          size={150} />
             )}
           </Grid>

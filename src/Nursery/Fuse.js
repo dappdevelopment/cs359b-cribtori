@@ -228,7 +228,9 @@ class Fuse extends Component {
                          title="Base Tori"
               />
             ) : (
-              <ToriImage dna={this.state.base.dna}
+              <ToriImage special={this.state.base.special}
+                         generation={this.state.base.generation}
+                         dna={this.state.base.dna}
                          size={100}
                          animate={true} />
             )}
@@ -255,7 +257,9 @@ class Fuse extends Component {
                          title="Offering Tori"
               />
             ) : (
-              <ToriImage dna={this.state.offering.dna}
+              <ToriImage special={this.state.offering.special}
+                         generation={this.state.offering.generation}
+                         dna={this.state.offering.dna}
                          size={100}
                          animate={true} />
             )}

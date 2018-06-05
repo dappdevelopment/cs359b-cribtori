@@ -35,7 +35,7 @@ class ToriCell extends Component {
       let info = util.parseToriResult(result);
       this.setState({
         loaded: true,
-        dna: info.dna,
+        info: info,
       })
     })
     .catch(console.error);
@@ -44,7 +44,13 @@ class ToriCell extends Component {
   render() {
     let content = (<CircularProgress  color="secondary" />);
     if (this.state.loaded) {
-      content = (<ToriImage dna={this.state.dna} size={this.props.unit} />);
+      content = (
+        <ToriImage special={this.state.info.special}
+                   generation={this.state.info.generation}
+                   dna={this.state.info.dna}
+                   size={this.props.unit}
+                   bubble={this.props.bubble} />
+      );
     }
     return content;
   }

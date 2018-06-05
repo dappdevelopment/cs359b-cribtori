@@ -114,7 +114,9 @@ class TokenItem extends Component {
                 disabled={disabled}
                 onClick={(e) => this.props.onItemSelected(this.state.info, e) }>
         { !this.state.mode ? (
-          <ToriImage dna={this.state.info.dna}
+          <ToriImage special={this.state.info.special}
+                     generation={this.state.info.generation}
+                     dna={this.state.info.dna}
                      size={80}
                      still={true} />
         ) : (

@@ -2,14 +2,18 @@ pragma solidity ^0.4.21;
 
 import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
 import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
 
 //import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 //import 'openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol';
+//import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 import '../RBACMintableToken.sol';
 
 
 contract AccessoriesToken is StandardToken, RBACMintableToken {
+
+  using SafeMath for uint256;
 
   string[] public MATERIAL_NAME = ["Wood", "Cloth", "Metal"];
 
@@ -29,12 +33,12 @@ contract AccessoriesToken is StandardToken, RBACMintableToken {
   uint8 public rarity;
 
   function() payable{
-    totalEthInWei = totalEthInWei + msg.value;
+    totalEthInWei = totalEthInWei.add(msg.value;
     uint256 amount = msg.value * unitsOneEthCanBuy;
     require(balances[fundsWallet] >= amount);
 
-    balances[fundsWallet] = balances[fundsWallet] - amount;
-    balances[msg.sender] = balances[msg.sender] + amount;
+    balances[fundsWallet] = balances[fundsWallet].sub(amount);
+    balances[msg.sender] = balances[msg.sender].add(amount);
 
     emit Transfer(fundsWallet, msg.sender, amount);
 
@@ -99,7 +103,7 @@ contract AccessoriesToken is StandardToken, RBACMintableToken {
     uint256 price = pricePerToken[_owner];
     require((allowedValue >= _value) && (_value > 0) && (msg.value >= (_value * price)));
     // Send the ether.
-    uint256 excess = msg.value - _value * price;
+    uint256 excess = msg.value.sub(_value * price);
     if (excess > 0) {
       msg.sender.transfer(excess);
       _owner.transfer(_value * price);
@@ -109,7 +113,7 @@ contract AccessoriesToken is StandardToken, RBACMintableToken {
     this.transferFrom(_owner, msg.sender, _value);
 
     if (allowedValue == _value) {
-      allowedSale -= 1;
+      allowedSale = allowedSale.sub(1);
     }
   }
 
@@ -118,14 +122,14 @@ contract AccessoriesToken is StandardToken, RBACMintableToken {
     uint[] memory prices = new uint[](allowedSale);
     address[] memory owners = new address[](allowedSale);
     uint idx = 0;
-    for (uint i = 0; i < allowanceOwner.length; i++) {
+    for (uint i = 0; i < allowanceOwner.length; i = i.add(1)) {
       address _owner = allowanceOwner[i];
       uint256 value = allowance(_owner, this);
       if (value > 0) {
         values[idx] = value;
         prices[idx] = pricePerToken[_owner];
         owners[idx] = _owner;
-        idx += 1;
+        idx = idx.add(1);
       }
     }
     return (values, prices, owners);

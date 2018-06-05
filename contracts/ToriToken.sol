@@ -3,11 +3,15 @@ pragma solidity ^0.4.21;
 import './DnaCore.sol';
 import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
 import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Whitelist.sol';
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
 
 //import 'openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
 //import 'openzeppelin-solidity/contracts/ownership/Whitelist.sol';
+//import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
+
+  using SafeMath for uint256;
 
   struct Tori {
     uint256 dna;
@@ -67,7 +71,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
   uint256 currentGeneration = 0;
 
   function updateGeneration() onlyOwner public {
-    currentGeneration += 1;
+    currentGeneration = currentGeneration.add(1);
   }
 
   /*
@@ -173,10 +177,10 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
     uint[] memory result = new uint[](size);
 
     uint idx = 0;
-    for (uint i = 0; i < toris.length; i++) {
+    for (uint i = 0; i < toris.length; i = i.add(1)) {
       if (tokenOwner[i] == _owner) {
         result[idx] = i;
-        idx++;
+        idx = idx.add(1);
       }
       if (idx >= size) {
         break;
@@ -188,7 +192,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
   function getTokenIndexesWithMaxLevel(address _owner) public view returns (uint[], uint) {
     uint[] memory indexes = getTokenIndexes(_owner);
     uint maxLevel = 1;
-    for (uint i = 0; i < indexes.length; i++) {
+    for (uint i = 0; i < indexes.length; i = i.add(1)) {
       uint currLevel = toris[i].level;
       if (currLevel > maxLevel) {
         maxLevel = currLevel;
@@ -261,7 +265,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
 
     address _from = ownerOf(_tokenId);
     // Send the ether.
-    uint256 excess = msg.value - toriSale[_tokenId];
+    uint256 excess = msg.value.sub(toriSale[_tokenId]);
     if (excess > 0) {
       msg.sender.transfer(excess);
       _from.transfer(toriSale[_tokenId]);
@@ -280,10 +284,10 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
   function retrieveAllForSales() public view returns (uint[]) {
     uint[] memory result = new uint[](toriSaleCount);
     uint idx = 0;
-    for (uint i = 0; i < toris.length; i++) {
+    for (uint i = 0; i < toris.length; i = i.add(1)) {
       if (toriSale[i] > 0) {
         result[idx] = i;
-        idx += 1;
+        idx = idx.add(1);
       }
     }
     return result;

@@ -43,10 +43,12 @@ contract ToriVisit is DnaCore, Ownable {
 
   ToriTokenInterface toriTokenInterface;
   // TODO change this!
-  uint256 private TIME_LIMIT = 5 minutes;
+  uint256 private TIME_LIMIT = 30 minutes;
 
   uint256 private BREED_RANDOMNESS = 4;
   uint256 private FUSE_RANDOMNESS = 0;
+
+  mapping (uint256 => uint256) breedCount;
 
   struct VisitTicket {
     uint256 toriId;
@@ -95,7 +97,7 @@ contract ToriVisit is DnaCore, Ownable {
 
     success = toriTokenInterface.generateNewTori(
       newDna,
-      level + 1,
+      level.add(1),
       newProficiency,
       newPersonality,
       _toriId,
@@ -139,7 +141,7 @@ contract ToriVisit is DnaCore, Ownable {
     ticketCount[msg.sender] = ticketCount[msg.sender].add(1);
 
     occupied[_toriId] = true;
-
+    breedCount[_toriId] = breedCount[_toriId].add(1);
     // TODO: broadcast an event
   }
 
@@ -159,24 +161,7 @@ contract ToriVisit is DnaCore, Ownable {
                             string _name,
                             uint256 _threshold)
                             private view returns (uint256, uint32, uint32) {
-    /* uint256 dna;
-    uint32 proficiency;
-    uint32 personality;
-    (, dna, , , proficiency, personality, , , ) = toriTokenInterface.getTokenInfo(_toriId);
-    uint256 otherDna;
-    uint32 otherProficiency;
-    uint32 otherPersonality;
-    (, otherDna, , , otherProficiency, otherPersonality, , , ) = toriTokenInterface.getTokenInfo(_otherId); */
 
-    /* return _combineTwoTraits(dna,
-                             proficiency,
-                             personality,
-                             otherDna,
-                             otherProficiency,
-                             otherPersonality,
-                             _name,
-                             msg.sender,
-                             _threshold); */
      return _combineTwoTraits(_getToriMaterials(_toriId),
                               _getToriMaterials(_otherId),
                               _name,
@@ -184,9 +169,24 @@ contract ToriVisit is DnaCore, Ownable {
                               _threshold);
   }
 
+  function _getTimeLimit(uint256 _toriId, uint256 _level) private returns (uint256 limit) {
+    limit = _level * TIME_LIMIT;
+
+    uint256 divider = (_level - 1);
+    if (divider == 0) {
+      divider = 1;
+    }
+    limit = limit.add(breedCount[_toriId] * (limit / (divider * 10)));
+
+    if (limit >= 3 days) {
+      limit = 3 days;
+    }
+  }
+
   function claimTori(uint256 _ticketId, string _name) public returns (bool result) {
     VisitTicket storage ticket = tickets[_ticketId];
-    require((ticketOwner[_ticketId] == msg.sender) && (now - ticket.submitTime) >= TIME_LIMIT);
+    uint256 timeLimit = _getTimeLimit(ticket.toriId, ticket.level);
+    require((ticketOwner[_ticketId] == msg.sender) && (now.sub(ticket.submitTime)) >= timeLimit);
     uint256 newDna;
     uint32 newProficiency;
     uint32 newPersonality;
@@ -225,10 +225,10 @@ contract ToriVisit is DnaCore, Ownable {
     uint[] memory result = new uint[](size);
 
     uint idx = 0;
-    for (uint i = 0; i < tickets.length; i++) {
+    for (uint i = 0; i < tickets.length; i = i.add(1)) {
       if (ticketOwner[i] == _owner && !tickets[i].claimed) {
         result[idx] = i;
-        idx++;
+        idx = idx.add(1);
       }
       if (idx >= size) {
         break;
@@ -238,7 +238,7 @@ contract ToriVisit is DnaCore, Ownable {
   }
 
   function getToriTicket(address _owner, uint256 _toriId) public view returns (uint, bool found) {
-    for (uint i = 0; i < tickets.length; i++) {
+    for (uint i = 0; i < tickets.length; i = i.add(1)) {
       if (ticketOwner[i] == _owner && !tickets[i].claimed && tickets[i].toriId == _toriId) {
         return (i, true);
       }
@@ -258,7 +258,7 @@ contract ToriVisit is DnaCore, Ownable {
     otherId = ticket.otherId;
     maxLevel = ticket.maxLevel;
     submitTime = ticket.submitTime;
-    dueTime = submitTime + TIME_LIMIT;
+    dueTime = submitTime.add(_getTimeLimit(toriId, maxLevel));
     owner = ticket.owner;
     claimed = ticket.claimed;
   }
