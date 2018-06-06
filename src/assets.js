@@ -34,6 +34,7 @@ import DECOR_1 from './img/tori/decoration/1.png';
 import DECOR_2 from './img/tori/decoration/2.png';
 import DECOR_3 from './img/tori/decoration/3.png';
 import DECOR_4 from './img/tori/decoration/4.png';
+import DECOR_5 from './img/tori/decoration/5.png';
 
 import EYES_0 from './img/tori/eyes/0.png';
 import EYES_1 from './img/tori/eyes/1.png';
@@ -48,6 +49,7 @@ import HAND_0 from './img/tori/hand/0.png';
 import HAND_1 from './img/tori/hand/1.png';
 import HAND_2 from './img/tori/hand/2.png';
 import HAND_3 from './img/tori/hand/3.png';
+import HAND_4 from './img/tori/hand/4.png';
 
 import MOUTH_0 from './img/tori/mouth/0.png';
 import MOUTH_1 from './img/tori/mouth/1.png';
@@ -56,7 +58,7 @@ import MOUTH_3 from './img/tori/mouth/3.png';
 
 import S_KITTY from './img/tori/special/kitty.png';
 import S_TREE from './img/tori/special/tree.png';
-
+import S_MENTOR from './img/tori/special/mentor.png';
 
 import FEED from './img/food.png';
 import CLEAN from './img/clean.png';
@@ -107,7 +109,7 @@ export const assets = {
       BODY_0, BODY_1, BODY_2, BODY_3
     ],
     decoration: [
-      DECOR_0, DECOR_1, DECOR_2, DECOR_3, DECOR_4
+      DECOR_0, DECOR_1, DECOR_2, DECOR_3, DECOR_4, DECOR_5
     ],
     eyes: [
       EYES_0, EYES_1, EYES_2, EYES_3
@@ -116,14 +118,15 @@ export const assets = {
       FEET_0, FEET_1, FEET_2
     ],
     hand: [
-      HAND_0, HAND_1, HAND_2, HAND_3
+      HAND_0, HAND_1, HAND_2, HAND_3, HAND_4
     ],
     mouth: [
       MOUTH_0, MOUTH_1, MOUTH_2, MOUTH_3
     ],
     special: {
       'kitty': S_KITTY,
-      'tree': S_TREE
+      'tree': S_TREE,
+      'mentor': S_MENTOR
     }
   },
   food: FEED,

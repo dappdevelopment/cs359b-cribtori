@@ -74,8 +74,12 @@ class ToriImage extends Component {
     // Whether it's a special tori or not.
     let specialDecor;
 
-    if (special === 1) specialDecor = assets.tori.special.tree;
-    if (special === 2) specialDecor = assets.tori.special.kitty;
+    if (special === 1) specialDecor = assets.tori.special.mentor;
+    if (special === 2) {
+      specialDecor = assets.tori.special.tree;
+      isSpecial = false;
+    }
+    // if (special === 3) specialDecor = assets.tori.special.kitty;
 
 
     let baseTime = 0.5;
