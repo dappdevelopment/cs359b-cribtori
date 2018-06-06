@@ -162,6 +162,8 @@ class Breed extends Component {
     }
 
     breedToris() {
+      this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
+      
       util.visitTori(this.context.toriVisit, this.state.offering.id, this.state.info.id, this.context.userAccount)
       .then((result) => {
         if (!result) {

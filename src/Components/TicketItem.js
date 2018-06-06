@@ -61,6 +61,8 @@ class TicketItem extends Component {
   }
 
   claimTicket() {
+    this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
+    
     util.claimTori(this.context.toriVisit, this.props.id, this.state.name, this.context.userAccount)
     .then((result) => {
       let message = 'Claim unsuccessful, try again later :(';

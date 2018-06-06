@@ -2,13 +2,13 @@ pragma solidity ^0.4.21;
 
 import './DnaCore.sol';
 
-import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
-import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Whitelist.sol';
-import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
+/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol'; */
+/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Whitelist.sol'; */
+/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol'; */
 
-//import 'openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
-//import 'openzeppelin-solidity/contracts/ownership/Whitelist.sol';
-//import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import 'openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
+import 'openzeppelin-solidity/contracts/ownership/Whitelist.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
 

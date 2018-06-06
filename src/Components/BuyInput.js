@@ -76,6 +76,7 @@ class BuyInput extends Component {
     let amount = 1;
     if (this.props.custom) {
       amount = this.state.amount;
+      this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
       util.buyAccForSale(this.props.contract,
                          this.props.addr,
                          amount,
@@ -96,6 +97,8 @@ class BuyInput extends Component {
       })
       .catch(console.err);
     } else {
+      this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
+      
       util.buyTokenForSale(this.props.contract,
                            this.props.addr,
                            this.props.price,

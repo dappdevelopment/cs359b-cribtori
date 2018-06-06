@@ -125,32 +125,56 @@ function createEndpoints(devServer) {
         });
       }
 
-      // TODO: assuming there's already an entry.
-      let hearts = rows[0].hearts;
-      let lastUpdate = rows[0].last_update;
+      if (rows.length === 0) {
+        // Insert the new Tori.
+        let hearts = calculateHearts(2.6, req.activity_type, req.body.info.personality, actTime, actTime);
 
-      hearts = calculateHearts(hearts, req.activity_type, personality, lastUpdate, actTime);
-
-      // We're updating the hearts!
-      query = 'UPDATE hearts SET hearts = ?, last_update = ? WHERE tori_id = ?';
-      inserts = [hearts, actTime, req.body.id];
-
-      query = mysql.format(query, inserts);
-      connection.query(query, function (err, rows, fields) {
-        if (err) {
-          return connection.rollback(function() {
-            throw err;
-          });
-        }
-        connection.commit(function(err) {
+        query = 'INSERT IGNORE INTO hearts (tori_id, hearts, personality, last_update, active) VALUES (?, ?, ?, ?, ?)';
+        inserts = [req.body.id, hearts, req.body.info.personality, actTime, 1];
+        query = mysql.format(query, inserts);
+        connection.query(query, function (err, rows, fields) {
           if (err) {
             return connection.rollback(function() {
               throw err;
             });
           }
-          res.status(200).end();
+          connection.commit(function(err) {
+            if (err) {
+              return connection.rollback(function() {
+                throw err;
+              });
+            }
+            res.status(200).end();
+          });
         });
-      });
+      } else {
+        // TODO: assuming there's already an entry.
+        let hearts = rows[0].hearts;
+        let lastUpdate = rows[0].last_update;
+
+        hearts = calculateHearts(hearts, req.activity_type, personality, lastUpdate, actTime);
+
+        // We're updating the hearts!
+        query = 'UPDATE hearts SET hearts = ?, last_update = ? WHERE tori_id = ?';
+        inserts = [hearts, actTime, req.body.id];
+
+        query = mysql.format(query, inserts);
+        connection.query(query, function (err, rows, fields) {
+          if (err) {
+            return connection.rollback(function() {
+              throw err;
+            });
+          }
+          connection.commit(function(err) {
+            if (err) {
+              return connection.rollback(function() {
+                throw err;
+              });
+            }
+            res.status(200).end();
+          });
+        });
+      }
     });
   }
 

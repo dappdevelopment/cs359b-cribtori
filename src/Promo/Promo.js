@@ -83,9 +83,10 @@ class Promo extends Component {
     quizzes = quizzes.map((q) => parseInt(q, 10));
 
     if (this.state.promoCode !== '') {
+      this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
       util.claimPromoCode(this.context.toriPromo, quizzes, this.state.toriName, this.context.userAccount, this.state.promoCode)
       .then((result) => {
-        let message = 'Transaction has been subitted';
+        let message = 'Transaction has been submitted';
         if (!result) {
           message = 'Uh oh, something went wrong. Please try again later.';
         }
@@ -99,9 +100,10 @@ class Promo extends Component {
         }
       })
     } else {
+      this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
       util.claimInitialTori(this.context.toriPromo, quizzes, this.state.toriName, this.context.userAccount)
       .then((result) => {
-        let message = 'Transaction has been subitted';
+        let message = 'Transaction has been submitted';
         if (!result) {
           message = 'Uh oh, something went wrong. Please try again later.';
         }

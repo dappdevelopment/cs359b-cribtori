@@ -130,6 +130,8 @@ class Inventory extends Component {
     } else if (info.balance - info.used < data.amount) {
       this.context.onMessage('Insufficient amount. Check if accessories are currently placed in room.');
     } else {
+      this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
+
       util.postAccForSale(contract, data.amount, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
       .then((result) => {
         if (!result) this.context.onMessage("Uh oh, something went wrong. Please try again later");
@@ -150,6 +152,8 @@ class Inventory extends Component {
   }
 
   removeAccForSale(contract, e) {
+    this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
+    
     util.removeAccForSale(contract, this.context.userAccount)
     .then((result) => {
       this.context.onMessage("Revoking sale post in progress...")

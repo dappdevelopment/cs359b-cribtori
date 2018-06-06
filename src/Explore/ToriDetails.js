@@ -88,7 +88,7 @@ class ToriDetails extends Component {
     util.retrieveTokenInfo(this.context.toriToken, this.state.id, this.context.userAccount)
     .then((result) => {
       let info = util.parseToriResult(result);
-      
+
       this.setState({
         info: info,
         isOwned: info.owner === this.context.userAccount,
@@ -136,6 +136,8 @@ class ToriDetails extends Component {
   }
 
   changeName() {
+    this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
+
     util.changeToriName(this.context.toriToken, this.state.info.id, this.state.name, this.context.userAccount)
     .then((result) => {
       let message = 'Name change is in progress';
@@ -379,6 +381,8 @@ class ToriDetails extends Component {
     if (data.price === 0) {
       this.context.onMessage('Not a valid amount or price');
     } else {
+      this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
+
       util.postTokenForSale(this.context.toriToken, this.state.id, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
       .then((result) => {
         if (!result) this.context.onMessage("Uh oh, something went wrong. Please try again later");
@@ -397,6 +401,8 @@ class ToriDetails extends Component {
   }
 
   removeToriForSale() {
+    this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
+    
     util.removeTokenForSale(this.context.toriToken, this.state.id, this.context.userAccount)
     .then((result) => {
       this.context.onMessage("Revoking sale post in progress...")

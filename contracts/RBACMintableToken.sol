@@ -1,10 +1,10 @@
 pragma solidity ^0.4.21;
 
-import "github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC20/MintableToken.sol";
-import "github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/rbac/RBAC.sol";
+/* import "github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC20/MintableToken.sol"; */
+/* import "github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/rbac/RBAC.sol"; */
 
-//import "openzeppelin-solidity/contracts/token/ERC20/MintableToken.sol";
-//import "openzeppelin-solidity/contracts/ownership/rbac/RBAC.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/MintableToken.sol";
+import "openzeppelin-solidity/contracts/ownership/rbac/RBAC.sol";
 
 
 /**
