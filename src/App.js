@@ -141,8 +141,13 @@ class App extends Component {
 
     getWeb3
     .then(results => {
+      // Check if local.
+      if (results.web3.currentProvider.host !== undefined) {
+        // Local host.
+        throw "Not MetaMask";
+      }
+
       // Instantiate contract once web3 provided.
-      console.log(results)
       this.setState({
         web3: results.web3
       }, this.instantiateContract);
@@ -158,6 +163,15 @@ class App extends Component {
     // Periodically check if the metamask account has changed
     let timer = setInterval( async () => {
       if (this.state.web3 !== undefined) {
+        if (this.state.web3.currentProvider.host !== undefined) {
+          this.setState({
+            loaded: true,
+          })
+          this.handleMessage('Please install MetaMask to play Cribtori');
+          // Disable the interval.
+          clearInterval(timer);
+          return;
+        }
         this.state.web3.eth.getAccounts((error, accounts) => {
           if (accounts === undefined) {
             this.setState({
