@@ -1,7 +1,7 @@
 import "babel-polyfill";
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link, Switch, Route, withRouter } from 'react-router-dom';
+import { Link, Switch, Route, withRouter, Redirect } from 'react-router-dom';
 
 // Tori contracts
 import ToriToken from '../build/contracts/ToriToken.json';
@@ -34,7 +34,6 @@ import OtherToris from './Explore/OtherToris.js';
 import ToriDetails from './Explore/ToriDetails.js';
 import Market from './Marketplace/Market.js';
 import Confirmation from './Components/Confirmation.js';
-import Prompt from './Components/Prompt.js';
 import Promo from './Promo/Promo.js';
 
 
@@ -50,6 +49,7 @@ import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Toolbar from '@material-ui/core/Toolbar';
 import Snackbar from '@material-ui/core/Snackbar';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { assets } from './assets.js';
 
@@ -114,6 +114,7 @@ class App extends Component {
       accessoriesTokenInstances: [],
       accNum: 100,
       openSnackBar: false,
+      loaded: false,
     }
 
     // Function BINDS
@@ -140,19 +141,21 @@ class App extends Component {
 
     getWeb3
     .then(results => {
+      // Instantiate contract once web3 provided.
       this.setState({
         web3: results.web3
-      })
-
-      // Instantiate contract once web3 provided.
-      this.instantiateContract();
+      }, this.instantiateContract);
     })
     .catch(() => {
-      this.onMessage('Error finding web3.');
-      this.props.history.push({
-        pathname: '/prereq',
-        state: {mode: 0}
-      });
+      // Error finding web3.
+      this.setState({
+        loaded: true,
+      })
+      this.handleMessage('Please install MetaMask to play Cribtori');
+      // this.props.history.push({
+      //   pathname: '/prereq',
+      //   state: {mode: 0}
+      // });
     });
 
     // Periodically check if the metamask account has changed
@@ -163,6 +166,7 @@ class App extends Component {
             // Redirect ...
             this.setState({
               userAccount: accounts[0],
+              loaded: true,
               mode: 5,
             }, () => {
               if (this.props.history.location.pathname !== "/") this.props.history.push('/');
@@ -209,49 +213,45 @@ class App extends Component {
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
       this.setState({userAccount: accounts[0]});
-
       // Tori Token
-      toriToken.deployed().then((instance) => {
-        this.setState({toriTokenInstance: instance})
+      toriToken.deployed().then((toriTokenInstance) => {
+        // Tori Visit
+        toriVisit.deployed().then((toriVisitInstance) => {
+          // Tori Promo
+          toriPromo.deployed().then((toriPromoInstance) => {
+            this.setState({
+              toriTokenInstance: toriTokenInstance,
+              toriVisitInstance: toriVisitInstance,
+              toriPromoInstance: toriPromoInstance
+            }, () => {
+              // Tori Accessories
+              Promise.all(accessories.map((c) => c.deployed()))
+              .then((instances) => {
+                instances.forEach((instance) =>
+                  this.setState({
+                    accessoriesTokenInstances: this.state.accessoriesTokenInstances.concat(instance),
+                  })
+                );
+              })
+              .then(() => {
+                this.setState({
+                  loaded: true
+                });
+              });
+            });
+          });
+        });
       })
       .catch(() => {
-        this.props.history.push({
-          pathname: '/prereq',
-          state: {mode: 0}
+        this.setState({
+          loaded: true
         });
+        this.handleMessage('Please connect to Rinkeby Test Network to play Cribtori.')
+        // this.props.history.push({
+        //   pathname: '/prereq',
+        //   state: {mode: 1}
+        // });
       });
-
-      // Tori Visit
-      toriVisit.deployed().then((instance) => {
-        this.setState({toriVisitInstance: instance})
-      })
-      .catch(() => {
-        this.props.history.push({
-          pathname: '/prereq',
-          state: {mode: 0}
-        });
-      });
-
-      // Tori Promo
-      toriPromo.deployed().then((instance) => {
-        this.setState({toriPromoInstance: instance})
-      })
-      .catch(() => {
-        this.props.history.push({
-          pathname: '/prereq',
-          state: {mode: 0}
-        });
-      });
-
-      // Tori Accessories
-      Promise.all(accessories.map((c) => c.deployed()))
-      .then((instances) => {
-        instances.forEach((instance) =>
-          this.setState({
-            accessoriesTokenInstances: this.state.accessoriesTokenInstances.concat(instance),
-          })
-        );
-      })
     });
   }
 
@@ -275,6 +275,7 @@ class App extends Component {
   }
 
   render() {
+    let disabled = this.state.toriTokenInstance === undefined;
     return (
       <div className="App">
         <AppBar position="static">
@@ -287,36 +288,46 @@ class App extends Component {
             <Tabs value={this.state.mode}
                   onChange={this.switchDisplay}
                   className={this.props.classes.tab}>
-              <Tab label="My Toris" component={Link} to={'/mytoris'} />
-              <Tab label="Nursery" component={Link} to={'/nursery'} />
-              <Tab label="Inventory" component={Link} to={'/inventory'} />
-              <Tab label="Explore" component={Link} to={'/explore'} />
-              <Tab label="Marketplace" component={Link} to={'/market'} />
+              <Tab disabled={disabled} label="My Toris" component={Link} to={'/mytoris'} />
+              <Tab disabled={disabled} label="Nursery" component={Link} to={'/nursery'} />
+              <Tab disabled={disabled} label="Inventory" component={Link} to={'/inventory'} />
+              <Tab disabled={disabled} label="Explore" component={Link} to={'/explore'} />
+              <Tab disabled={disabled} label="Marketplace" component={Link} to={'/market'} />
               <Tab label="Info" component={Link} to={'/'} />
             </Tabs>
           </Toolbar>
         </AppBar>
         <div className={this.props.classes.banner}>
         </div>
-        {(this.state.accessoriesTokenInstances.length === this.state.accNum) &&
-         (this.state.userAccount) &&
-          <Switch>
-            <Route exact path='/' component={Info} />
-            <Route exact path='/mytoris' component={MyTori} />
-            <Route exact path='/mytoris/edit' component={EditRoom} />
-            <Route exact path='/nursery' component={Nursery} />
-            <Route exact path='/nursery/fuse' component={Fuse} />
-            <Route exact path='/nursery/breed' component={BreedHome} />
-            <Route exact path='/nursery/breed/:id' component={Breed} />
-            <Route exact path='/inventory' component={Inventory} />
-            <Route exact path='/explore' component={OtherToris} />
-            <Route exact path='/explore/:id' component={ToriDetails} />
-            <Route exact path='/market' component={Market} />
-            <Route exact path='/confirmation' component={Confirmation} />
-            <Route exact path='/prereq' component={Prompt} />
-            <Route exact path='/promo' component={Promo} />
-          </Switch>
-        }
+        { this.state.loaded ?
+          this.state.toriTokenInstance ? (
+            <Switch>
+              <Route exact path='/' component={Info} />
+              <Route exact path='/mytoris' component={MyTori} />
+              <Route exact path='/mytoris/edit' component={EditRoom} />
+              <Route exact path='/nursery' component={Nursery} />
+              <Route exact path='/nursery/fuse' component={Fuse} />
+              <Route exact path='/nursery/breed' component={BreedHome} />
+              <Route exact path='/nursery/breed/:id' component={Breed} />
+              <Route exact path='/inventory' component={Inventory} />
+              <Route exact path='/explore' component={OtherToris} />
+              <Route exact path='/explore/:id' component={ToriDetails} />
+              <Route exact path='/market' component={Market} />
+              <Route exact path='/confirmation' component={Confirmation} />
+              <Route exact path='/promo' component={Promo} />
+            </Switch>
+          ) : (
+            <Switch>
+              <Route exact path='/' component={Info} />
+              <Redirect to={{
+                pathname: "/",
+                state: { mode: -1 }
+              }} />
+            </Switch>
+          )
+         : (
+          <CircularProgress  color="primary" />
+        )}
         <Snackbar
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
           open={this.state.openSnackBar}

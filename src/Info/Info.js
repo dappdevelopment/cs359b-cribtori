@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Link, Switch, Route } from 'react-router-dom';
+import { Link, Switch, Route, withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -49,8 +49,20 @@ const styles = theme => ({
 });
 
 class Info extends Component {
-  constructor(props) {
+
+  static contextTypes = {
+    onMessage: PropTypes.func,
+  }
+
+  constructor(props, context) {
     super(props);
+    this.context = context;
+
+    let historyState = this.props.history.location.state;
+    if (historyState !== undefined) historyState = historyState.mode;
+    if (historyState === -1) {
+      this.context.onMessage('Please install MetaMask and connect to Rinkeby Test Network');
+    }
   }
 
   render() {
@@ -207,4 +219,4 @@ class Info extends Component {
   }
 }
 
-export default withStyles(styles)(Info)
+export default withStyles(styles)(withRouter(Info))
