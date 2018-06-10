@@ -229,7 +229,6 @@ class App extends Component {
       accNum: accessories.length,
     });
     accessories.forEach((c) => c.setProvider(this.state.web3.currentProvider));
-
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
       if (accounts === undefined) {
