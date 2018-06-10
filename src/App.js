@@ -142,6 +142,7 @@ class App extends Component {
     getWeb3
     .then(results => {
       // Instantiate contract once web3 provided.
+      console.log(results)
       this.setState({
         web3: results.web3
       }, this.instantiateContract);
@@ -152,17 +153,20 @@ class App extends Component {
         loaded: true,
       })
       this.handleMessage('Please install MetaMask to play Cribtori');
-      // this.props.history.push({
-      //   pathname: '/prereq',
-      //   state: {mode: 0}
-      // });
     });
 
     // Periodically check if the metamask account has changed
-    setInterval( async () => {
+    let timer = setInterval( async () => {
       if (this.state.web3 !== undefined) {
         this.state.web3.eth.getAccounts((error, accounts) => {
-          if (this.state.userAccount !== accounts[0]) {
+          if (accounts === undefined) {
+            this.setState({
+              loaded: true,
+            })
+            this.handleMessage('Please install MetaMask to play Cribtori');
+            // Disable the interval.
+            clearInterval(timer);
+          } else if (this.state.userAccount !== accounts[0]) {
             // Redirect ...
             this.setState({
               userAccount: accounts[0],
@@ -212,6 +216,13 @@ class App extends Component {
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
+      if (accounts === undefined) {
+        this.setState({
+          loaded: true,
+        })
+        this.handleMessage('Please install MetaMask to play Cribtori');
+        return;
+      }
       this.setState({userAccount: accounts[0]});
       // Tori Token
       toriToken.deployed().then((toriTokenInstance) => {
@@ -247,10 +258,6 @@ class App extends Component {
           loaded: true
         });
         this.handleMessage('Please connect to Rinkeby Test Network to play Cribtori.')
-        // this.props.history.push({
-        //   pathname: '/prereq',
-        //   state: {mode: 1}
-        // });
       });
     });
   }
