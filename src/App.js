@@ -141,12 +141,6 @@ class App extends Component {
 
     getWeb3
     .then(results => {
-      // Check if local.
-      if (results.web3.currentProvider.host !== undefined) {
-        // Local host.
-        throw "Not MetaMask";
-      }
-
       // Instantiate contract once web3 provided.
       this.setState({
         web3: results.web3
@@ -163,6 +157,7 @@ class App extends Component {
     // Periodically check if the metamask account has changed
     let timer = setInterval( async () => {
       if (this.state.web3 !== undefined) {
+        // Check if local.
         if (this.state.web3.currentProvider.host !== undefined) {
           this.setState({
             loaded: true,
@@ -202,7 +197,14 @@ class App extends Component {
      * Normally these functions would be called in the context of a
      * state management library, but for convenience I've placed them here.
      */
-
+     // Check if local.
+     if (this.state.web3.currentProvider.host !== undefined) {
+       this.setState({
+         loaded: true,
+       })
+       this.handleMessage('Please install MetaMask to play Cribtori');
+       return;
+     }
     const contract = require('truffle-contract');
     const toriToken = contract(ToriToken);
     const toriVisit = contract(ToriVisit);

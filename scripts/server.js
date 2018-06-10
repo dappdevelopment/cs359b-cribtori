@@ -103,7 +103,8 @@ function createEndpoints(devServer) {
     let plus = (type === -1) ? 0 : (increment[personality] / denom);
     let hourPassed = (currentTime - lastUpdate) / ONE_HOUR;
 
-    hearts = hearts + plus - decrement[personality] * (hourPassed / 4);
+    hearts = Math.max(0, hearts - decrement[personality] * (hourPassed / 4));
+    hearts = hearts + plus;
     hearts = Math.max(0, Math.min(5, hearts));
 
     return hearts;
