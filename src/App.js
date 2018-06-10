@@ -34,6 +34,7 @@ import OtherToris from './Explore/OtherToris.js';
 import ToriDetails from './Explore/ToriDetails.js';
 import Market from './Marketplace/Market.js';
 import Confirmation from './Components/Confirmation.js';
+import Prompt from './Components/Prompt.js';
 import Promo from './Promo/Promo.js';
 
 
@@ -148,6 +149,10 @@ class App extends Component {
     })
     .catch(() => {
       this.onMessage('Error finding web3.');
+      this.props.history.push({
+        pathname: '/prereq',
+        state: {mode: 0}
+      });
     });
 
     // Periodically check if the metamask account has changed
@@ -208,16 +213,34 @@ class App extends Component {
       // Tori Token
       toriToken.deployed().then((instance) => {
         this.setState({toriTokenInstance: instance})
+      })
+      .catch(() => {
+        this.props.history.push({
+          pathname: '/prereq',
+          state: {mode: 0}
+        });
       });
 
       // Tori Visit
       toriVisit.deployed().then((instance) => {
         this.setState({toriVisitInstance: instance})
+      })
+      .catch(() => {
+        this.props.history.push({
+          pathname: '/prereq',
+          state: {mode: 0}
+        });
       });
 
       // Tori Promo
       toriPromo.deployed().then((instance) => {
         this.setState({toriPromoInstance: instance})
+      })
+      .catch(() => {
+        this.props.history.push({
+          pathname: '/prereq',
+          state: {mode: 0}
+        });
       });
 
       // Tori Accessories
@@ -290,6 +313,7 @@ class App extends Component {
             <Route exact path='/explore/:id' component={ToriDetails} />
             <Route exact path='/market' component={Market} />
             <Route exact path='/confirmation' component={Confirmation} />
+            <Route exact path='/prereq' component={Prompt} />
             <Route exact path='/promo' component={Promo} />
           </Switch>
         }
