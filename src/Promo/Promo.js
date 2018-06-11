@@ -95,7 +95,10 @@ class Promo extends Component {
         if (result) {
           this.props.history.push({
             pathname: '/confirmation',
-            state: {receipt: result.receipt}
+            state: {
+              receipt: result.receipt,
+              status: 'Generating your first Tori'
+            }
           });
         }
       })
@@ -112,7 +115,10 @@ class Promo extends Component {
         if (result) {
           this.props.history.push({
             pathname: '/confirmation',
-            state: {receipt: result.receipt}
+            state: {
+              receipt: result.receipt,
+              status: 'Generating your first Tori'
+            }
           });
         }
       })

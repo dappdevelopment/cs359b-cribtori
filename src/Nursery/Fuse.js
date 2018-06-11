@@ -169,7 +169,7 @@ class Fuse extends Component {
                 this.state.offering.name.substring(0, Math.floor(this.state.offering.name.length / 2));
     if (fuseName.length > 25) fuseName = fuseName.slice(0, 25);
     this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
-    
+
     util.fuseToris(this.context.toriVisit, this.state.base.id, this.state.offering.id, fuseName, this.context.userAccount)
     .then((result) => {
       let message = this.state.base.name + '\'s fusion is in progress';
@@ -181,7 +181,10 @@ class Fuse extends Component {
       if (result) {
         this.props.history.push({
           pathname: '/confirmation',
-          state: {receipt: result.receipt}
+          state: {
+            receipt: result.receipt,
+            status: `Fusing ${this.state.base.name} with ${this.state.offering.name}`
+          }
         });
       }
     })

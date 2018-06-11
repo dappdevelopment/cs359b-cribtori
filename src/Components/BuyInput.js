@@ -78,7 +78,7 @@ class BuyInput extends Component {
       amount = this.state.amount;
       this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
       util.buyAccForSale(this.props.contract,
-                         this.props.addr,
+                         this.context.web3.utils.toChecksumAddress(this.props.addr),
                          amount,
                          amount * this.props.price,
                          this.context.userAccount)
@@ -92,20 +92,35 @@ class BuyInput extends Component {
 
         this.props.history.push({
           pathname: '/confirmation',
-          state: {receipt: result.receipt}
+          state: {
+            receipt: result.receipt,
+            status: `Buying ${amount} accessories`
+          }
         });
       })
       .catch(console.err);
     } else {
       this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
-      
+
       util.buyTokenForSale(this.props.contract,
                            this.props.addr,
                            this.props.price,
                            this.context.userAccount)
       .then((result) => {
         let message = 'Buy transaction submitted';
-        if (!result) message = 'Transaction failed :(';
+        if (!result) {
+          message = 'Transaction failed. Please try again.';
+          this.context.onMessage(message);
+          return;
+        }
+
+        this.props.history.push({
+          pathname: '/confirmation',
+          state: {
+            receipt: result.receipt,
+            status: `Buying Tori`
+          }
+        });
         this.context.onMessage(message);
         if (result && !this.props.custom) {
           // TODO: do a confirmation here from the smart contract side.
@@ -154,7 +169,7 @@ class BuyInput extends Component {
                 variant="raised"
                 color="primary"
                 onClick={this.handleBuy} >
-          Buy { !this.props.custom && (`for ${this.context.web3.fromWei(this.props.price, 'ether')} ETH`) }
+          Buy { !this.props.custom && (`for ${this.context.web3.utils.fromWei('' + this.props.price, 'ether')} ETH`) }
         </Button>
       </div>
     );

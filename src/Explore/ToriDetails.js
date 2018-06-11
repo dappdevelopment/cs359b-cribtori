@@ -151,6 +151,16 @@ class ToriDetails extends Component {
         isEditName: false,
         info: info
       })
+
+      if (result) {
+        this.props.history.push({
+          pathname: '/confirmation',
+          state: {
+            receipt: result.receipt,
+            status: 'Changing Tori name'
+          }
+        });
+      }
       this.context.onMessage(message);
     })
   }
@@ -383,13 +393,22 @@ class ToriDetails extends Component {
     } else {
       this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
 
-      util.postTokenForSale(this.context.toriToken, this.state.id, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
+      util.postTokenForSale(this.context.toriToken, this.state.id, this.context.web3.utils.toWei('' + data.price, 'ether'), this.context.userAccount)
       .then((result) => {
         if (!result) this.context.onMessage("Uh oh, something went wrong. Please try again later");
         this.context.onMessage("Posting Tori for sale in progress, TXHash: " + result.receipt.transactionHash);
         this.setState({
           dialogOpen: false,
         })
+        if (result) {
+          this.props.history.push({
+            pathname: '/confirmation',
+            state: {
+              receipt: result.receipt,
+              status: 'Posting Tori for sale'
+            }
+          });
+        }
       }).catch(console.error);
     }
   }
@@ -402,10 +421,20 @@ class ToriDetails extends Component {
 
   removeToriForSale() {
     this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
-    
+
     util.removeTokenForSale(this.context.toriToken, this.state.id, this.context.userAccount)
     .then((result) => {
       this.context.onMessage("Revoking sale post in progress...")
+
+      if (result) {
+        this.props.history.push({
+          pathname: '/confirmation',
+          state: {
+            receipt: result.receipt,
+            status: 'Revoking sale post'
+          }
+        });
+      }
     }).catch(console.error);
   }
 

@@ -132,13 +132,23 @@ class Inventory extends Component {
     } else {
       this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
 
-      util.postAccForSale(contract, data.amount, this.context.web3.toWei(data.price, 'ether'), this.context.userAccount)
+      util.postAccForSale(contract, data.amount, this.context.web3.utils.toWei('' + data.price, 'ether'), this.context.userAccount)
       .then((result) => {
         if (!result) this.context.onMessage("Uh oh, something went wrong. Please try again later");
         this.context.onMessage("Posting accessory for sale in progress, TXHash: " + result.receipt.transactionHash);
         this.setState({
           dialogOpen: false,
         });
+
+        if (result) {
+          this.props.history.push({
+            pathname: '/confirmation',
+            state: {
+              receipt: result.receipt,
+              status: 'Posting accessory for sale'
+            }
+          });
+        }
       }).catch(console.error);
     }
   }
@@ -153,11 +163,23 @@ class Inventory extends Component {
 
   removeAccForSale(contract, e) {
     this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
-    
+
     util.removeAccForSale(contract, this.context.userAccount)
     .then((result) => {
       this.context.onMessage("Revoking sale post in progress...")
-    }).catch(console.error);
+
+      if (result) {
+        this.props.history.push({
+          pathname: '/confirmation',
+          state: {
+            receipt: result.receipt,
+            status: 'Revoking sale post for accessory'
+          }
+        });
+      }
+    }).catch((error) => {
+      this.context.onMessage("Transaction failed, please check gas value")
+    });
   }
 
 

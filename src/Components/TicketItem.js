@@ -62,7 +62,7 @@ class TicketItem extends Component {
 
   claimTicket() {
     this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
-    
+
     util.claimTori(this.context.toriVisit, this.props.id, this.state.name, this.context.userAccount)
     .then((result) => {
       let message = 'Claim unsuccessful, try again later :(';
@@ -75,7 +75,10 @@ class TicketItem extends Component {
       if (result) {
         this.props.history.push({
           pathname: '/confirmation',
-          state: {receipt: result.receipt}
+          state: {
+            receipt: result.receipt,
+            status: 'Claiming new Tori'
+          }
         });
       }
     })

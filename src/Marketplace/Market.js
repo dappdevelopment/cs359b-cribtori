@@ -87,7 +87,7 @@ class Market extends Component {
             let item = {
               amount: val,
               price: price,
-              addr: addr
+              addr: this.context.web3.utils.toChecksumAddress(addr)
             };
             sales.push(item);
           });
@@ -125,8 +125,7 @@ class Market extends Component {
     let items = ids.map((id) => {
       return (
         <Grid item sm={minSize} key={id} >
-          <TokenInfo id={id}
-                     forSale={true} />
+          <TokenInfo id={id} />
         </Grid>
       );
     });
@@ -152,8 +151,7 @@ class Market extends Component {
     let item = (
       <Grid item sm={3} key={this.state.accSelfItems.length}>
         <TokenInfo contract={contract}
-                   sales={sales}
-                   forSale={true} />
+                   sales={sales} />
       </Grid>
     );
     this.setState({

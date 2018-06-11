@@ -123,9 +123,9 @@ class TokenInfo extends Component {
       let offer = this.props.sales.map((item, i) => {
         return (
           <ListItem key={`${this.state.info.symbol}_${i}`}>
-            <ListItemText primary={`${item.amount.toNumber()} for ${this.context.web3.fromWei(item.price, 'ether')} ETH/token`}/>
+            <ListItemText primary={`${item.amount.toNumber()} for ${this.context.web3.utils.fromWei('' + item.price, 'ether')} ETH/token`}/>
             <BuyInput contract={this.props.contract}
-                      addr={item.addr}
+                      addr={this.context.web3.utils.toChecksumAddress(item.addr)}
                       price={item.price.toNumber()}
                       total={item.amount.toNumber()}
                       custom={true} />
@@ -141,6 +141,11 @@ class TokenInfo extends Component {
       );
     } else {
       // Render for owner.
+      if (this.props.onRevokeSale === undefined && this.props.onPostSale === undefined) {
+        return (
+          <CardActions></CardActions>
+        );
+      }
       let buttonDisabled = this.state.info.balance - this.state.info.used === 0;
       return (
         <CardActions>
@@ -183,7 +188,7 @@ class TokenInfo extends Component {
     } else {
       let saleInfo = 'None';
       if (this.state.info.amount > 0) {
-        saleInfo = `${this.state.info.amount} for ${this.context.web3.fromWei(this.state.info.price, 'ether')} ETH / item`;
+        saleInfo = `${this.state.info.amount} for ${this.context.web3.utils.fromWei('' + this.state.info.price, 'ether')} ETH / item`;
       }
       content = (
         <Grid container className={this.props.classes.grid}

@@ -73,6 +73,8 @@ import INFO2 from './img/info2.png';
 import INFO3 from './img/info3.png';
 import INFO4 from './img/info4.png';
 
+import PENDING from './img/Pending.png';
+
 import BUBBLE from './img/reactions/bubble.png';
 import HEARTS from './img/reactions/hearts.png';
 import FOOD from './img/reactions/food.png';
@@ -136,6 +138,7 @@ export const assets = {
   logo: LOGO,
   logoWhite: LOGO_WHITE,
   info: [INFO1, INFO2, INFO3, INFO4],
+  pending: PENDING,
   reactions: {
     'bubble': BUBBLE,
     'food': FOOD,

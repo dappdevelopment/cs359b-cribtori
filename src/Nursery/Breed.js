@@ -163,7 +163,7 @@ class Breed extends Component {
 
     breedToris() {
       this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
-      
+
       util.visitTori(this.context.toriVisit, this.state.offering.id, this.state.info.id, this.context.userAccount)
       .then((result) => {
         if (!result) {
@@ -177,7 +177,10 @@ class Breed extends Component {
         if (result) {
           this.props.history.push({
             pathname: '/confirmation',
-            state: {receipt: result.receipt}
+            state: {
+              receipt: result.receipt,
+              status: `Breeding ${this.state.offering.name} with ${this.state.info.name}`
+            }
           });
         }
 

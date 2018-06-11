@@ -50,6 +50,16 @@ import Typography from '@material-ui/core/Typography';
 import Toolbar from '@material-ui/core/Toolbar';
 import Snackbar from '@material-ui/core/Snackbar';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import IconButton from '@material-ui/core/IconButton';
+import Drawer from '@material-ui/core/Drawer';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+
+import ConfirmationNumber from '@material-ui/icons/ConfirmationNumber';
+import CheckCircle from '@material-ui/icons/CheckCircle';
+import MoreHoriz from '@material-ui/icons/MoreHoriz';
+
 
 import { assets } from './assets.js';
 
@@ -83,6 +93,23 @@ const styles = theme => ({
     backgroundColor: theme.palette.primary.dark,
     height: 20,
     width: `100%`,
+  },
+  transactionButton: {
+    backgroundColor: '#e53100',
+    color: 'white',
+    position: 'fixed',
+    bottom: 10,
+    left: 10,
+    boxShadow: '1px 1px grey'
+  },
+  transactionDrawer: {
+  },
+  list: {
+    maxHeight: 400
+  },
+  txEntry: {
+    marginLeft: 10,
+    marginRight: 30
   }
 });
 
@@ -96,6 +123,8 @@ class App extends Component {
     accContracts: PropTypes.array,
     userAccount: PropTypes.string,
     onMessage: PropTypes.func,
+    pushToDrawer: PropTypes.func,
+    openDrawer: PropTypes.func,
   }
 
   constructor(props) {
@@ -115,12 +144,18 @@ class App extends Component {
       accNum: 100,
       openSnackBar: false,
       loaded: false,
+      openDrawer: false,
+      transactions: [],
+      transactionItems: [],
     }
 
     // Function BINDS
     this.switchDisplay = this.switchDisplay.bind(this);
     this.handleCloseSnackBar = this.handleCloseSnackBar.bind(this);
     this.handleMessage = this.handleMessage.bind(this);
+    this.handleOpenDrawer = this.handleOpenDrawer.bind(this);
+    this.handleCloseDrawer = this.handleCloseDrawer.bind(this);
+    this.pushToDrawer = this.pushToDrawer.bind(this);
   }
 
   getChildContext() {
@@ -131,7 +166,9 @@ class App extends Component {
       toriPromo: this.state.toriPromoInstance,
       accContracts: this.state.accessoriesTokenInstances,
       userAccount: this.state.userAccount,
-      onMessage: this.handleMessage
+      onMessage: this.handleMessage,
+      pushToDrawer: this.pushToDrawer,
+      openDrawer: this.handleOpenDrawer
     };
   }
 
@@ -296,6 +333,89 @@ class App extends Component {
     });
   }
 
+  async handleOpenDrawer() {
+    // Check the transaction status.
+    // if status is already checked --> remove from transactions
+    let txs = this.state.transactions.filter((entry) => entry[2] === -1);
+
+    if (txs.length === 0) {
+      this.setState({
+        openDrawer: true,
+        transactions: txs,
+        transactionItems: [],
+      });
+      return;
+    }
+
+    await Promise.all(txs.map((entry) => {
+      let txhash = entry[0];
+      let txText = entry[1];
+      let status = entry[2];
+
+      return this.state.web3.eth.getTransaction(txhash);
+    }))
+    .then((results) => {
+      let txEntries = results.map((entry, i) => {
+        let txhash = entry.hash;
+        let bn = entry.blockNumber;
+        let txText = txs[i][1];
+
+        let st = (<CheckCircle />);
+        if (bn === null) {
+          // Pending.
+          st = (<MoreHoriz/>);
+        }
+
+        return (
+          <ListItem key={i} >
+            <Typography
+              className={this.props.classes.txEntry}
+              variant="subheading"
+              color="inherit"
+              component="p"
+              align="left">
+              {txText}
+            </Typography>
+            <Typography
+              className={this.props.classes.txEntry}
+              variant="subheading"
+              color="inherit"
+              component="p"
+              align="center">
+              <b>TxHash: </b> {txhash}
+            </Typography>
+            <Typography
+              className={this.props.classes.txEntry}
+              variant="subheading"
+              color="inherit"
+              component="p"
+              align="right">
+              <b>Status:</b> {st}
+            </Typography>
+          </ListItem>
+        )
+      });
+
+      this.setState({
+        openDrawer: true,
+        transactions: txs,
+        transactionItems: txEntries,
+      });
+    });
+  }
+
+  handleCloseDrawer() {
+    this.setState({
+      openDrawer: false,
+    });
+  }
+
+  pushToDrawer(txhash, status) {
+    this.setState({
+      transactions: this.state.transactions.concat([[txhash, status, -1]])
+    });
+  }
+
   render() {
     let disabled = this.state.toriTokenInstance === undefined;
     return (
@@ -361,6 +481,26 @@ class App extends Component {
         />
         <div className={this.props.classes.footer}>
         </div>
+        <IconButton
+          className={this.props.classes.transactionButton}
+          variant="raised"
+          color="primary"
+          onClick={this.handleOpenDrawer} >
+          <ConfirmationNumber />
+        </IconButton>
+        <Drawer
+          className={this.props.classes.transactionDrawer}
+          anchor="bottom"
+          open={this.state.openDrawer}
+          onClose={this.handleCloseDrawer}>
+          <List className={this.props.classes.list}>
+            {this.state.transactionItems.length === 0 ? (
+              <ListItem>No Pending Transactions</ListItem>
+            ) :
+              this.state.transactionItems
+            }
+          </List>
+        </Drawer>
       </div>
     );
   }
