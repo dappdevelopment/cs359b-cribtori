@@ -80,7 +80,7 @@ class EditRoom extends Component {
 
       toriIds = toriIds.map((id) => { return id.toNumber() });
       maxLevel = maxLevel.toNumber();
-
+      
       this.setState({
         loaded: true,
         toriIds: toriIds,

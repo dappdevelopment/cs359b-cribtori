@@ -76,14 +76,17 @@ class MyTori extends Component {
     this.cleaningSwitch = this.cleaningSwitch.bind(this);
     this.onToriClick = this.onToriClick.bind(this);
     this.postActivity = this.postActivity.bind(this);
+
+    console.log('here?')
   }
 
   componentDidMount() {
+    console.log('hos')
     util.retrieveTokenIndexesWithMaxLevel(this.context.toriToken, this.state.userAccount)
     .then((results) => {
       let toriIds = results[0];
       let maxLevel = results[1];
-
+      console.log(results, this.context.userAccount)
       toriIds = toriIds.map((id) => { return id.toNumber() });
       maxLevel = maxLevel.toNumber();
 

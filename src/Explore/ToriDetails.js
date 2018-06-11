@@ -64,8 +64,10 @@ class ToriDetails extends Component {
       dialogOpen: false,
       name: '',
       isEditName: false,
+      canChangeName: false,
       greetings: '',
       isEditGreetings: false,
+      canChangeGreetings: false,
     }
 
     // Function BINDS
@@ -88,10 +90,12 @@ class ToriDetails extends Component {
     util.retrieveTokenInfo(this.context.toriToken, this.state.id, this.context.userAccount)
     .then((result) => {
       let info = util.parseToriResult(result);
-
+      info.owner = this.context.web3.utils.toChecksumAddress(info.owner);
       this.setState({
         info: info,
         isOwned: info.owner === this.context.userAccount,
+        canChangeName: util.canChangeName(info.level),
+        canChangeGreetings: util.canChangeGreetings(info.level),
       });
 
       // Get the greetings.
@@ -218,11 +222,12 @@ class ToriDetails extends Component {
         </div>
       );
     }
+
     return (
       <Paper className={this.props.classes.paper + ' ' + this.props.classes.primary}>
         <Typography variant="subheading" color="inherit" component="h3" align="left">
           { this.state.info.name }:
-          { this.state.isOwned && util.canChangeGreetings(this.state.info.level) && (
+          { this.state.isOwned && this.state.canChangeGreetings && (
             <IconButton aria-label="Edit"
                         onClick={this.greetingsEditSwitch}>
               { !this.state.isEditGreetings ? (
@@ -245,7 +250,7 @@ class ToriDetails extends Component {
       let nameContent = (
         <Typography variant="title" color="inherit" component="h3" align="center">
           {this.state.info.name}
-          { this.state.isOwned && util.canChangeName(this.state.info.level) && (
+          { this.state.isOwned && this.state.canChangeName && (
             <IconButton aria-label="Edit"
                         onClick={this.nameEditSwitch}>
               { !this.state.isEditName ? (

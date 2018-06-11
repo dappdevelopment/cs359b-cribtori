@@ -3,14 +3,14 @@ pragma solidity ^0.4.21;
 import './DnaCore.sol';
 
 /* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol'; */
-/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Whitelist.sol'; */
+/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/rbac/RBACWithAdmin.sol'; */
 /* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol'; */
 
 import 'openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
-import 'openzeppelin-solidity/contracts/ownership/Whitelist.sol';
+import 'openzeppelin-solidity/contracts/ownership/rbac/RBACWithAdmin.sol';
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
+contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
 
   using SafeMath for uint256;
 
@@ -35,12 +35,10 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
   uint256 toriSaleCount;
 
   event NewTori(address indexed _address, uint256 toriIdx);
+  uint256 currentGeneration = 0;
 
 
-  /* DEV USE */
-  function ToriToken() {
-    // Generate some Toris for the owner.
-
+  function ToriToken () {
     // 1.
     uint8[] memory testQuiz = new uint8[](4);
     testQuiz[0] = 0;
@@ -57,21 +55,10 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
     id = toris.push(newTori) - 1;
     tokenOwner[id] = msg.sender;
     ownedTokensCount[msg.sender] = ownedTokensCount[msg.sender].add(1);
-
-    // 3.
-    testQuiz[0] = 1;
-    testQuiz[3] = 1;
-    newTori = _generateRandomTori(testQuiz, "Rito", msg.sender, 0);
-    id = toris.push(newTori) - 1;
-    tokenOwner[id] = msg.sender;
-    ownedTokensCount[msg.sender] = ownedTokensCount[msg.sender].add(1);
-
-    approveForSale(0, 1000000000000000);
   }
 
-  uint256 currentGeneration = 0;
 
-  function updateGeneration() onlyOwner public {
+  function updateGeneration() onlyAdmin public {
     currentGeneration = currentGeneration.add(1);
   }
 
@@ -87,13 +74,13 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
     uint32 proficiency;
     uint32 personality;
     (dna, proficiency, personality) = _generateRandomTraits(_quizzes, _name, _owner);
-    return Tori(dna, 1, _name, proficiency, personality, uint32(now), currentGeneration, _special, 0, 0);
+    return Tori(dna, 2, _name, proficiency, personality, uint32(now), currentGeneration, _special, 0, 0);
   }
 
   function generateSpecialTori(uint8[] _quizzes,
                                string _name,
                                uint256 _special,
-                               address _owner) onlyWhitelisted public returns (bool success) {
+                               address _owner) onlyRole('promo') public returns (bool success) {
     Tori memory newTori = _generateRandomTori(_quizzes, _name, _owner, _special);
     // Push to the book keeping array.
     uint256 id = toris.push(newTori) - 1;
@@ -111,7 +98,8 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
                             uint256 _parent2,
                             string _name,
                             address _owner,
-                            uint256 _special) onlyWhitelisted private returns (bool success) {
+                            uint256 _special,
+                            uint256 _generation) private returns (bool success) {
     require((_dna / DNA_LIMIT == 0) &&
             (_proficiency >= 0) &&
             (_proficiency < PROFICIENCY_THRESHOLD.length) &&
@@ -124,7 +112,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
                                _proficiency,
                                _personality,
                                uint32(now),
-                               currentGeneration,
+                               _generation,
                                _special,
                                _parent1,
                                _parent2);
@@ -143,7 +131,8 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
                            uint256 _parent2,
                            string _name,
                            address _owner,
-                           uint256 _special) public returns (bool success) {
+                           uint256 _special,
+                           uint256 _generation) onlyRole('visit') public returns (bool success) {
     return _generateNewTori(
       _dna,
       _level,
@@ -153,11 +142,35 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
       _parent2,
       _name,
       _owner,
-      _special
+      _special,
+      _generation
     );
   }
 
-  function _burnTori(address _owner, uint256 _tokenId) onlyWhitelisted private returns (bool success) {
+  function generateNewTori(uint256 _dna,
+                           uint256 _level,
+                           uint32 _proficiency,
+                           uint32 _personality,
+                           uint256 _parent1,
+                           uint256 _parent2,
+                           string _name,
+                           address _owner,
+                           uint256 _special) onlyRole('visit') public returns (bool success) {
+    return _generateNewTori(
+      _dna,
+      _level,
+      _proficiency,
+      _personality,
+      _parent1,
+      _parent2,
+      _name,
+      _owner,
+      _special,
+      currentGeneration
+    );
+  }
+
+  function _burnTori(address _owner, uint256 _tokenId) onlyRole('visit') private returns (bool success) {
     // Check if for sale
     // TODO: remove it automatically for now.
     if (toriSale[_tokenId] > 0) {
@@ -194,7 +207,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
     uint[] memory indexes = getTokenIndexes(_owner);
     uint maxLevel = 1;
     for (uint i = 0; i < indexes.length; i = i.add(1)) {
-      uint currLevel = toris[i].level;
+      uint currLevel = toris[indexes[i]].level;
       if (currLevel > maxLevel) {
         maxLevel = currLevel;
       }
@@ -310,7 +323,7 @@ contract ToriToken is Whitelist, DnaCore, ERC721BasicToken {
                       uint32 _proficiency,
                       uint32 _personality,
                       uint256 _special,
-                      uint256 _minLevel) onlyWhitelisted onlyOwnerOf(_tokenId) minLevel(_tokenId, _minLevel) public returns (bool result) {
+                      uint256 _minLevel) onlyRole('update') onlyOwnerOf(_tokenId) minLevel(_tokenId, _minLevel) public returns (bool result) {
     Tori storage tori = toris[_tokenId];
     tori.name = _name;
     tori.proficiency = _proficiency;

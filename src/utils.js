@@ -182,6 +182,10 @@ export function getTicketInfo(contract, ticketId, addr) {
   return contract.getTicketInfo(ticketId, {from: addr});
 }
 
+export function getBreedStatus(contract, id, addr) {
+  return contract.isOccupied(id, { from: addr });
+}
+
 export function parseTicketResult(result) {
   let toriId = result[0].toNumber();
   let otherId = result[1].toNumber();

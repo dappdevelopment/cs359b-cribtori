@@ -23,6 +23,7 @@ class TokenItem extends Component {
   static contextTypes = {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
+    toriVisit: PropTypes.object,
     accContracts: PropTypes.array,
     userAccount: PropTypes.string
   }
@@ -57,13 +58,19 @@ class TokenItem extends Component {
       util.retrieveTokenInfo(this.context.toriToken, this.props.id, this.context.userAccount)
       .then((result) => {
         let info = util.parseToriResult(result);
-        this.setState({
-          mode: 0,
-          info: info,
-        });
 
-        // Init tori if necessary
-        this.initTori(info);
+        util.getBreedStatus(this.context.toriVisit, this.props.id, this.context.userAccount)
+        .then((result) => {
+          info.occupied = result;
+
+          this.setState({
+            mode: 0,
+            info: info,
+          });
+
+          // Init tori if necessary
+          this.initTori(info);
+        });
       })
       .catch(console.error);
     }
@@ -98,7 +105,7 @@ class TokenItem extends Component {
     if (this.state.mode === 0) {
       // Check for tori.
       if (this.props.active !== undefined) disabled = this.props.active.indexOf(this.state.info.id) !== -1;
-      if (this.props.nursery !== undefined && this.props.nursery) disabled = this.state.info.salePrice > 0;
+      if (this.props.nursery !== undefined && this.props.nursery) disabled = this.state.info.salePrice > 0 || this.state.info.occupied;
     } else {
       // Check for accessory
       amount = this.state.info.balance - this.state.info.amount;
