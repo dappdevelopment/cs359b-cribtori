@@ -90,6 +90,7 @@ class ToriDetails extends Component {
     util.retrieveTokenInfo(this.context.toriToken, this.state.id, this.context.userAccount)
     .then((result) => {
       let info = util.parseToriResult(result);
+
       info.owner = this.context.web3.utils.toChecksumAddress(info.owner);
       this.setState({
         info: info,

@@ -53,23 +53,26 @@ class OtherToris extends Component {
             }
           }
 
+          this.setState({
+            ids: otherIds
+          });
           // Check which ones are currently active.
-          fetch('/cribtori/api/hearts?active=1')
-          .then(function(response) {
-            if (response.ok) {
-              return response.json();
-            }
-            throw response;
-          })
-          .then(function(data) {
-            // Filter the toris.
-            data = data.map((d) => { return d.tori_id; });
-            otherIds = otherIds.filter((id) => data.indexOf(id) !== -1);
-            this.setState({
-              ids: otherIds
-            });
-          }.bind(this))
-          .catch(console.err);
+          // fetch('/cribtori/api/hearts?active=1')
+          // .then(function(response) {
+          //   if (response.ok) {
+          //     return response.json();
+          //   }
+          //   throw response;
+          // })
+          // .then(function(data) {
+          //   // Filter the toris.
+          //   data = data.map((d) => { return d.tori_id; });
+          //   otherIds = otherIds.filter((id) => data.indexOf(id) !== -1);
+          //   this.setState({
+          //     ids: otherIds
+          //   });
+          // }.bind(this))
+          // .catch(console.err);
         })
         .catch(console.error);
     })
