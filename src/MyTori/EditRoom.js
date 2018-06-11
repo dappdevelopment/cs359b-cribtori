@@ -13,6 +13,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
 import Chip from '@material-ui/core/Chip';
 import Avatar from '@material-ui/core/Avatar';
 
@@ -357,18 +358,28 @@ class EditRoom extends Component {
           )}
         </Grid>
         <Grid item sm={3}>
-          { false /* TODO */&& (
-            <Paper className={this.props.classes.paper + ' ' + this.props.classes.paperBlue}
-                   elevation={4}>
-             <Typography variant="title" color="inherit" component="h3">
-               Manual
-             </Typography>
-             <Divider />
-             <Typography variant="body2" color="inherit">
-               [ TBA ]
-             </Typography>
-            </Paper>
-          )}
+          <Paper className={this.props.classes.paper + ' ' + this.props.classes.paperBlue}
+                 elevation={4}>
+           <Typography variant="title" color="inherit" component="h3">
+             Hint
+           </Typography>
+           <Divider />
+           <Typography variant="body2" color="inherit">
+            Items with size 2 will be placed horizontally <b>to the left</b>.
+           </Typography>
+           <Divider />
+           <Typography variant="body2" color="inherit">
+             You cannot block the entrance.
+           </Typography>
+           <Divider />
+           <Typography variant="body2" color="inherit">
+             Toris not placed in the room will be considered <b>Inactive</b>
+           </Typography>
+           <Divider />
+           <Typography variant="body2" color="inherit">
+             <b>Inactive</b> Toris will not be viewable and happiness level will be <b>frozen</b>.
+           </Typography>
+          </Paper>
           <Button variant="raised"
                   color="secondary"
                   component={Link}

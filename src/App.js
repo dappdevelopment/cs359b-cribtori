@@ -355,6 +355,19 @@ class App extends Component {
       return this.state.web3.eth.getTransaction(txhash);
     }))
     .then((results) => {
+      txs = results.map((entry, i) => {
+        let txhash = entry.hash;
+        let bn = entry.blockNumber;
+        let txText = txs[i][1];
+
+        let st = (<CheckCircle />);
+        if (bn === null) {
+          // Pending.
+          st = 1
+        }
+        return [txhash, txText, st];
+      });
+
       let txEntries = results.map((entry, i) => {
         let txhash = entry.hash;
         let bn = entry.blockNumber;

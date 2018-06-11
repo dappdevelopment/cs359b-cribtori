@@ -41,6 +41,7 @@ class TicketItem extends Component {
     this.renderAction = this.renderAction.bind(this);
     this.claimTicket = this.claimTicket.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.onTimerDone = this.onTimerDone.bind(this);
   }
 
   componentDidMount() {
@@ -95,10 +96,22 @@ class TicketItem extends Component {
     });
   }
 
+  onTimerDone() {
+    // Get the timer switch.
+    let dueTime = this.state.dueTime;
+    this.setState({
+      dueTime: 0
+    }, () => {
+      this.setState({
+        dueTime: dueTime,
+      });
+    });
+  }
+
   renderAction() {
     if (this.state.dueTime - new Date().getTime() / 1000 > 0) {
       return (
-        <Timer dueTime={this.state.dueTime} />
+        <Timer dueTime={this.state.dueTime} timerCallback={this.onTimerDone}/>
       );
     } else {
       return (
