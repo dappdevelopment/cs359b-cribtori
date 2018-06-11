@@ -33,7 +33,7 @@ contract ToriSimplePromo is DnaCore, Ownable {
     toriTokenInterface = ToriTokenInterface(_address);
 
     // Code 0 is for initial Tori.
-    limit[0] = 30;
+    limit[0] = 25;
     special[0] = 0;
   }
 

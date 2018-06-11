@@ -99,30 +99,4 @@ module.exports = function(deployer) {
     console.log('Success in setting old address');
     return transferInstance.setNewAddress(ToriToken.address);
   })
-  .then((result) => {
-    console.log('Success in setting new address');
-    return transferInstance.getOldCount()
-  })
-  .then((result) => {
-    count = result.toNumber();
-    console.log('Starting transfer of ' + count + ' Toris');
-
-    let countLst = [];
-    for (let i = 0; i < count; i++) countLst.push(i);
-
-    Promise.all(countLst.map((c) => {
-      return toriInstance.getTokenInfo(c);
-    }))
-    .then((results) => {
-      let names = results.map((r) => { return r[3] });
-
-      Promise.all(names.map((n, i) => {
-        console.log(n, i)
-        return transferInstance.transferTori(i, n);
-      }))
-      .then((results) => {
-        console.log('SUCCESS', results);
-      })
-    });
-  });
 };

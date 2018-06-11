@@ -2,9 +2,11 @@ pragma solidity ^0.4.21;
 
 /* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Ownable.sol'; */
 /* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/lifecycle/Destructible.sol'; */
+/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol'; */
 
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import 'openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract ToriTokenInterface {
   function getTokenInfo(uint256 _toriId) public view returns
@@ -39,6 +41,8 @@ contract ToriTokenInterface {
 }
 
 contract ToriTransfer is Ownable, Destructible {
+
+  using SafeMath for uint256;
 
   ToriTokenInterface oldToriToken;
   ToriTokenInterface newToriToken;
@@ -97,7 +101,6 @@ contract ToriTransfer is Ownable, Destructible {
                                  owner,
                                  r1[2],
                                  r1[3]);
-    oldToriToken.burnTori(owner, _tokenId);
   }
 
   function getOldCount() public view returns (uint result) {

@@ -2,13 +2,13 @@ pragma solidity ^0.4.21;
 
 import './DnaCore.sol';
 
-/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol'; */
-/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/rbac/RBACWithAdmin.sol'; */
-/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol'; */
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/examples/RBACWithAdmin.sol';
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
 
-import 'openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
-import 'openzeppelin-solidity/contracts/ownership/rbac/RBACWithAdmin.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+//import 'openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
+//import 'openzeppelin-solidity/contracts/ownership/rbac/RBACWithAdmin.sol';
+//import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
 
@@ -36,26 +36,6 @@ contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
 
   event NewTori(address indexed _address, uint256 toriIdx);
   uint256 currentGeneration = 0;
-
-
-  function ToriToken () {
-    // 1.
-    uint8[] memory testQuiz = new uint8[](4);
-    testQuiz[0] = 0;
-    testQuiz[1] = 0;
-    testQuiz[2] = 0;
-    testQuiz[3] = 0;
-    Tori memory newTori = _generateRandomTori(testQuiz, "Toto", msg.sender, 0);
-    uint256 id = toris.push(newTori) - 1;
-    tokenOwner[id] = msg.sender;
-    ownedTokensCount[msg.sender] = ownedTokensCount[msg.sender].add(1);
-    // 2.
-    testQuiz[1] = 1;
-    newTori = _generateRandomTori(testQuiz, "Riri", msg.sender, 0);
-    id = toris.push(newTori) - 1;
-    tokenOwner[id] = msg.sender;
-    ownedTokensCount[msg.sender] = ownedTokensCount[msg.sender].add(1);
-  }
 
 
   function updateGeneration() onlyAdmin public {

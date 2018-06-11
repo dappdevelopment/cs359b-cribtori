@@ -35,6 +35,7 @@ import ToriDetails from './Explore/ToriDetails.js';
 import Market from './Marketplace/Market.js';
 import Confirmation from './Components/Confirmation.js';
 import Promo from './Promo/Promo.js';
+import Admin from './Admin/Admin.js';
 
 
 import './css/oswald.css'
@@ -59,7 +60,6 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ConfirmationNumber from '@material-ui/icons/ConfirmationNumber';
 import CheckCircle from '@material-ui/icons/CheckCircle';
 import MoreHoriz from '@material-ui/icons/MoreHoriz';
-
 
 import { assets } from './assets.js';
 
@@ -470,6 +470,9 @@ class App extends Component {
               <Route exact path='/market' component={Market} />
               <Route exact path='/confirmation' component={Confirmation} />
               <Route exact path='/promo' component={Promo} />
+              { false && (
+                  <Route exact path='/admin' component={Admin} />
+              )}
             </Switch>
           ) : (
             <Switch>
