@@ -54,7 +54,7 @@ contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
     uint32 proficiency;
     uint32 personality;
     (dna, proficiency, personality) = _generateRandomTraits(_quizzes, _name, _owner);
-    return Tori(dna, 2, _name, proficiency, personality, uint32(now), currentGeneration, _special, 0, 0);
+    return Tori(dna, 1, _name, proficiency, personality, uint32(now), currentGeneration, _special, 0, 0);
   }
 
   function generateSpecialTori(uint8[] _quizzes,
@@ -98,8 +98,13 @@ contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
                                _parent2);
     // Push to the book keeping array.
     uint256 id = toris.push(newTori) - 1;
-    _mint(_owner, id);
-    emit NewTori(_owner, id);
+
+    if (_owner == address(0)) {
+      tokenOwner[id] = _owner;
+    } else {
+      _mint(_owner, id);
+      emit NewTori(_owner, id);
+    }
     return true;
   }
 

@@ -2,11 +2,11 @@ pragma solidity ^0.4.21;
 
 import '../DnaCore.sol';
 
-/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Ownable.sol'; */
-/* import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol'; */
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
 
-import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+//import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+//import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract ToriTokenInterface {
   function generateSpecialTori(uint8[] _quizzes,
@@ -33,7 +33,7 @@ contract ToriSimplePromo is DnaCore, Ownable {
     toriTokenInterface = ToriTokenInterface(_address);
 
     // Code 0 is for initial Tori.
-    limit[0] = 25;
+    limit[0] = 30;
     special[0] = 0;
   }
 
@@ -44,6 +44,11 @@ contract ToriSimplePromo is DnaCore, Ownable {
 
     limit[hashCode] = _limit;
     special[hashCode] = _specialCode;
+  }
+
+  function getLimit(string _code) public view returns (uint256 limitValue) {
+    uint256 hashCode = uint256(keccak256(_code));
+    limitValue = limit[hashCode];
   }
 
   function increaseLimit(string _code, uint256 _limitAddition) onlyOwner public {
