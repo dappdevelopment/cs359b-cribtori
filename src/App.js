@@ -60,6 +60,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ConfirmationNumber from '@material-ui/icons/ConfirmationNumber';
 import CheckCircle from '@material-ui/icons/CheckCircle';
 import MoreHoriz from '@material-ui/icons/MoreHoriz';
+import Feedback from '@material-ui/icons/Feedback';
 
 import { assets } from './assets.js';
 
@@ -110,6 +111,17 @@ const styles = theme => ({
   txEntry: {
     marginLeft: 10,
     marginRight: 30
+  },
+  feedBackButton: {
+    backgroundColor: '#FF6F00',
+    color: 'white',
+    position: 'fixed',
+    bottom: 100,
+    left: 10,
+    boxShadow: '1px 1px grey',
+    '&:hover': {
+      backgroundColor: '#e53100',
+    },
   }
 });
 
@@ -497,6 +509,14 @@ class App extends Component {
         />
         <div className={this.props.classes.footer}>
         </div>
+        <a href="https://goo.gl/forms/UMr3APBwfBVZ4C1D2" >
+          <IconButton
+            className={this.props.classes.feedBackButton}
+            variant="raised"
+            color="secondary" >
+            <Feedback />
+          </IconButton>
+        </a>
         <IconButton
           className={this.props.classes.transactionButton}
           variant="raised"
