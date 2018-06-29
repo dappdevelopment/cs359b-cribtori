@@ -455,7 +455,7 @@ class App extends Component {
             <Tabs value={this.state.mode}
                   onChange={this.switchDisplay}
                   className={this.props.classes.tab}>
-              <Tab disabled={disabled} label="My Toris" component={Link} to={'/mytoris'} />
+              <Tab disabled={disabled} label="My Room" component={Link} to={'/mytoris'} />
               <Tab disabled={disabled} label="Nursery" component={Link} to={'/nursery'} />
               <Tab disabled={disabled} label="Inventory" component={Link} to={'/inventory'} />
               <Tab disabled={disabled} label="Explore" component={Link} to={'/explore'} />
