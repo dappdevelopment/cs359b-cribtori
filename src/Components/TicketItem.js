@@ -86,8 +86,8 @@ class TicketItem extends Component {
     .catch(console.error);
   }
 
-  onToriSelected() {
-    this.props.history.push('/explore/' + this.props.id);
+  onToriSelected(id) {
+    this.props.history.push('/explore/' + id);
   }
 
   handleChange(e) {
@@ -140,10 +140,10 @@ class TicketItem extends Component {
                         direction={'row'}
                         justify={'center'}>
           <TokenItem id={this.state.id}
-                     onItemSelected={this.onToriSelected}
+                     onItemSelected={() => this.onToriSelected(this.state.id)}
                      showLevel={true} />
           <TokenItem id={this.state.otherId}
-                     onItemSelected={this.onToriSelected}
+                     onItemSelected={() => this.onToriSelected(this.state.otherId)}
                      showLevel={true} />
           { this.renderAction() }
         </Grid>
