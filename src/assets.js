@@ -123,7 +123,7 @@ export const assets = {
       HAND_0, HAND_1, HAND_2, HAND_3, HAND_4
     ],
     mouth: [
-      MOUTH_0, MOUTH_1, MOUTH_2, MOUTH_3
+      MOUTH_0, MOUTH_1, MOUTH_2//, MOUTH_3
     ],
     special: {
       'kitty': S_KITTY,

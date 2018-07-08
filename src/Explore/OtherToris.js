@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import TokenInfo from '../Components/TokenInfo.js';
+import Pagination from '../Components/Pagination.js';
 
 import * as util from '../utils.js';
 
@@ -14,6 +16,8 @@ const styles = theme => ({
     flexGrow: 1,
   },
 });
+
+const MAX_PER_PAGE = 10;
 
 class OtherToris extends Component {
 
@@ -30,11 +34,15 @@ class OtherToris extends Component {
     this.state = {
       otherToris: [],
       empties: [],
+      currentPage: 1,
+      totalPage: 1
     }
 
     // Function BINDS
     this.onEmpty = this.onEmpty.bind(this);
     this.renderDisplay = this.renderDisplay.bind(this);
+    this.handlePrev = this.handlePrev.bind(this);
+    this.handleNext = this.handleNext.bind(this);
   }
 
   componentDidMount() {
@@ -53,26 +61,18 @@ class OtherToris extends Component {
             }
           }
 
-          this.setState({
-            ids: otherIds
+          Promise.all(otherIds.map((id) => this.context.toriToken.exists(id)))
+          .then((results) => {
+            let filteredOthers = [];
+            results.forEach((res, i) => {
+              if (res) filteredOthers.push(otherIds[i]);
+            });
+
+            this.setState({
+              ids: filteredOthers,
+              totalPage: Math.ceil(filteredOthers.length / MAX_PER_PAGE)
+            });
           });
-          // Check which ones are currently active.
-          // fetch('/cribtori/api/hearts?active=1')
-          // .then(function(response) {
-          //   if (response.ok) {
-          //     return response.json();
-          //   }
-          //   throw response;
-          // })
-          // .then(function(data) {
-          //   // Filter the toris.
-          //   data = data.map((d) => { return d.tori_id; });
-          //   otherIds = otherIds.filter((id) => data.indexOf(id) !== -1);
-          //   this.setState({
-          //     ids: otherIds
-          //   });
-          // }.bind(this))
-          // .catch(console.err);
         })
         .catch(console.error);
     })
@@ -85,6 +85,8 @@ class OtherToris extends Component {
     let ids = this.state.ids;
     ids = ids.filter((id) => this.state.empties.indexOf(id) === -1);
     let minSize = (ids.length >= 4) ? 3 : Math.floor(12 / ids.length);
+    // Pagination.
+    ids = ids.slice(MAX_PER_PAGE * (this.state.currentPage - 1), MAX_PER_PAGE * this.state.currentPage);
     let items = ids.map((id) => {
       return (
         <Grid item sm={minSize} key={id} >
@@ -104,14 +106,35 @@ class OtherToris extends Component {
     })
   }
 
+  handlePrev() {
+    this.setState({
+      currentPage: Math.max(1, this.state.currentPage - 1)
+    });
+  }
+
+  handleNext() {
+    this.setState({
+      currentPage: Math.min(this.state.totalPage, this.state.currentPage + 1)
+    });
+  }
+
   render() {
+    if (this.state.ids === undefined) return (<CircularProgress />);
     return (
       <Grid container className={this.props.classes.root}
                       spacing={8}
                       alignItems={'center'}
                       direction={'row'}
                       justify={'center'}>
+        <Pagination currentPage={this.state.currentPage}
+                    totalPage={this.state.totalPage}
+                    handlePrev={this.handlePrev}
+                    handleNext={this.handleNext} />
         { this.renderDisplay() }
+        <Pagination currentPage={this.state.currentPage}
+                    totalPage={this.state.totalPage}
+                    handlePrev={this.handlePrev}
+                    handleNext={this.handleNext} />
       </Grid>
     );
   }
