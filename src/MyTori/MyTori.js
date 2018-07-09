@@ -13,6 +13,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import Status from '../Components/Status.js';
 import Room from '../Components/Room.js';
+import IsometricRoom from '../Components/IsometricRoom.js';
 
 import * as util from '../utils.js';
 import { assets } from '../assets.js';
@@ -97,41 +98,55 @@ class MyTori extends Component {
   }
 
   retrieveLayout() {
-    util.retrieveRoomLayout(this.state.userAccount)
-    .then((result) => {
-      let layout = (result.locations) ? JSON.parse(result.locations) : [];
-
-      // Need to filter out the layout.
-      layout = layout.filter((l) => (l.key !== 'tori' || this.state.toriIds.indexOf(l.id) !== -1));
-
-      // Check the layout. If the layout is empty, then this is the very first
-      // time the user has ever visited their tori.
-      // First, check if the user has any tori at all.
-      if (layout.length === 0 && this.state.toriIds.length > 0) {
-        // Okay, there's at least one tori. Let's default to this.
-        // Let's save the layout for this one tori.
-        // TODO: customizable width and height.
-        layout.push({
-          c: this.state.sizes[0] - Math.floor(this.state.sizes[0] / 2) - 1,
-          r: 0,
-          key: 'tori',
-          id: this.state.toriIds[0],
-        });
-
-        // Now, save the layout (silently)...
-        // let data = {
-        //   id: this.state.userAccount,
-        //   locations: JSON.stringify(layout),
-        // }
+    let layout = this.state.toriIds.map((id, i) => {
+      let r = Math.floor(i / this.state.sizes[0]);
+      let c = i % this.state.sizes[1];
+      return {
+        c: c,
+        r: r,
+        key: 'tori',
+        id: id
       }
-      // Get active toris.
-      let activeToris = layout.filter((l) => l.key === 'tori').map((l) => { return l.id; });
-      this.setState({
-        roomLayout: layout,
-        activeToris: activeToris,
-      });
+    });
+    this.setState({
+      roomLayout: layout,
+      activeToris: this.state.toriIds,
     })
-    .catch(console.error);
+    // util.retrieveRoomLayout(this.state.userAccount)
+    // .then((result) => {
+    //   let layout = (result.locations) ? JSON.parse(result.locations) : [];
+    //
+    //   // Need to filter out the layout.
+    //   layout = layout.filter((l) => (l.key !== 'tori' || this.state.toriIds.indexOf(l.id) !== -1));
+    //
+    //   // Check the layout. If the layout is empty, then this is the very first
+    //   // time the user has ever visited their tori.
+    //   // First, check if the user has any tori at all.
+    //   if (layout.length === 0 && this.state.toriIds.length > 0) {
+    //     // Okay, there's at least one tori. Let's default to this.
+    //     // Let's save the layout for this one tori.
+    //     // TODO: customizable width and height.
+    //     layout.push({
+    //       c: this.state.sizes[0] - Math.floor(this.state.sizes[0] / 2) - 1,
+    //       r: 0,
+    //       key: 'tori',
+    //       id: this.state.toriIds[0],
+    //     });
+    //
+    //     // Now, save the layout (silently)...
+    //     // let data = {
+    //     //   id: this.state.userAccount,
+    //     //   locations: JSON.stringify(layout),
+    //     // }
+    //   }
+    //   // Get active toris.
+    //   let activeToris = layout.filter((l) => l.key === 'tori').map((l) => { return l.id; });
+    //   this.setState({
+    //     roomLayout: layout,
+    //     activeToris: activeToris,
+    //   });
+    // })
+    // .catch(console.error);
   }
 
   postActivity(id, type) {
@@ -276,19 +291,7 @@ class MyTori extends Component {
                       alignItems={'center'}
                       direction={'row'}
                       justify={'center'}>
-        <Grid item sm={3}>
-          <Paper className={this.props.classes.paper}
-                 elevation={4}>
-            <Typography variant="title" color="inherit" component="h3">
-              Status
-            </Typography>
-            <Divider />
-            { this.state.activeToris && (
-              <Status ids={this.state.activeToris}/>
-            )}
-          </Paper>
-        </Grid>
-        <Grid item sm={6} className={actionCursor}>
+        <Grid item sm={12} className={actionCursor}>
           { (this.state.loaded && this.state.roomLayout && this.state.toriIds) ? (
             <Room width={this.state.sizes[0]}
                   height={this.state.sizes[1]}
@@ -300,7 +303,19 @@ class MyTori extends Component {
             <CircularProgress  color="secondary" />
           )}
         </Grid>
-        <Grid item sm={3}>
+        <Grid item sm={6}>
+          <Paper className={this.props.classes.paper}
+                 elevation={4}>
+            <Typography variant="title" color="inherit" component="h3">
+              Status
+            </Typography>
+            <Divider />
+            { this.state.activeToris && (
+              <Status ids={this.state.activeToris}/>
+            )}
+          </Paper>
+        </Grid>
+        <Grid item sm={6}>
           { this.state.userAccount === this.context.userAccount && (
             <Paper className={this.props.classes.paper}
                    elevation={4}>
@@ -317,6 +332,7 @@ class MyTori extends Component {
   }
 
   render() {
+    return (<IsometricRoom />)
     let content = (<CircularProgress  color="secondary" />);
     if (this.state.loaded) {
       if (this.state.toriIds.length === 0) {

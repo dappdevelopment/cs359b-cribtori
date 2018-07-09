@@ -68,6 +68,17 @@ class OtherToris extends Component {
               if (res) filteredOthers.push(otherIds[i]);
             });
 
+            // Promise.all(filteredOthers.map((id) => this.context.toriToken.ownerOf(id)))
+            // .then((results) => {
+            //   let count = {}
+            //   results.forEach((owner, i) => {
+            //     if (count[owner] === undefined) count[owner] = 0;
+            //     count[owner] += 1;
+            //   });
+            //
+            //   console.log('owners', count)
+            // })
+
             this.setState({
               ids: filteredOthers,
               totalPage: Math.ceil(filteredOthers.length / MAX_PER_PAGE)

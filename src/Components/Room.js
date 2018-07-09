@@ -10,7 +10,7 @@ import { assets } from '../assets.js';
 import WallImage from './WallImage.js';
 import ToriCell from './ToriCell.js';
 
-const unit = 80;
+const unit = 130;
 const LIM = 5;
 
 const styles = theme => ({

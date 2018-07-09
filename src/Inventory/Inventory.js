@@ -39,15 +39,12 @@ class Inventory extends Component {
     this.context = context;
 
     this.state = {
-      toriItems: [],
       accItems: [],
       dialogOpen: false,
     }
 
     // Function BINDS
     this.retrieveAccessories = this.retrieveAccessories.bind(this);
-    this.retrieveToris = this.retrieveToris.bind(this);
-    this.initToriItems = this.initToriItems.bind(this);
     this.initAccessoryItem = this.initAccessoryItem.bind(this);
     this.handleDialogSubmit = this.handleDialogSubmit.bind(this);
     this.handleDialogClose = this.handleDialogClose.bind(this);
@@ -57,7 +54,6 @@ class Inventory extends Component {
 
   componentDidMount() {
     this.retrieveAccessories();
-    this.retrieveToris();
   }
 
   retrieveAccessories() {
@@ -74,33 +70,6 @@ class Inventory extends Component {
         })
         .catch(console.error);
       });
-    });
-  }
-
-  retrieveToris() {
-    this.setState({
-      toriItems: [],
-    }, () => {
-      util.retrieveTokenIndexes(this.context.toriToken, this.context.userAccount)
-      .then((toriIds) => {
-          toriIds = toriIds.map((id) => { return id.toNumber() });
-          this.initToriItems(toriIds);
-      })
-      .catch(console.error);
-    });
-  }
-
-  initToriItems(ids) {
-    let minSize = (ids.length >= 4) ? 3 : Math.floor(12 / ids.length);
-    let items = ids.map((id) => {
-      return (
-        <Grid item sm={minSize} key={id} >
-          <TokenInfo id={id}/>
-        </Grid>
-      );
-    });
-    this.setState({
-      toriItems: items,
     });
   }
 
@@ -189,23 +158,6 @@ class Inventory extends Component {
                       alignItems={'center'}
                       direction={'column'}
                       justify={'center'}>
-        <Grid item sm={12}>
-          <div className={this.props.classes.container} >
-            <Typography className={this.props.classes.title}
-                        variant="title"
-                        color="inherit"
-                        component="h1">
-              Toris
-            </Typography>
-            <Divider/>
-            <Grid container spacing={8}
-                            alignItems={'center'}
-                            direction={'row'}
-                            justify={'center'}>
-              { this.state.toriItems }
-            </Grid>
-          </div>
-        </Grid>
         <Grid item sm={12} className={this.props.classes.gridContainer}>
           <div className={this.props.classes.container} >
             <Typography className={this.props.classes.title}
