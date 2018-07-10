@@ -22,7 +22,7 @@ const styles = theme => ({
     zIndex: 1000,
     '&:hover': {
       backgroundColor: 'blue'
-    }
+    },
   },
   chip: {
     position: 'absolute',
