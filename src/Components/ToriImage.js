@@ -108,6 +108,7 @@ class ToriImage extends Component {
           alt="Feet Base"
           style={{
             position: 'absolute',
+            left: 0,
             zIndex: 50,
             width: `100%`,
             filter: `hue-rotate(${baseHue}deg) saturate(${baseSaturate}%) sepia(${baseSephia})`,
@@ -118,6 +119,7 @@ class ToriImage extends Component {
           alt="Cheek"
           style={{
             position: 'absolute',
+            left: 0,
             zIndex: 200,
             width: `100%`,
             animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
@@ -127,6 +129,7 @@ class ToriImage extends Component {
           alt="Shadow"
           style={{
             position: 'absolute',
+            left: 0,
             zIndex: 50,
             width: `100%`,
           }} />
@@ -135,6 +138,7 @@ class ToriImage extends Component {
           alt="Body"
           style={{
             position: 'absolute',
+            left: 0,
             zIndex: 150,
             width: `100%`,
             filter: `hue-rotate(${baseHue}deg) saturate(${baseSaturate}%) sepia(${baseSephia})`,
@@ -145,6 +149,7 @@ class ToriImage extends Component {
           alt="Eyes"
           style={{
             position: 'absolute',
+            left: 0,
             zIndex: 200,
             width: `100%`,
             animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
@@ -154,6 +159,7 @@ class ToriImage extends Component {
           alt="Mouth"
           style={{
             position: 'absolute',
+            left: 0,
             zIndex: 200,
             width: `100%`,
             animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
@@ -163,6 +169,7 @@ class ToriImage extends Component {
           alt="Hand"
           style={{
             position: 'absolute',
+            left: 0,
             zIndex: 200,
             width: `100%`,
             filter: `hue-rotate(${secHue}deg) saturate(${secSaturate}%) sepia(${secSephia})`,
@@ -173,6 +180,7 @@ class ToriImage extends Component {
           alt="Feet"
           style={{
             position: 'absolute',
+            left: 0,
             zIndex: 100,
             width: `100%`,
           }} />
@@ -182,6 +190,7 @@ class ToriImage extends Component {
             alt="Decoration"
             style={{
               position: 'absolute',
+              left: 0,
               zIndex: 200,
               width: `100%`,
               filter: `hue-rotate(${decorHue}deg) saturate(${decorSaturate}%) sepia(${decorSephia})`,
@@ -194,6 +203,7 @@ class ToriImage extends Component {
             alt="Special decoration"
             style={{
               position: 'absolute',
+              left: 0,
               zIndex: 250,
               width: `100%`,
               animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : ''
@@ -206,6 +216,7 @@ class ToriImage extends Component {
               alt="Bubble"
               style={{
                 position: 'absolute',
+                left: 0,
                 zIndex: 300,
                 width: `100%`,
               }} />
@@ -214,6 +225,7 @@ class ToriImage extends Component {
               alt="Bubble-content"
               style={{
                 position: 'absolute',
+                left: 0,
                 zIndex: 320,
                 width: `100%`,
               }} />

@@ -18,17 +18,10 @@ const tileWidth = 280;
 const tileHeight = 140;
 const tileSide = Math.sqrt(tileWidth * tileWidth / 4 + tileHeight * tileHeight / 4);
 
-const xCount = 4;
-const yCount = 4;
-
-const roomWidth = tileWidth * xCount;
-const roomHeight = tileHeight * yCount;
-
 const styles = theme => ({
   room: {
     position: 'relative',
-    width: roomWidth,
-    height: roomHeight,
+    display: 'inline-block'
   },
   tile: {
     position: 'absolute',
@@ -57,8 +50,14 @@ const styles = theme => ({
 });
 
 class IsometricRoom extends Component {
-  constructor(props) {
+  constructor(props, context) {
     super(props);
+    this.context = context;
+
+    this.state = {
+      roomWidth: tileWidth * this.props.size,
+      roomHeight: tileHeight * this.props.size,
+    }
 
     this.renderFloor = this.renderFloor.bind(this);
     this.renderToris = this.renderToris.bind(this);
@@ -76,10 +75,10 @@ class IsometricRoom extends Component {
     let top;
     let left;
     // First, build the top pyramid.
-    for (let r = 0; r < yCount - 1; r++) {
+    for (let r = 0; r < this.props.size - 1; r++) {
       for (let c = 0; c <= r; c++) {
         top = r * tileHeight / 2;
-        left = roomWidth / 2 - (r + 1) * tileWidth / 2 + c * tileWidth;
+        left = this.state.roomWidth / 2 - (r + 1) * tileWidth / 2 + c * tileWidth;
         floor.push(
           <img key={`floor_${count}`}
                src={Tile}
@@ -94,8 +93,8 @@ class IsometricRoom extends Component {
     }
 
     // Second, build the mid.
-    for (let c = 0; c < xCount; c++) {
-      top = (yCount - 1) * tileHeight / 2;
+    for (let c = 0; c < this.props.size; c++) {
+      top = (this.props.size - 1) * tileHeight / 2;
       left = c * tileWidth;
       floor.push(
         <img key={`floor_${count}`}
@@ -110,10 +109,10 @@ class IsometricRoom extends Component {
     }
 
     // Third, build the bottom pyramid.
-    for (let r = 0; r < yCount - 1; r++) {
-      for (let c = 0; c < yCount - 1 - r; c++) {
-        top = yCount * tileHeight / 2 + r * tileHeight / 2;
-        left = roomWidth / 2 - (yCount - r - 1) * tileWidth / 2 + c * tileWidth;
+    for (let r = 0; r < this.props.size - 1; r++) {
+      for (let c = 0; c < this.props.size - 1 - r; c++) {
+        top = this.props.size * tileHeight / 2 + r * tileHeight / 2;
+        left = this.state.roomWidth / 2 - (this.props.size - r - 1) * tileWidth / 2 + c * tileWidth;
         floor.push(
           <img key={`floor_${count}`}
                src={Tile}
@@ -130,8 +129,8 @@ class IsometricRoom extends Component {
   }
 
   getRandomCoordinates(isoX, isoY) {
-    let totalXSide = tileSide * xCount;
-    let totalYSide = tileSide * yCount;
+    let totalXSide = tileSide * this.props.size;
+    let totalYSide = tileSide * this.props.size;
     // Then randomly choose the offset inside the tile (with a bit of margin).
     let offsetX = Math.random() * tileSide * 0.6 + 0.2 * tileSide;
     let offsetY = Math.random() * tileSide * 0.6 + 0.2 * tileSide;
@@ -140,15 +139,15 @@ class IsometricRoom extends Component {
     isoY = isoY * tileSide + offsetY;
 
     let nx = 0;
-    let ny = roomHeight / 2;
+    let ny = this.state.roomHeight / 2;
 
     // First, translate nx and ny by isoX, parallel to the upward slope.
-    nx += (isoX / totalXSide) * roomWidth / 2;
-    ny -= (isoX / totalXSide) * roomHeight / 2;
+    nx += (isoX / totalXSide) * this.state.roomWidth / 2;
+    ny -= (isoX / totalXSide) * this.state.roomHeight / 2;
 
     // Next, translate nx and ny by isoY, parallel to the downward slope.
-    nx += (isoY / totalYSide) * roomWidth / 2;
-    ny += (isoY / totalYSide) * roomHeight / 2;
+    nx += (isoY / totalYSide) * this.state.roomWidth / 2;
+    ny += (isoY / totalYSide) * this.state.roomHeight / 2;
 
     return [nx, ny];
   }
@@ -161,8 +160,8 @@ class IsometricRoom extends Component {
 
   renderToris() {
     let coordinates = [];
-    for (let i = 0; i < xCount; i++) {
-      for (let j = 0; j < yCount; j++) {
+    for (let i = 0; i < this.props.size; i++) {
+      for (let j = 0; j < this.props.size; j++) {
         // Only TWO toris can occupy the same tile.
         // So, when we get the random coordinates for each tile,
         // we need to make sure that they are appart by a certain margin.
@@ -179,7 +178,7 @@ class IsometricRoom extends Component {
     // Shuffle the coordinates array.
     coordinates = util.shuffle(coordinates);
     // Slice by the number of toris.
-    coordinates = coordinates.slice(0, 5);
+    coordinates = coordinates.slice(0, this.props.toris.length);
 
     // Sort the coordinates by y.
     coordinates.sort((a, b) => {
@@ -190,6 +189,7 @@ class IsometricRoom extends Component {
       return (
         <IsometricToriCell key={`tori_${i}`}
                            index={i}
+                           id={this.props.toris[i]}
                            size={165}
                            coor={coor} />
       )
@@ -199,7 +199,11 @@ class IsometricRoom extends Component {
   render() {
     return (
       <div className={this.props.classes.room}
-           onMouseOver={this.onMouseOver}>
+           onMouseOver={this.onMouseOver}
+           style={{
+             width: this.state.roomWidth,
+             height: this.state.roomHeight,
+           }}>
         { this.renderFloor() }
         { this.renderToris() }
       </div>

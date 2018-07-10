@@ -84,7 +84,7 @@ class EditRoom extends Component {
       this.setState({
         loaded: true,
         toriIds: toriIds,
-        sizes: util.getRoomSizes(maxLevel),
+        sizes: util.getRoomSize(maxLevel),
       }, this.retrieveLayout);
     })
     .catch(console.error);

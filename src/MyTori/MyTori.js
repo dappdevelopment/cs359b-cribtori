@@ -38,6 +38,9 @@ const styles = theme => ({
   },
   clean: {
     cursor: `url(${assets.clean}), auto`,
+  },
+  roomWrapper: {
+    textAlign: 'center'
   }
 });
 
@@ -91,7 +94,7 @@ class MyTori extends Component {
       this.setState({
         loaded: true,
         toriIds: toriIds,
-        sizes: util.getRoomSizes(maxLevel),
+        size: util.getRoomSize(maxLevel),
       }, this.retrieveLayout);
     })
     .catch(console.error);
@@ -99,8 +102,8 @@ class MyTori extends Component {
 
   retrieveLayout() {
     let layout = this.state.toriIds.map((id, i) => {
-      let r = Math.floor(i / this.state.sizes[0]);
-      let c = i % this.state.sizes[1];
+      let r = Math.floor(i / this.state.size);
+      let c = i % this.state.size;
       return {
         c: c,
         r: r,
@@ -285,6 +288,19 @@ class MyTori extends Component {
           ''
       );
 
+    /*
+    { (this.state.loaded && this.state.roomLayout && this.state.toriIds) ? (
+      <Room width={this.state.sizes[0]}
+            height={this.state.sizes[1]}
+            layout={this.state.roomLayout}
+            firstTori={this.state.toriIds[0]}
+            onToriClick={this.onToriClick}
+            bubbles={this.state.bubbles} />
+    ) : (
+      <CircularProgress  color="secondary" />
+    )}
+    */
+
     return (
       <Grid container className={this.props.classes.grid}
                       spacing={8}
@@ -292,16 +308,10 @@ class MyTori extends Component {
                       direction={'row'}
                       justify={'center'}>
         <Grid item sm={12} className={actionCursor}>
-          { (this.state.loaded && this.state.roomLayout && this.state.toriIds) ? (
-            <Room width={this.state.sizes[0]}
-                  height={this.state.sizes[1]}
-                  layout={this.state.roomLayout}
-                  firstTori={this.state.toriIds[0]}
-                  onToriClick={this.onToriClick}
-                  bubbles={this.state.bubbles} />
-          ) : (
-            <CircularProgress  color="secondary" />
-          )}
+          <div className={this.props.classes.roomWrapper}>
+            <IsometricRoom toris={this.state.toriIds}
+                           size={this.state.size} />
+          </div>
         </Grid>
         <Grid item sm={6}>
           <Paper className={this.props.classes.paper}
@@ -332,7 +342,6 @@ class MyTori extends Component {
   }
 
   render() {
-    return (<IsometricRoom />)
     let content = (<CircularProgress  color="secondary" />);
     if (this.state.loaded) {
       if (this.state.toriIds.length === 0) {

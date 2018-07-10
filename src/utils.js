@@ -36,18 +36,18 @@ export function canChangeGreetings(level) {
   return level >= 2;
 }
 
-export function getRoomSizes(maxLevel) {
+export function getRoomSize(maxLevel) {
   // TODO: refactor this.
-  // 1 - 2: 3x2
-  // 3 - 4: 3x3
-  // 5 - ?: 3x4
-  let sizes = [3, 2];
-  if (maxLevel >= 5) {
-    sizes[1] = 4;
-  } else if (maxLevel >= 3) {
-    sizes[1] = 3;
+  // 1 - 3: 2x2
+  // 4 - 7: 3x3
+  // 8 - ?: 4x4
+  if (maxLevel < 4) {
+    return 2;
+  } else if (maxLevel < 8) {
+    return 3;
+  } else {
+    return 4;
   }
-  return sizes;
 }
 
 

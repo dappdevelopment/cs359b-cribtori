@@ -27,6 +27,9 @@ const styles = theme => ({
   chip: {
     position: 'absolute',
     top: 0,
+    left: 0,
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.secondary.main,
     margin: theme.spacing.unit,
     zIndex: 1001
   },
@@ -44,11 +47,8 @@ class IsometricToriCell extends Component {
     super(props);
 
     this.state = {
-      loaded: true,//false,
+      loaded: false,
       showChip: false,
-      special: 0,
-      generation: 1,
-      dna: 0,
       bubble: undefined,
     }
 
@@ -58,15 +58,15 @@ class IsometricToriCell extends Component {
   }
 
   componentDidMount() {
-    // util.retrieveTokenInfo(this.context.toriToken, this.props.id, this.context.userAccount)
-    // .then((result) => {
-    //   let info = util.parseToriResult(result);
-    //   this.setState({
-    //     loaded: true,
-    //     info: info,
-    //   })
-    // })
-    // .catch(console.error);
+    util.retrieveTokenInfo(this.context.toriToken, this.props.id, this.context.userAccount)
+    .then((result) => {
+      let info = util.parseToriResult(result);
+      this.setState({
+        loaded: true,
+        info: info,
+      })
+    })
+    .catch(console.error);
   }
 
   onMouseOver(e) {
@@ -97,9 +97,9 @@ class IsometricToriCell extends Component {
              top: this.props.coor[1] - this.props.size * 0.9,
            }} >
         <div style={{zIndex: this.props.index}}>
-          <ToriImage special={this.state.special}
-                     generation={this.state.generation}
-                     dna={this.state.dna}
+          <ToriImage special={this.state.info.special}
+                     generation={this.state.info.generation}
+                     dna={this.state.info.dna}
                      size={this.props.size}
                      bubble={this.state.bubble}/>
         </div>
@@ -114,7 +114,8 @@ class IsometricToriCell extends Component {
              }}>
         </div>
         {this.state.showChip && (
-          <Chip label="Tori. Lvl. 1" className={this.props.classes.chip} />
+          <Chip label={`${this.state.info.name} (Lvl. ${this.state.info.level})`}
+                className={this.props.classes.chip} />
         )}
       </div>
     );
