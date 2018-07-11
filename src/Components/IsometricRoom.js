@@ -68,6 +68,10 @@ const styles = theme => ({
     display: 'inline-block',
     height: 'auto'
   },
+  menuBorder: {
+    height: 5,
+    backgroundColor: theme.palette.primary.dark,
+  },
   chip: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.secondary.main,
@@ -275,7 +279,7 @@ class IsometricRoom extends Component {
                 </Typography>
               </Button>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} className={this.props.classes.menuBorder}>
             </Grid>
           </Grid>
         </MenuList>

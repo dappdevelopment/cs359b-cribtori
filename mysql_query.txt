@@ -29,4 +29,16 @@ CREATE TABLE greetings ( tori_id int not null,
                          greetings varchar(250),
                          PRIMARY KEY (tori_id) );
 
+
+CREATE TABLE user ( public_key varchar(200) not null,
+                    username varchar(200) not null,
+                    email varchar(100) not null,
+                    PRIMARY KEY (public_key))
+
+CREATE TABLE room ( public_key varchar(200) not null,
+                    roomId int not null,
+                    size int not null,
+                    max_level int not null
+                    PRIMARY KEY (public_key));
+
 DELETE FROM hearts; DELETE FROM arrangement; DELETE FROM activity;
