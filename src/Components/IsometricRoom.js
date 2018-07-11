@@ -4,11 +4,20 @@ import { Link, Switch, Route } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
+import MenuList from '@material-ui/core/MenuList';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
+import Chip from '@material-ui/core/Chip';
+import Avatar from '@material-ui/core/Avatar';
+
+import FormatPaintIcon from '@material-ui/icons/FormatPaint';
+import RestaurantIcon from '@material-ui/icons/Restaurant';
 
 import ToriImage from './ToriImage.js';
 import IsometricToriCell from './IsometricToriCell.js';
 
 import Tile from '../img/background/isometric_floor.png';
+import ToriIcon from '../img/toriIcon_secondary.png';
 
 import * as util from '../utils.js';
 
@@ -46,6 +55,24 @@ const styles = theme => ({
     '&:hover': {
       backgroundColor: 'blue'
     }
+  },
+  roomWrapper: {
+    marginTop: 100,
+    position: 'relative'
+  },
+  menuList: {
+    zIndex: 2000,
+    display: 'block'
+  },
+  menuItem: {
+    display: 'inline-block',
+    height: 'auto'
+  },
+  chip: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.secondary.main,
+    fontSize: 18,
+    padding: 10
   }
 });
 
@@ -63,6 +90,16 @@ class IsometricRoom extends Component {
     this.renderToris = this.renderToris.bind(this);
     this.getRandomCoordinates = this.getRandomCoordinates.bind(this);
     this.onMouseOver = this.onMouseOver.bind(this);
+    this.handleFeed = this.handleFeed.bind(this);
+    this.handleEdit = this.handleEdit.bind(this);
+  }
+
+  handleFeed() {
+
+  }
+
+  handleEdit() {
+
   }
 
   onMouseOver(e) {
@@ -198,14 +235,58 @@ class IsometricRoom extends Component {
 
   render() {
     return (
-      <div className={this.props.classes.room}
-           onMouseOver={this.onMouseOver}
-           style={{
-             width: this.state.roomWidth,
-             height: this.state.roomHeight,
-           }}>
-        { this.renderFloor() }
-        { this.renderToris() }
+      <div className={this.props.classes.room}>
+        <MenuList className={this.props.classes.menuList}>
+          <Grid container spacing={8}
+                          alignItems={'center'}
+                          direction={'row'}
+                          justify={'center'}>
+            <Grid item xs={4}>
+              <Typography variant="caption" color="inherit" align="center">
+                Room Limit
+              </Typography>
+              <Chip avatar={<Avatar src={ToriIcon} />}
+                    label={`${this.props.toris.length} / ${util.getRoomLimit(this.props.size)}`}
+                    className={this.props.classes.chip}/>
+            </Grid>
+            <Grid item xs={4}>
+              <Button variant="contained"
+                      color="secondary"
+                      onClick={this.handleFeed}
+                      className={this.props.classes.menuItem}>
+                <Typography variant="caption" color="inherit" align="center">
+                  <RestaurantIcon />
+                </Typography>
+                <Typography variant="caption" color="inherit" align="center">
+                  Feed Tori
+                </Typography>
+              </Button>
+            </Grid>
+            <Grid item xs={4}>
+              <Button variant="contained"
+                      color="secondary"
+                      onClick={this.handleEdit}
+                      className={this.props.classes.menuItem}>
+                <Typography variant="caption" color="inherit" align="center">
+                  <FormatPaintIcon />
+                </Typography>
+                <Typography variant="caption" color="inherit" align="center">
+                  Edit Room
+                </Typography>
+              </Button>
+            </Grid>
+            <Grid item xs={12}>
+            </Grid>
+          </Grid>
+        </MenuList>
+        <div className={this.props.classes.roomWrapper}
+             style={{
+               height: this.state.roomHeight,
+               width: this.state.roomWidth
+             }}>
+          { this.renderFloor() }
+          { this.renderToris() }
+        </div>
       </div>
     );
   }

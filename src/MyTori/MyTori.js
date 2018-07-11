@@ -313,30 +313,6 @@ class MyTori extends Component {
                            size={this.state.size} />
           </div>
         </Grid>
-        <Grid item sm={6}>
-          <Paper className={this.props.classes.paper}
-                 elevation={4}>
-            <Typography variant="title" color="inherit" component="h3">
-              Status
-            </Typography>
-            <Divider />
-            { this.state.activeToris && (
-              <Status ids={this.state.activeToris}/>
-            )}
-          </Paper>
-        </Grid>
-        <Grid item sm={6}>
-          { this.state.userAccount === this.context.userAccount && (
-            <Paper className={this.props.classes.paper}
-                   elevation={4}>
-              <Typography variant="title" color="inherit" component="h3">
-                Actions
-              </Typography>
-              <Divider />
-              { this.renderActions() }
-            </Paper>
-          )}
-        </Grid>
       </Grid>
     );
   }

@@ -26,8 +26,8 @@ const styles = theme => ({
   },
   chip: {
     position: 'absolute',
-    top: 0,
-    left: 0,
+    top: -10,
+    left: -20,
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.secondary.main,
     margin: theme.spacing.unit,
@@ -71,20 +71,20 @@ class IsometricToriCell extends Component {
 
   onMouseOver(e) {
     this.setState({
-      bubble: assets.reactions.hearts
+      bubble: assets.reactions.hearts,
+      showChip: true,
     })
   }
 
   onMouseOut(e) {
     this.setState({
-      bubble: undefined
+      bubble: undefined,
+      showChip: false
     })
   }
 
   onClick() {
-    this.setState({
-      showChip: !this.state.showChip
-    })
+    console.log('clicked');
   }
 
   render() {
