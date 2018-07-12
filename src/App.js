@@ -305,7 +305,7 @@ class App extends Component {
           username: sessionStorage.getItem('username')
         });
       } else {
-        fetch('/cribtori/api/user/' + this.context.userAccount)
+        fetch('/cribtori/api/user/' + accounts[0])
         .then(function(response) {
           if (response.ok) {
             return response.json();
