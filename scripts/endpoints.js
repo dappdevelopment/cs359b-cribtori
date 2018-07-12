@@ -9,7 +9,7 @@ module.exports = function(devServer) {
     //this.createHeartsEndpoints(mysql, connection);
     //this.createRoomEndpoints(mysql, connection);
     //this.createVisitEndpoints(mysql, connection);
-    //this.createGreetingsEndpoints(mysql, connection);
+    this.createGreetingsEndpoints(mysql, connection);
   }
 
   // TEST

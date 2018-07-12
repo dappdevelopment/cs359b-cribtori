@@ -280,6 +280,7 @@ class ToriDetails extends Component {
           </div>
         );
       }
+      // TODO: <Hearts id={this.state.id} />
       content = (
         <Grid container className={this.props.classes.grid}
                         spacing={8}
@@ -292,7 +293,6 @@ class ToriDetails extends Component {
             <Typography variant="subheading" color="inherit" component="h3" align="center">
               Level: { this.state.info.level }
             </Typography>
-            <Hearts id={this.state.id} />
           </Grid>
           <Grid item sm={12}>
             { this.state.info && (

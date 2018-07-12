@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { withRouter, Link } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -21,6 +22,7 @@ const styles = theme => ({
     left: '50%',
     zIndex: 1000,
     '&:hover': {
+      cursor: 'pointer'
     },
   },
   chip: {
@@ -84,6 +86,9 @@ class IsometricToriCell extends Component {
 
   onClick() {
     console.log('clicked');
+    // Redirect to details page.
+    this.props.history.push('/explore/' + this.props.id);
+    // TODO: handle feed.
   }
 
   render() {
@@ -121,4 +126,4 @@ class IsometricToriCell extends Component {
   }
 }
 
-export default withStyles(styles)(IsometricToriCell)
+export default withStyles(styles)(withRouter(IsometricToriCell))
