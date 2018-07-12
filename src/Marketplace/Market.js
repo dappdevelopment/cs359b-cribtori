@@ -74,35 +74,35 @@ class Market extends Component {
     .catch(console.error);
 
     // Accessories
-    this.setState({
-      accItems: [],
-    }, () => {
-      this.context.accContracts.forEach((contract) => {
-        let sales = [];
-        util.retrieveAllAccsForSale(contract, this.context.userAccount)
-        .then((result) => {
-          result[0].forEach((val, i) => {
-            let price = result[1][i];
-            let addr = result[2][i];
-            let item = {
-              amount: val,
-              price: price,
-              addr: this.context.web3.utils.toChecksumAddress(addr)
-            };
-            sales.push(item);
-          });
-          // Filter sales
-          let selfSales = sales.filter((item) => (item.addr === this.context.userAccount));
-          sales = sales.filter((item) => (item.addr !== this.context.userAccount));
-          if (sales.length !== 0) {
-            this.initAccessoryItem(contract, sales);
-          }
-          if (selfSales.length !== 0) {
-            this.initSelfAccessoryItem(contract, selfSales);
-          }
-        })
-      });
-    });
+    // this.setState({
+    //   accItems: [],
+    // }, () => {
+    //   this.context.accContracts.forEach((contract) => {
+    //     let sales = [];
+    //     util.retrieveAllAccsForSale(contract, this.context.userAccount)
+    //     .then((result) => {
+    //       result[0].forEach((val, i) => {
+    //         let price = result[1][i];
+    //         let addr = result[2][i];
+    //         let item = {
+    //           amount: val,
+    //           price: price,
+    //           addr: this.context.web3.utils.toChecksumAddress(addr)
+    //         };
+    //         sales.push(item);
+    //       });
+    //       // Filter sales
+    //       let selfSales = sales.filter((item) => (item.addr === this.context.userAccount));
+    //       sales = sales.filter((item) => (item.addr !== this.context.userAccount));
+    //       if (sales.length !== 0) {
+    //         this.initAccessoryItem(contract, sales);
+    //       }
+    //       if (selfSales.length !== 0) {
+    //         this.initSelfAccessoryItem(contract, selfSales);
+    //       }
+    //     })
+    //   });
+    // });
   }
 
   initToriItems(ids) {
@@ -160,6 +160,7 @@ class Market extends Component {
   }
 
   renderMyItems() {
+    // { this.state.accSelfItems }
     return (
       <Grid item sm={12} className={this.props.classes.gridContainer}>
         <div className={this.props.classes.container} >
@@ -173,7 +174,6 @@ class Market extends Component {
                               direction={'row'}
                               justify={'center'}>
                 { this.state.toriSelfItems }
-                { this.state.accSelfItems }
               </Grid>
             </ExpansionPanelDetails>
           </ExpansionPanel>
@@ -208,26 +208,29 @@ class Market extends Component {
             </Grid>
           </div>
         </Grid>
-        <Grid item sm={12} className={this.props.classes.gridContainer}>
-          <div className={this.props.classes.container} >
-            <Typography className={this.props.classes.title}
-                        variant="title"
-                        color="inherit"
-                        component="h1">
-              Accessories for Sale
-            </Typography>
-            <Divider />
-            <Grid container spacing={8}
-                            alignItems={'center'}
-                            direction={'row'}
-                            justify={'center'}>
-              { this.state.accItems }
-            </Grid>
-          </div>
-        </Grid>
       </Grid>
     );
   }
 }
+/*
+<Grid item sm={12} className={this.props.classes.gridContainer}>
+  <div className={this.props.classes.container} >
+    <Typography className={this.props.classes.title}
+                variant="title"
+                color="inherit"
+                component="h1">
+      Accessories for Sale
+    </Typography>
+    <Divider />
+    <Grid container spacing={8}
+                    alignItems={'center'}
+                    direction={'row'}
+                    justify={'center'}>
+      { this.state.accItems }
+    </Grid>
+  </div>
+</Grid>
+
+*/
 
 export default withStyles(styles)(Market)

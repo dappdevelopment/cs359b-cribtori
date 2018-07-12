@@ -73,13 +73,13 @@ module.exports = function(devServer) {
         connection.query(query, function (err, rows, fields) {
           if (err) {
             return connection.rollback(function() {
-              throw error;
+              res.status(400).send({ message: 'sign up failed, Error: ' + err });
             });
           }
 
           if (rows.length > 0) {
             return connection.rollback(function() {
-              throw error;
+              res.status(400).send({ message: 'sign up failed, Error: ' + err });
             });
           }
 
@@ -90,7 +90,7 @@ module.exports = function(devServer) {
           connection.query(query, function (err, rows, fields) {
             if (err) {
               return connection.rollback(function() {
-                throw error;
+                res.status(400).send({ message: 'sign up failed, Error: ' + err });
               });
             }
             // Success! Now also push to room.
@@ -101,13 +101,13 @@ module.exports = function(devServer) {
             connection.query(query, function (err, rows, fields) {
               if (err) {
                 return connection.rollback(function() {
-                  throw err;
+                  res.status(400).send({ message: 'sign up failed, Error: ' + err });
                 });
               }
               connection.commit(function(err) {
                 if (err) {
                   return connection.rollback(function() {
-                    throw err;
+                    res.status(400).send({ message: 'sign up failed, Error: ' + err });
                   });
                 }
                 res.status(200).end();

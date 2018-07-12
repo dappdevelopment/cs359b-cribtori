@@ -154,8 +154,8 @@ class App extends Component {
 
     let loc = this.props.history.location.pathname;
     loc = loc.split('/')[1];
-
-    const locMode = {'': 5, 'mytoris': 0, 'nursery': 1, 'inventory': 2, 'explore': 3, 'market': 4}
+    // 'inventory': 2
+    const locMode = {'': 5, 'mytoris': 0, 'nursery': 1, 'explore': 2, 'market': 3}
     let currentMode = locMode[loc];
 
     this.state = {
@@ -300,6 +300,7 @@ class App extends Component {
 
       // Get info about the user here.
       if (sessionStorage.getItem('pk') === accounts[0]) {
+        console.log('user:', sessionStorage.getItem('username'))
         this.setState({
           username: sessionStorage.getItem('username')
         });
@@ -480,6 +481,10 @@ class App extends Component {
 
   render() {
     let disabled = this.state.toriTokenInstance === undefined;
+
+    // TODO:
+    // <Tab disabled={disabled} label="Inventory" component={Link} to={'/inventory'} />
+    // <Route exact path='/inventory' component={Inventory} />
     return (
       <div className="App">
         <AppBar position="static">
@@ -502,7 +507,6 @@ class App extends Component {
                   className={this.props.classes.tab}>
               <Tab disabled={disabled} label="My Room" component={Link} to={'/mytoris'} />
               <Tab disabled={disabled} label="Nursery" component={Link} to={'/nursery'} />
-              <Tab disabled={disabled} label="Inventory" component={Link} to={'/inventory'} />
               <Tab disabled={disabled} label="Explore" component={Link} to={'/explore'} />
               <Tab disabled={disabled} label="Marketplace" component={Link} to={'/market'} />
               <Tab label="Info" component={Link} to={'/'} />
@@ -521,7 +525,6 @@ class App extends Component {
               <Route exact path='/nursery/fuse' component={Fuse} />
               <Route exact path='/nursery/breed' component={BreedHome} />
               <Route exact path='/nursery/breed/:id' component={Breed} />
-              <Route exact path='/inventory' component={Inventory} />
               <Route exact path='/explore' component={OtherToris} />
               <Route exact path='/explore/:id' component={ToriDetails} />
               <Route exact path='/market' component={Market} />

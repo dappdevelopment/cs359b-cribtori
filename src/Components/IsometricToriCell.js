@@ -15,13 +15,12 @@ const styles = theme => ({
     position: 'absolute',
   },
   center: {
-    backgroundColor: 'red',
+    backgroundColor: 'transparent',
     position: 'absolute',
     top: '50%',
     left: '50%',
     zIndex: 1000,
     '&:hover': {
-      backgroundColor: 'blue'
     },
   },
   chip: {

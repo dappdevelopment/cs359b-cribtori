@@ -79,7 +79,7 @@ class Register extends Component {
       sessionStorage.setItem('username', this.state.username);
       sessionStorage.setItem('pk', this.context.userAccount);
       console.log(result);
-    })
+    }.bind(this))
     .catch(console.error);
   }
 
