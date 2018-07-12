@@ -33,7 +33,8 @@ class TicketItem extends Component {
     this.context = context;
 
     this.state = {
-      name: ''
+      name: '',
+      claiming: false,
     };
 
     // Function BINDS
@@ -62,28 +63,35 @@ class TicketItem extends Component {
   }
 
   claimTicket() {
-    this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
+    this.setState({
+      claiming: true,
+    }, () => {
+      this.context.onMessage('Transaction is being processed. You can check the progress of your transaction through Metamask.');
 
-    util.claimTori(this.context.toriVisit, this.props.id, this.state.name, this.context.userAccount)
-    .then((result) => {
-      let message = 'Claim unsuccessful, try again later :(';
-      if (result) {
-        // this.updateClaim();
-        message = 'Claim successful! Refresh to see your new Tori!';
-      }
-      this.context.onMessage(message);
-
-      if (result) {
-        this.props.history.push({
-          pathname: '/confirmation',
-          state: {
-            receipt: result.receipt,
-            status: 'Claiming new Tori'
-          }
+      util.claimTori(this.context.toriVisit, this.props.id, this.state.name, this.context.userAccount)
+      .then((result) => {
+        let message = 'Claim unsuccessful, try again later :(';
+        if (result) {
+          // this.updateClaim();
+          message = 'Claim successful! Refresh to see your new Tori!';
+        }
+        this.setState({
+          claiming: false,
         });
-      }
-    })
-    .catch(console.error);
+        this.context.onMessage(message);
+
+        if (result) {
+          this.props.history.push({
+            pathname: '/confirmation',
+            state: {
+              receipt: result.receipt,
+              status: 'Claiming new Tori'
+            }
+          });
+        }
+      })
+      .catch(console.error);
+    });
   }
 
   onToriSelected(id) {
@@ -120,12 +128,16 @@ class TicketItem extends Component {
                      value={this.state.name}
                      type="text"
                      onChange={this.handleChange} />
-          <Button disabled={this.state.name === ''}
-                  variant="raised"
-                  color="primary"
-                  onClick={this.claimTicket} >
-            Claim
-          </Button>
+          { this.state.claiming ? (
+            <CircularProgress  color="secondary" />
+          ) : (
+            <Button disabled={this.state.name === ''}
+                    variant="raised"
+                    color="primary"
+                    onClick={this.claimTicket} >
+              Claim
+            </Button>
+          )}
         </div>
       );
     }
