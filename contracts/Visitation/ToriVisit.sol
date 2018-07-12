@@ -73,15 +73,12 @@ contract ToriVisit is DnaCore, Ownable {
     uint256 _toriId,
     uint256 _otherToriId
   ) private view returns (
-    uint256 dna,
-    uint32 proficiency;
-    uint32 personality;
     uint256 level,
     uint256 special
   ) {
     uint256 price;
     address owner;
-    (dna, , level, , proficiency, personality, , , special, price, owner) = toriTokenInterface.getTokenInfo(_toriId);
+    (, , level, , , , , , special, price, owner) = toriTokenInterface.getTokenInfo(_toriId);
     uint256 otherLevel;
     uint256 otherPrice;
     address otherOwner;
@@ -95,12 +92,14 @@ contract ToriVisit is DnaCore, Ownable {
 
   function fuseToris(uint256 _toriId, uint256 _otherToriId, string _name) public returns (bool success) {
     require(!occupied[_toriId] && !occupied[_otherToriId]);
+    uint256 level;
+    uint256 special;
+    (level, special) = _prepareFusion(_toriId, _otherToriId);
+
     uint256 dna;
     uint32 proficiency;
     uint32 personality;
-    uint256 level;
-    uint256 special;
-    (dna, proficiency, personality, level, special) = _prepareFusion(_toriId, _otherToriId);
+    (dna, , level, , proficiency, personality, , , , , ) = toriTokenInterface.getTokenInfo(_toriId);
 
     success = toriTokenInterface.generateNewTori(
       dna,

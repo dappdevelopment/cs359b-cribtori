@@ -85,7 +85,6 @@ class IsometricToriCell extends Component {
   }
 
   onClick() {
-    console.log('clicked');
     // Redirect to details page.
     this.props.history.push('/explore/' + this.props.id);
     // TODO: handle feed.
