@@ -254,7 +254,8 @@ class IsometricRoom extends Component {
                     className={this.props.classes.chip}/>
             </Grid>
             <Grid item xs={4}>
-              <Button variant="contained"
+              <Button disabled // TODO
+                      variant="contained"
                       color="secondary"
                       onClick={this.handleFeed}
                       className={this.props.classes.menuItem}>
@@ -267,7 +268,8 @@ class IsometricRoom extends Component {
               </Button>
             </Grid>
             <Grid item xs={4}>
-              <Button variant="contained"
+              <Button disabled // TODO
+                      variant="contained"
                       color="secondary"
                       onClick={this.handleEdit}
                       className={this.props.classes.menuItem}>

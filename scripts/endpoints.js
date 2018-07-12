@@ -3,18 +3,17 @@ module.exports = function(devServer) {
   var ONE_HOUR = 60 * 60 * 1000;
 
   this.createAllEndpoints = function(mysql, connection) {
-    console.log('here?')
     this.createTestEndpoints();
-    this.createActivityEndpoints(mysql, connection);
-    this.createHeartsEndpoints(mysql, connection);
-    this.createRoomEndpoints(mysql, connection);
-    this.createVisitEndpoints(mysql, connection);
-    this.createGreetingsEndpoints(mysql, connection);
+    this.createUserEndpoints(mysql, connection);
+    //this.createActivityEndpoints(mysql, connection);
+    //this.createHeartsEndpoints(mysql, connection);
+    //this.createRoomEndpoints(mysql, connection);
+    //this.createVisitEndpoints(mysql, connection);
+    //this.createGreetingsEndpoints(mysql, connection);
   }
 
   // TEST
   this.createTestEndpoints = function() {
-    console.log('how?')
     this.devServer.get('/cribtori/api/hello', function(req, res) {
       res.status(200).send('hello world');
     });
@@ -28,6 +27,97 @@ module.exports = function(devServer) {
       res.status(200).send('hello!');
     });
   };
+
+  // USER
+  this.createUserEndpoints = function(mysql, connection) {
+    // Get user.
+    this.devServer.get('/cribtori/api/user/:pk', function(req, res) {
+      var pk = req.params.pk;
+      var query = 'SELECT username from user WHERE public_key = ?';
+      var inserts = [pk];
+      query = mysql.format(query, inserts);
+      connection.query(query, function (err, rows, fields) {
+        if (err) res.status(400).send({ message: ('invalid request, Error: ' + err) });
+
+        let data = {};
+        if (rows.length > 0) {
+          data = {
+            pk: pk,
+            username: rows[0].username
+          }
+        }
+        res.status(200).send(data);
+      });
+    });
+
+    // Post user.
+    this.devServer.post('/cribtori/api/user', function(req, res) {
+      var pk = req.body.pk;
+      var username = req.body.username;
+      var email = req.body.email;
+
+      // Assert the values.
+      if (pk === '' || username === '' || email === '') {
+        return res.status(400).send({message: 'invalid values to sign up.'});
+      }
+
+      connection.beginTransaction(function(err) {
+        if (err) {
+          return res.status(400).send({ message: 'sign up failed, Error: ' + err });
+        }
+
+        // Check if public key already exist.
+        var query = 'SELECT username from user WHERE public_key = ?';
+        var inserts = [pk];
+        query = mysql.format(query, inserts);
+        connection.query(query, function (err, rows, fields) {
+          if (err) {
+            return connection.rollback(function() {
+              throw error;
+            });
+          }
+
+          if (rows.length > 0) {
+            return connection.rollback(function() {
+              throw error;
+            });
+          }
+
+          // Seems like it's a new user.
+          query = 'INSERT INTO user (public_key, username, email, time) VALUES (?, ?, ?, ?)';
+          inserts = [pk, username, email, new Date()];
+          query = mysql.format(query, inserts);
+          connection.query(query, function (err, rows, fields) {
+            if (err) {
+              return connection.rollback(function() {
+                throw error;
+              });
+            }
+            // Success! Now also push to room.
+            // TODO: should we check if pk exists in room?
+            query = 'INSERT INTO room (public_key, room_id, room_size, max_level) VALUES (?, ?, ?, ?)';
+            inserts = [pk, 1, 2, 1];
+            query = mysql.format(query, inserts);
+            connection.query(query, function (err, rows, fields) {
+              if (err) {
+                return connection.rollback(function() {
+                  throw err;
+                });
+              }
+              connection.commit(function(err) {
+                if (err) {
+                  return connection.rollback(function() {
+                    throw err;
+                  });
+                }
+                res.status(200).end();
+              });
+            });
+          });
+        });
+      });
+    });
+  }
 
   // ACTIVITY
   this.createActivityEndpoints = function(mysql, connection) {

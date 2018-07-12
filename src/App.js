@@ -35,6 +35,7 @@ import ToriDetails from './Explore/ToriDetails.js';
 import Market from './Marketplace/Market.js';
 import Confirmation from './Components/Confirmation.js';
 import Promo from './Promo/Promo.js';
+import Register from './Registration/Register.js';
 import Admin from './Admin/Admin.js';
 
 
@@ -58,6 +59,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 import ConfirmationNumber from '@material-ui/icons/ConfirmationNumber';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import CheckCircle from '@material-ui/icons/CheckCircle';
 import MoreHoriz from '@material-ui/icons/MoreHoriz';
 import Feedback from '@material-ui/icons/Feedback';
@@ -122,6 +124,14 @@ const styles = theme => ({
     '&:hover': {
       backgroundColor: '#e53100',
     },
+  },
+  user: {
+    marginLeft: 30,
+    padding: 10,
+    border: '1px solid',
+    borderColor: theme.palette.secondary.main,
+    borderRadius: '10%',
+    color: theme.palette.secondary.main,
   }
 });
 
@@ -287,6 +297,33 @@ class App extends Component {
         this.handleMessage('Please install MetaMask to play Cribtori');
         return;
       }
+
+      // Get info about the user here.
+      if (sessionStorage.getItem('pk') === accounts[0]) {
+        this.setState({
+          username: sessionStorage.getItem('username')
+        });
+      } else {
+        fetch('/cribtori/api/user/' + this.context.userAccount)
+        .then(function(response) {
+          if (response.ok) {
+            return response.json();
+          }
+          throw response;
+        })
+        .then(function(result) {
+          if (result.username !== undefined) {
+            // Save the username
+            sessionStorage.setItem('username', result.username);
+            sessionStorage.setItem('pk', accounts[0]);
+            this.setState({
+              username: result.username
+            })
+          }
+        }.bind(this))
+        .catch(console.error);
+      }
+
       this.setState({userAccount: accounts[0]});
       // Tori Token
       toriToken.deployed().then((toriTokenInstance) => {
@@ -452,6 +489,14 @@ class App extends Component {
                    alt={"Cribtori"}
                    className={this.props.classes.logo} />
             </Link>
+            { this.state.username && (
+              <Typography className={this.props.classes.user}
+                          variant="caption"
+                          color="inherit"
+                          align="center">
+                <AccountCircle /> { this.state.username }
+              </Typography>
+            )}
             <Tabs value={this.state.mode}
                   onChange={this.switchDisplay}
                   className={this.props.classes.tab}>
@@ -482,6 +527,7 @@ class App extends Component {
               <Route exact path='/market' component={Market} />
               <Route exact path='/confirmation' component={Confirmation} />
               <Route exact path='/promo' component={Promo} />
+              <Route exact path='/signup' component={Register} />
               { false && (
                   <Route exact path='/admin' component={Admin} />
               )}
