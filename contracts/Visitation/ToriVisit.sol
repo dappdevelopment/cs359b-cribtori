@@ -69,10 +69,19 @@ contract ToriVisit is DnaCore, Ownable {
     toriTokenInterface = ToriTokenInterface(_address);
   }
 
-  function _prepareFusion(uint256 _toriId, uint256 _otherToriId) private view returns (uint256 level, uint256 special) {
+  function _prepareFusion(
+    uint256 _toriId,
+    uint256 _otherToriId
+  ) private view returns (
+    uint256 dna,
+    uint32 proficiency;
+    uint32 personality;
+    uint256 level,
+    uint256 special
+  ) {
     uint256 price;
     address owner;
-    (, , level, , , , , , special, price, owner) = toriTokenInterface.getTokenInfo(_toriId);
+    (dna, , level, , proficiency, personality, , , special, price, owner) = toriTokenInterface.getTokenInfo(_toriId);
     uint256 otherLevel;
     uint256 otherPrice;
     address otherOwner;
@@ -86,24 +95,18 @@ contract ToriVisit is DnaCore, Ownable {
 
   function fuseToris(uint256 _toriId, uint256 _otherToriId, string _name) public returns (bool success) {
     require(!occupied[_toriId] && !occupied[_otherToriId]);
+    uint256 dna;
+    uint32 proficiency;
+    uint32 personality;
     uint256 level;
     uint256 special;
-    (level, special) = _prepareFusion(_toriId, _otherToriId);
-
-    uint256 newDna;
-    uint32 newProficiency;
-    uint32 newPersonality;
-
-    (newDna, newProficiency, newPersonality) = _combineTwoToris(_toriId,
-                                                                _otherToriId,
-                                                                _name,
-                                                                FUSE_RANDOMNESS);
+    (dna, proficiency, personality, level, special) = _prepareFusion(_toriId, _otherToriId);
 
     success = toriTokenInterface.generateNewTori(
-      newDna,
+      dna,
       level.add(1),
-      newProficiency,
-      newPersonality,
+      proficiency,
+      personality,
       _toriId,
       _otherToriId,
       _name,
