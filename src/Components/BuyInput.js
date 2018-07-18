@@ -114,6 +114,22 @@ class BuyInput extends Component {
           return;
         }
 
+        // TODO: update the max level.
+        // fetch('/cribtori/api/room', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json'
+        //   },
+        //   body: JSON.stringify(data),
+        // })
+        // .then(function(response) {
+        //   return response.status;
+        // })
+        // .then(function(status) {
+        //   // Updated!
+        // })
+        // .catch(console.err);
+
         this.props.history.push({
           pathname: '/confirmation',
           state: {

@@ -7,7 +7,7 @@ module.exports = function(devServer) {
     this.createUserEndpoints(mysql, connection);
     //this.createActivityEndpoints(mysql, connection);
     //this.createHeartsEndpoints(mysql, connection);
-    //this.createRoomEndpoints(mysql, connection);
+    this.createRoomEndpoints(mysql, connection);
     //this.createVisitEndpoints(mysql, connection);
     this.createGreetingsEndpoints(mysql, connection);
   }
@@ -398,6 +398,43 @@ module.exports = function(devServer) {
 
   // ROOM
   this.createRoomEndpoints = function(mysql, connection) {
+    // Retrieve room info.
+    this.devServer.get('/cribtori/api/room/:pk', function(req, res) {
+      var pk = req.params.pk;
+      var query = 'SELECT * from room WHERE public_key = ?';
+      var inserts = [pk];
+      query = mysql.format(query, inserts);
+      connection.query(query, function (err, rows, fields) {
+          if (err) return res.status(400).send({ message: 'invalid key, Error: ' + err });
+
+          let result = rows.map((item) => {
+            return {
+              roomId: item.room_id,
+              roomSize: item.room_size,
+              maxLevel: item.max_level
+            };
+          });
+          return res.status(200).send(result);
+      });
+    });
+
+    // Update room info.
+    this.devServer.post('/cribtori/api/room', function(req, res) {
+      // TODO: add a middleware to check registered user.
+      let maxLevel = req.body.maxLevel;
+      // Get the appropriate room size.
+      let roomSize = (maxLevel < 4) ? 2 : (maxLevel < 8) ? 3 : 4;
+      var query = 'UPDATE room SET max_level = ?, room_size = ? WHERE public_key = ? AND room_id = ? AND max_level < ?';
+      var inserts = [maxLevel, roomSize, req.body.pk, req.body.roomId, maxLevel];
+      query = mysql.format(query, inserts);
+      connection.query(query, function (err, rows, fields) {
+        if (err) return res.status(400).send({ message: 'error in saving max level, Error: ' + err });
+
+        return res.status(200).end();
+      })
+    });
+
+    /*
     // Retrieving room arrangements.
     this.devServer.get('/cribtori/api/room/:id', function(req, res) {
       var id = req.params.id;
@@ -502,6 +539,7 @@ module.exports = function(devServer) {
         });
       })
     });
+    */
   };
 
   // VISIT
