@@ -38,7 +38,6 @@ import Promo from './Promo/Promo.js';
 import Register from './Registration/Register.js';
 import Admin from './Admin/Admin.js';
 
-
 import './css/oswald.css'
 import './css/open-sans.css'
 import './css/pure-min.css'
@@ -155,7 +154,7 @@ class App extends Component {
     let loc = this.props.history.location.pathname;
     loc = loc.split('/')[1];
     // 'inventory': 2
-    const locMode = {'': 5, 'mytoris': 0, 'nursery': 1, 'explore': 2, 'market': 3}
+    const locMode = {'': 4, 'mytoris': 0, 'nursery': 1, 'explore': 2, 'market': 3}
     let currentMode = locMode[loc];
 
     this.state = {

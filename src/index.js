@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter } from 'react-router-dom';
+import { Switch, Route, HashRouter } from 'react-router-dom';
 
 import App from './App';
+import Tutorial from './Tutorial/TutorialWrapper.js';
 
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
@@ -26,7 +27,10 @@ const theme = createMuiTheme({
 const Container = () => (
   <HashRouter>
     <MuiThemeProvider theme={theme}>
-      <App />
+      <Switch>
+        <Route exact path='/' component={App} />
+        <Route exact path='/tutorial' component={Tutorial} />
+      </Switch>
     </MuiThemeProvider>
   </HashRouter>
 );
