@@ -1,16 +1,15 @@
 pragma solidity ^0.4.21;
 
 import './DnaCore.sol';
+import './ToriCapacity.sol';
 
-import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
-import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/examples/RBACWithAdmin.sol';
-import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
+//import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
+//import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
 
-//import 'openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
-//import 'openzeppelin-solidity/contracts/ownership/rbac/RBACWithAdmin.sol';
-//import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import 'openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
+contract ToriToken is DnaCore, ToriCapacity, ERC721BasicToken {
 
   using SafeMath for uint256;
 
@@ -37,9 +36,25 @@ contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
   event NewTori(address indexed _address, uint256 toriIdx);
   uint256 currentGeneration = 0;
 
+  // ROLES
+  string public constant ROLE_VISIT = "visit";
+  string public constant ROLE_PROMO = "promo";
+  string public constant ROLE_UPDATE = "update";
+
 
   function updateGeneration() onlyAdmin public {
     currentGeneration = currentGeneration.add(1);
+  }
+
+  modifier capacityNotFull(address _owner) {
+    if ((_owner == address(0)) && (hasRole(msg.sender, ROLE_VISIT))) {
+      // Bypass capacity check for transfer
+      _;
+    } else {
+      uint maxCapacity = getMaxCapacity(_owner);
+      require(maxCapacity >= balanceOf(_owner));
+      _;
+    }
   }
 
   /*
@@ -60,12 +75,12 @@ contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
   function generateSpecialTori(uint8[] _quizzes,
                                string _name,
                                uint256 _special,
-                               address _owner) onlyRole('promo') public returns (bool success) {
+                               address _owner) onlyRole(ROLE_PROMO) capacityNotFull(_owner) public returns (bool success) {
     Tori memory newTori = _generateRandomTori(_quizzes, _name, _owner, _special);
     // Push to the book keeping array.
     uint256 id = toris.push(newTori) - 1;
     _mint(_owner, id);
-
+    updateMaxLevel(_owner, newTori.level);
     emit NewTori(_owner, id);
     return true;
   }
@@ -103,6 +118,7 @@ contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
       tokenOwner[id] = _owner;
     } else {
       _mint(_owner, id);
+      updateMaxLevel(_owner, newTori.level);
       emit NewTori(_owner, id);
     }
     return true;
@@ -117,7 +133,7 @@ contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
                            string _name,
                            address _owner,
                            uint256 _special,
-                           uint256 _generation) onlyRole('visit') public returns (bool success) {
+                           uint256 _generation) onlyRole(ROLE_VISIT) capacityNotFull(_owner) public returns (bool success) {
     return _generateNewTori(
       _dna,
       _level,
@@ -140,7 +156,7 @@ contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
                            uint256 _parent2,
                            string _name,
                            address _owner,
-                           uint256 _special) onlyRole('visit') public returns (bool success) {
+                           uint256 _special) onlyRole(ROLE_VISIT) capacityNotFull(_owner) public returns (bool success) {
     return _generateNewTori(
       _dna,
       _level,
@@ -155,7 +171,7 @@ contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
     );
   }
 
-  function _burnTori(address _owner, uint256 _tokenId) onlyRole('visit') private returns (bool success) {
+  function _burnTori(address _owner, uint256 _tokenId) onlyRole(ROLE_VISIT) private returns (bool success) {
     // Check if for sale
     // TODO: remove it automatically for now.
     if (toriSale[_tokenId] > 0) {
@@ -276,6 +292,9 @@ contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
     toriSale[_tokenId] = 0;
     toriSaleCount = toriSaleCount.sub(1);
 
+    // Update max level
+    updateMaxLevel(msg.sender, toris[_tokenId].level);
+
     // We want to call this from this contract.
     this.safeTransferFrom(_from, msg.sender, _tokenId);
   }
@@ -308,7 +327,7 @@ contract ToriToken is RBACWithAdmin, DnaCore, ERC721BasicToken {
                       uint32 _proficiency,
                       uint32 _personality,
                       uint256 _special,
-                      uint256 _minLevel) onlyRole('update') onlyOwnerOf(_tokenId) minLevel(_tokenId, _minLevel) public returns (bool result) {
+                      uint256 _minLevel) onlyRole(ROLE_UPDATE) onlyOwnerOf(_tokenId) minLevel(_tokenId, _minLevel) public returns (bool result) {
     Tori storage tori = toris[_tokenId];
     tori.name = _name;
     tori.proficiency = _proficiency;

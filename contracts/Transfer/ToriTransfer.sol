@@ -1,18 +1,18 @@
 pragma solidity ^0.4.21;
 
-import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Ownable.sol';
-import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/lifecycle/Destructible.sol';
-import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
+//import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/ownership/Ownable.sol';
+//import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/lifecycle/Destructible.sol';
+//import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
 
-//import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-//import 'openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
-//import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import 'openzeppelin-solidity/contracts/lifecycle/Destructible.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract ToriTokenInterface {
   function getTokenInfo(uint256 _toriId) public view returns
                     (uint256 toriId,
                       uint256 toriDna,
-                      uint256 _level,
+                      uint256 level,
                       string name,
                       uint32 proficiency,
                       uint32 personality,
