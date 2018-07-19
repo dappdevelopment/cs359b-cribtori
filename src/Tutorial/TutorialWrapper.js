@@ -80,7 +80,6 @@ class TutorialWrapper extends Component {
               <Tab disabled={true} label="Nursery" component={Link} to={'/tutorial/nursery'} />
               <Tab disabled={true} label="Explore" component={Link} to={'/tutorial/explore'} />
               <Tab disabled={true} label="Marketplace" component={Link} to={'/tutorial/market'} />
-              <Tab label="Info" component={Link} to={'/'} />
             </Tabs>
           </Toolbar>
         </AppBar>

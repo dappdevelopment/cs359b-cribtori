@@ -23,14 +23,16 @@ const theme = createMuiTheme({
     },
   },
 });
-
+/*
+<Switch>
+  <Route exact path='/' component={App} />
+  <Route exact path='/tutorial' component={Tutorial} />
+</Switch>
+*/
 const Container = () => (
   <HashRouter>
     <MuiThemeProvider theme={theme}>
-      <Switch>
-        <Route exact path='/' component={App} />
-        <Route exact path='/tutorial' component={Tutorial} />
-      </Switch>
+      <App />
     </MuiThemeProvider>
   </HashRouter>
 );
