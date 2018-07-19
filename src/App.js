@@ -7,6 +7,7 @@ import { Link, Switch, Route, withRouter, Redirect } from 'react-router-dom';
 import ToriToken from '../build/contracts/ToriToken.json';
 import ToriVisit from '../build/contracts/ToriVisit.json';
 import ToriSimplePromo from '../build/contracts/ToriSimplePromo.json';
+import ToriTransfer from '../build/contracts/ToriTransfer.json';
 
 // Accessories contract
 import ClothCushion from '../build/contracts/ClothCushion.json';
@@ -336,6 +337,7 @@ class App extends Component {
               toriVisitInstance: toriVisitInstance,
               toriPromoInstance: toriPromoInstance
             }, () => {
+
               // Tori Accessories
               Promise.all(accessories.map((c) => c.deployed()))
               .then((instances) => {

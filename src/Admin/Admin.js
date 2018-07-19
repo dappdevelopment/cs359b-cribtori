@@ -94,6 +94,39 @@ class Admin extends Component {
     });
   }
 
+  handleTransfer() {
+    const contract = require('truffle-contract');
+
+    const toriTransfer = contract(ToriTransfer);
+    toriTransfer.setProvider(this.state.web3.currentProvider);
+
+    toriTransfer.deployed().then((toriTransferInstance) => {
+      this.state.toriTokenInstance.getAllTokensCount.call({from: this.state.userAccount})
+      .then((result) => {
+        // Get all the counts.
+        let totalCount = result.toNumber();
+        console.log('Total Count:', totalCount);
+        // Get all the names.
+        let indexes = [];
+        for (let idx = 0; idx < totalCount; idx ++) indexes.push(idx);
+        Promise.all(indexes.map((id) => this.state.toriTokenInstance.getTokenInfo.call(id, {from: this.state.userAccount})))
+        .then((results) => {
+          let names = results.map((res, i) => {return [i, res[3]]});
+          console.log('Names: ', names);
+
+          // Do the batch transactions.
+          var batch = new this.state.web3.BatchRequest();
+          names.forEach((entry) => {
+            batch.add(toriTransferInstance.transferTori.request(entry[0], entry[1], {from: this.state.userAccount}, () => {console.log(entry[0], entry[1])}))
+          });
+          console.log(batch)
+          batch.execute();
+        })
+
+      });
+    });
+  }
+
   renderInfos() {
     return this.state.infos.map((info) => {
       return (

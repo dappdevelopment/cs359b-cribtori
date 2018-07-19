@@ -1,10 +1,10 @@
 pragma solidity ^0.4.21;
 
-//import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/examples/RBACWithAdmin.sol';
-//import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/examples/RBACWithAdmin.sol';
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
 
-import 'openzeppelin-solidity/contracts/ownership/rbac/RBACWithAdmin.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+//import 'openzeppelin-solidity/contracts/ownership/rbac/RBACWithAdmin.sol';
+//import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract ToriCapacity is RBACWithAdmin {
 

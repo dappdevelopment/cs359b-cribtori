@@ -3,11 +3,11 @@ pragma solidity ^0.4.21;
 import './DnaCore.sol';
 import './ToriCapacity.sol';
 
-//import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
-//import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
+import 'github.com/OpenZeppelin/zeppelin-solidity/contracts/math/SafeMath.sol';
 
-import 'openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+//import 'openzeppelin-solidity/contracts/token/ERC721/ERC721BasicToken.sol';
+//import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract ToriToken is DnaCore, ToriCapacity, ERC721BasicToken {
 
