@@ -34,6 +34,7 @@ CREATE TABLE user ( public_key varchar(200) not null,
                     username varchar(200) not null,
                     email varchar(100) not null,
                     time timestamp,
+                    nonce int,
                     PRIMARY KEY (public_key));
 
 CREATE TABLE room ( public_key varchar(200) not null,

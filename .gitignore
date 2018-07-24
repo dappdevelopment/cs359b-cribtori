@@ -63,5 +63,8 @@ src/mockimg/
 # SQL cred.
 config/sql.js
 
+# Session cred.
+config/session.js
+
 # Webpack build
 build_webpack

@@ -1,13 +1,37 @@
-module.exports = function(devServer) {
+module.exports = function(devServer, session) {
   this.devServer = devServer;
+  this.session = session;
+  this.sessionConfig = require('../config/session.js');
+  this.ethUtil = require('ethereumjs-util');
+
   var ONE_HOUR = 60 * 60 * 1000;
+  var NONCE_DIGIT = this.sessionConfig.nonceDigit;
+
+
+  // Set up the session.
+  this.devServer.use(
+    session({
+      secret: this.sessionConfig.secret,
+      // Set the expiration for a day
+      cookie: {
+        maxAge: 24 * ONE_HOUR;
+      }
+    });
+  );
+
+  function restrict(req, res, next) {
+    if ((req.session.loggedIn) && (req.session.pk)) {
+      next();
+    } else {
+      res.status(400).send('Access denied!');
+    }
+  }
 
   this.createAllEndpoints = function(mysql, connection) {
     this.createTestEndpoints();
     this.createUserEndpoints(mysql, connection);
     //this.createActivityEndpoints(mysql, connection);
     //this.createHeartsEndpoints(mysql, connection);
-    this.createRoomEndpoints(mysql, connection);
     //this.createVisitEndpoints(mysql, connection);
     this.createGreetingsEndpoints(mysql, connection);
   }
@@ -31,8 +55,8 @@ module.exports = function(devServer) {
   // USER
   this.createUserEndpoints = function(mysql, connection) {
     // Get user.
-    this.devServer.get('/cribtori/api/user/:pk', function(req, res) {
-      var pk = req.params.pk;
+    this.devServer.get('/cribtori/api/user', function(req, res) {
+      var pk = req.query.pk;
       var query = 'SELECT username from user WHERE public_key = ?';
       var inserts = [pk];
       query = mysql.format(query, inserts);
@@ -43,14 +67,15 @@ module.exports = function(devServer) {
         if (rows.length > 0) {
           data = {
             pk: pk,
-            username: rows[0].username
+            username: rows[0].username,
+            nonce: rows[0].nonce
           }
         }
         res.status(200).send(data);
       });
     });
 
-    // Post user.
+    // Sign up user.
     this.devServer.post('/cribtori/api/user', function(req, res) {
       var pk = req.body.pk;
       var username = req.body.username;
@@ -61,59 +86,102 @@ module.exports = function(devServer) {
         return res.status(400).send({message: 'invalid values to sign up.'});
       }
 
-      connection.beginTransaction(function(err) {
+      // Generate random nonce
+      let nonce = Math.floor(Math.random() * NONCE_DIGIT);;
+
+      let query = 'INSERT INTO user (public_key, username, email, time, nonce) VALUES (?, ?, ?, ?, ?)';
+      let inserts = [pk, username, email, new Date(), nonce];
+      query = mysql.format(query, inserts);
+      connection.query(query, function (err, rows, fields) {
         if (err) {
-          return res.status(400).send({ message: 'sign up failed, Error: ' + err });
+          return res.status(400).send({ message: 'sign up failed. User already signed up, Error: ' + err });
         }
 
-        // Check if public key already exist.
+        // Return the nonce
+        let data = {
+          pk: pk,
+          username: username,
+          nonce: nonce
+        }
+        res.status(200).send(data);
+      });
+    });
+
+    // Authenticate user.
+    this.devServer.post('/cribtori/api/user/auth', function(req, res) {
+      var signature = req.body.signature;
+      var pk = req.body.pk;
+
+      connection.beginTransaction(function(err) {
+        if (err) {
+          return res.status(400).send({ message: 'authentication failed, Error: ' + err });
+        }
+
+        // Get the nonce from the pk.
         var query = 'SELECT username from user WHERE public_key = ?';
         var inserts = [pk];
         query = mysql.format(query, inserts);
         connection.query(query, function (err, rows, fields) {
           if (err) {
             return connection.rollback(function() {
-              res.status(400).send({ message: 'sign up failed, Error: ' + err });
+              throw 'Getting user failed';
             });
           }
 
-          if (rows.length > 0) {
+          if (rows.length == 0) {
             return connection.rollback(function() {
-              res.status(400).send({ message: 'sign up failed, Error: ' + err });
+              throw 'User is not registered';
             });
           }
 
-          // Seems like it's a new user.
-          query = 'INSERT INTO user (public_key, username, email, time) VALUES (?, ?, ?, ?)';
-          inserts = [pk, username, email, new Date()];
-          query = mysql.format(query, inserts);
-          connection.query(query, function (err, rows, fields) {
-            if (err) {
-              return connection.rollback(function() {
-                res.status(400).send({ message: 'sign up failed, Error: ' + err });
-              });
-            }
-            // Success! Now also push to room.
-            // TODO: should we check if pk exists in room?
-            query = 'INSERT INTO room (public_key, room_id, room_size, max_level) VALUES (?, ?, ?, ?)';
-            inserts = [pk, 1, 2, 1];
-            query = mysql.format(query, inserts);
+          let nonce = rows[0].nonce;
+
+          var message = 'Signing one-time nonce: ' + nonce;
+
+          const messageBuffer = this.ethUtil.toBuffer(message);
+          const messageHash = this.ethUtil.hashPersonalMessage(messageBuffer);
+          const signatureBuffer = this.ethUtil.toBuffer(signature);
+          const signatureParams = this.ethUtil.fromRpcSig(signatureBuffer);
+          const publicKey = this.ethUtil.ecrecover(
+            messageHash,
+            signatureParams.v,
+            signatureParams.r,
+            signatureParams.s
+          );
+          const addressBuffer = ethUtil.publicToAddress(pk);
+          const address = ethUtil.bufferToHex(addressBuffer);
+
+          // Confirm address.
+          if (address.toLowerCase() === pk.toLowerCase()) {
+            // Matches. Now generate a new nonce for this user.
+            let newNonce = Math.floor(Math.random() * NONCE_DIGIT);
+
+            query = 'UPDATE user SET nonce = ? where public_key = ?';
+            inserts = [newNonce, pk];
             connection.query(query, function (err, rows, fields) {
-              if (err) {
-                return connection.rollback(function() {
-                  res.status(400).send({ message: 'sign up failed, Error: ' + err });
-                });
-              }
+              return connection.rollback(function() {
+                throw 'Saving new nonce failed';
+              });
+
               connection.commit(function(err) {
                 if (err) {
                   return connection.rollback(function() {
-                    res.status(400).send({ message: 'sign up failed, Error: ' + err });
+                    throw 'Commit failed';
                   });
                 }
-                res.status(200).end();
+
+                // Update the session.
+                req.session.loggedIn = true;
+                req.session.pk = pk;
+
+                return res.status(200).end();
               });
             });
-          });
+          } else {
+            return connection.rollback(function() {
+              throw 'Signature doesn\'t match';
+            });
+          }
         });
       });
     });
@@ -395,152 +463,6 @@ module.exports = function(devServer) {
     });
   };
 
-
-  // ROOM
-  this.createRoomEndpoints = function(mysql, connection) {
-    // Retrieve room info.
-    this.devServer.get('/cribtori/api/room/:pk', function(req, res) {
-      var pk = req.params.pk;
-      var query = 'SELECT * from room WHERE public_key = ?';
-      var inserts = [pk];
-      query = mysql.format(query, inserts);
-      connection.query(query, function (err, rows, fields) {
-          if (err) return res.status(400).send({ message: 'invalid key, Error: ' + err });
-
-          let result = rows.map((item) => {
-            return {
-              roomId: item.room_id,
-              roomSize: item.room_size,
-              maxLevel: item.max_level
-            };
-          });
-          return res.status(200).send(result);
-      });
-    });
-
-    // Update room info.
-    this.devServer.post('/cribtori/api/room', function(req, res) {
-      // TODO: add a middleware to check registered user.
-      let maxLevel = req.body.maxLevel;
-      // Get the appropriate room size.
-      let roomSize = (maxLevel < 4) ? 2 : (maxLevel < 8) ? 3 : 4;
-      var query = 'UPDATE room SET max_level = ?, room_size = ? WHERE public_key = ? AND room_id = ? AND max_level < ?';
-      var inserts = [maxLevel, roomSize, req.body.pk, req.body.roomId, maxLevel];
-      query = mysql.format(query, inserts);
-      connection.query(query, function (err, rows, fields) {
-        if (err) return res.status(400).send({ message: 'error in saving max level, Error: ' + err });
-
-        return res.status(200).end();
-      })
-    });
-
-    /*
-    // Retrieving room arrangements.
-    this.devServer.get('/cribtori/api/room/:id', function(req, res) {
-      var id = req.params.id;
-      var query = 'SELECT * from arrangement where public_key = ?';
-      var inserts = [id];
-      query = mysql.format(query, inserts);
-      connection.query(query, function (err, rows, fields) {
-        if (err) return res.status(400).send({ message: 'invalid key' });
-
-        if (rows.length > 0) {
-          var data = {
-            tori_id: rows[0].tori_id,
-            locations: rows[0].locations,
-          }
-          return res.status(200).send(data);
-        }
-        return res.status(200).send({});
-      })
-    });
-
-    // Posting arrangements.
-    this.devServer.post('/cribtori/api/room', function(req, res) {
-      let actTime = new Date();
-
-      var query = 'SELECT * FROM arrangement WHERE public_key = ?';
-      var inserts = [req.body.id];
-      query = mysql.format(query, inserts);
-      connection.query(query, function (err, rows, fields) {
-        if (err) res.status(400).send({ message: 'saving room failed, Error: ' + err });
-
-        let layout = (rows.length === 0) ? [] : JSON.parse(rows[0].locations);
-        layout = layout.filter((l) => l.key === 'tori').map((l) => { return l.id });
-        let newLayout = JSON.parse(req.body.locations);
-        newLayout = newLayout.filter((l) => l.key === 'tori').map((l) => { return l.id });
-
-        // Filter out the list.
-        layout = layout.filter((l) => newLayout.indexOf(l) === -1);     // Set in active
-        newLayout = newLayout.filter((l) => layout.indexOf(l) === -1);  // Set active
-
-        connection.beginTransaction(function(err) {
-          if (err) { return res.status(400).send({ message: 'saving room failed, Error: ' + err }); }
-
-          query = 'INSERT INTO arrangement (public_key, locations) VALUES (?, ?) ON DUPLICATE KEY UPDATE locations = ?';
-          inserts = [req.body.id, req.body.locations, req.body.locations];
-          query = mysql.format(query, inserts);
-          connection.query(query, function (err, rows, fields) {
-            if (err) {
-              return connection.rollback(function() {
-                throw error;
-              });
-            }
-            // Now, set inactive and active.
-            // First, set inactive.
-            async.forEach(layout, function(id_old, callback_old) {
-              query = 'UPDATE hearts SET active = ? WHERE tori_id = ?';
-              inserts = [0, id_old];
-              query = mysql.format(query, inserts);
-              connection.query(query, function (err, rows, fields) {
-                if (err) {
-                  return connection.rollback(function() {
-                    throw error;
-                  });
-                }
-                callback_old();
-              });
-            }, function(err, result) {
-              if (err) {
-                return connection.rollback(function() {
-                  throw error;
-                });
-              }
-              // Second, set active.
-              async.forEach(newLayout, function(id, callback) {
-                query = 'UPDATE hearts SET active = ?, last_update = ? WHERE tori_id = ?';
-                inserts = [1, actTime, id];
-                query = mysql.format(query, inserts);
-                connection.query(query, function (err, rows, fields) {
-                  if (err) {
-                    return connection.rollback(function() {
-                      throw err;
-                    });
-                  }
-                  callback();
-                });
-              }, function(err, result) {
-                if (err) {
-                  return connection.rollback(function() {
-                    throw err;
-                  });
-                }
-                connection.commit(function(err) {
-                  if (err) {
-                    return connection.rollback(function() {
-                      throw err;
-                    });
-                  }
-                  res.status(200).end();
-                });
-              });
-            });
-          });
-        });
-      })
-    });
-    */
-  };
 
   // VISIT
   this.createVisitEndpoints = function(mysql, connection) {
