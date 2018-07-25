@@ -38,6 +38,7 @@ contract ToriToken is DnaCore, ToriCapacity, ERC721BasicToken {
 
   // ROLES
   string public constant ROLE_VISIT = "visit";
+  string public constant ROLE_TRANSFER = "transfer";
   string public constant ROLE_PROMO = "promo";
   string public constant ROLE_UPDATE = "update";
 
@@ -95,8 +96,7 @@ contract ToriToken is DnaCore, ToriCapacity, ERC721BasicToken {
                             address _owner,
                             uint256 _special,
                             uint256 _generation) private returns (bool success) {
-    require((_dna / DNA_LIMIT == 0) &&
-            (_proficiency >= 0) &&
+    require((_proficiency >= 0) &&
             (_proficiency < PROFICIENCY_THRESHOLD.length) &&
             (_personality >= 0) &&
             (_personality < PERSONALITY_THRESHOLD.length));
@@ -134,6 +134,30 @@ contract ToriToken is DnaCore, ToriCapacity, ERC721BasicToken {
                            address _owner,
                            uint256 _special,
                            uint256 _generation) onlyRole(ROLE_VISIT) capacityNotFull(_owner) public returns (bool success) {
+    return _generateNewTori(
+      _dna,
+      _level,
+      _proficiency,
+      _personality,
+      _parent1,
+      _parent2,
+      _name,
+      _owner,
+      _special,
+      _generation
+    );
+  }
+
+  function transferOldTori(uint256 _dna,
+                           uint256 _level,
+                           uint32 _proficiency,
+                           uint32 _personality,
+                           uint256 _parent1,
+                           uint256 _parent2,
+                           string _name,
+                           address _owner,
+                           uint256 _special,
+                           uint256 _generation) onlyRole(ROLE_TRANSFER) public returns (bool success) {
     return _generateNewTori(
       _dna,
       _level,

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 import { withStyles } from '@material-ui/core/styles';
 
-import ToriToken from '../../build/contracts/ToriToken.json';
 import ToriTransfer from '../../build/contracts/ToriTransfer.json';
 
 import Button from '@material-ui/core/Button';
@@ -44,22 +43,15 @@ class Admin extends Component {
     this.startTransfer = this.startTransfer.bind(this);
     this.prepareTransfer = this.prepareTransfer.bind(this);
     this.renderInfos = this.renderInfos.bind(this);
+    this.renderBatch = this.renderBatch.bind(this);
   }
 
   componentDidMount() {
     const contract = require('truffle-contract');
     const toriTransfer = contract(ToriTransfer);
-    const oldToriToken = contract(ToriToken);
     toriTransfer.setProvider(this.context.web3.currentProvider);
-    oldToriToken.setProvider(this.context.web3.currentProvider);
 
-    oldToriToken.at('0xfb6fee1ff31132c35f2023f0eae8277b9355ff49')
-    .then((instance) => {
-      this.setState({
-        oldInstance: instance
-      })
-      return toriTransfer.deployed();
-    })
+    toriTransfer.deployed()
     .then((instance) => {
       this.setState({
         transferInstance: instance
@@ -72,97 +64,98 @@ class Admin extends Component {
     .then((result) => {
       let count = result.toNumber();
       let countLst = [];
+      console.log('Count:', count)
       for (let i = 0; i < count; i++) countLst.push(i);
       Promise.all(countLst.map((c) => {
-        return this.state.oldInstance.getTokenInfo(c);
+        return this.context.toriToken.getTokenInfo(c, {from: this.context.userAccount});
       }))
       .then((results) => {
         let infos = results.map((r) => { return util.parseToriResult(r) });
         let names = results.map((r) => { return r[3] });
+
+        // Divide the toris by batches of 6.
+        let batchDna = [];
+        let batchName = [];
+        let batchId = [];
+        let currDna = [];
+        let currName = [];
+        let currId = [];
+        let currCount = 0;
+
+        let dct = {}
+        countLst.forEach((id) => {
+          if (currCount === 6) {
+            batchDna.push(currDna);
+            batchName.push(currName);
+            batchId.push(currId);
+            currDna = [];
+            currName = [];
+            currId = [];
+            currCount = 0;
+          }
+
+          if (dct[infos[id].owner] === undefined) dct[infos[id].owner] = 0
+          dct[infos[id].owner] += 1;
+
+          currDna.push(infos[id].dna);
+          currName.push(infos[id].name);
+          currId.push(id);
+          currCount += 1;
+        })
+        console.log(dct)
+        batchDna.push(currDna);
+        batchName.push(currName);
+        batchId.push(currId);
+
         this.setState({
-          names: names,
-          infos: infos,
+          batchDna: batchDna,
+          batchName: batchName,
+          batchId: batchId,
         })
       });
     });
   }
 
-  startTransfer(id, name) {
-    this.state.transferInstance.transferTori(id, name, { from: this.context.userAccount })
+  startTransfer(names, ids) {
+    console.log(names, ids)
+    this.state.transferInstance.batchTransfer(ids, ids.length, ...names, { from: this.context.userAccount })
     .then((results) => {
-      console.log('SUCCESS')
+      console.log('SUCCESS', ids)
     });
   }
 
-  handleTransfer() {
-    const contract = require('truffle-contract');
-
-    const toriTransfer = contract(ToriTransfer);
-    toriTransfer.setProvider(this.state.web3.currentProvider);
-
-    toriTransfer.deployed().then((toriTransferInstance) => {
-      this.state.toriTokenInstance.getAllTokensCount.call({from: this.state.userAccount})
-      .then((result) => {
-        // Get all the counts.
-        let totalCount = result.toNumber();
-        console.log('Total Count:', totalCount);
-        // Get all the names.
-        let indexes = [];
-        for (let idx = 0; idx < totalCount; idx ++) indexes.push(idx);
-        Promise.all(indexes.map((id) => this.state.toriTokenInstance.getTokenInfo.call(id, {from: this.state.userAccount})))
-        .then((results) => {
-          let names = results.map((res, i) => {return [i, res[3]]});
-          console.log('Names: ', names);
-
-          // Do the batch transactions.
-          var batch = new this.state.web3.BatchRequest();
-          names.forEach((entry) => {
-            batch.add(toriTransferInstance.transferTori.request(entry[0], entry[1], {from: this.state.userAccount}, () => {console.log(entry[0], entry[1])}))
-          });
-          console.log(batch)
-          batch.execute();
-        })
-
-      });
-    });
+  renderBatch(names, ids, i) {
+    return (
+      <div className={this.props.classes.entry} key={`batch_${i}`}>
+        <span className={this.props.classes.textEntry}>
+          <b>Id:</b> {ids.join(', ')}
+        </span>
+        <span className={this.props.classes.textEntry}>
+          <b>Name:</b> {names.join(', ')}
+        </span>
+        <div>
+          <Button disabled={this.state.batchName.length === 0}
+                  variant="raised"
+                  color="primary"
+                  onClick={() => this.startTransfer(names, ids) } >
+            Start Transfer
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   renderInfos() {
-    return this.state.infos.map((info) => {
-      return (
-        <div className={this.props.classes.entry} key={info.id}>
-          <span className={this.props.classes.textEntry}>
-            <b>Id:</b> {info.id}
-          </span>
-          <span className={this.props.classes.textEntry}>
-            <b>Name:</b> {info.name}
-          </span>
-          <span className={this.props.classes.textEntry}>
-            <b>DNA:</b> {info.dna}
-          </span>
-          <span className={this.props.classes.textEntry}>
-            <b>Proficiency:</b> {info.proficiency}
-          </span>
-          <span className={this.props.classes.textEntry}>
-            <b>Personality:</b> {info.personality}
-          </span>
-          <div>
-            <Button disabled={this.state.names.length === 0}
-                    variant="raised"
-                    color="primary"
-                    onClick={() => this.startTransfer(info.id, info.name) } >
-              Start Transfer
-            </Button>
-          </div>
-        </div>
-      )
+    return this.state.batchName.map((names, i) => {
+      let ids = this.state.batchId[i];
+      return this.renderBatch(names, ids, i);
     })
   }
 
   render() {
     return (
       <div className={this.props.classes.root}>
-        {this.renderInfos()}
+        {this.state.batchDna !== undefined && this.renderInfos()}
       </div>
     );
   }

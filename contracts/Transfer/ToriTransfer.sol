@@ -22,16 +22,16 @@ contract ToriTokenInterface {
                       uint postingPrice,
                       address toriOwner);
 
-  function generateNewTori(uint256 _dna,
-                            uint256 _level,
-                            uint32 _proficiency,
-                            uint32 _personality,
-                            uint256 _parent1,
-                            uint256 _parent2,
-                            string _name,
-                            address _owner,
-                            uint256 _special,
-                            uint256 _generation) public returns (bool success);
+  function transferOldTori(uint256 _dna,
+                           uint256 _level,
+                           uint32 _proficiency,
+                           uint32 _personality,
+                           uint256 _parent1,
+                           uint256 _parent2,
+                           string _name,
+                           address _owner,
+                           uint256 _special,
+                           uint256 _generation) public returns (bool success);
 
   function getParentIds(uint256 _tokenId) public view returns (uint256 parent1, uint256 parent2);
 
@@ -76,14 +76,14 @@ contract ToriTransfer is Ownable, Destructible {
 
     r1[0] = toriDna;
     r1[1] = level;
-    r1[2] = generation;
-    r1[3] = special;
+    r1[2] = special;
+    r1[3] = generation;
 
     r2[0] = proficiency;
     r2[1] = personality;
   }
 
-  function transferTori(uint256 _tokenId, string name) external onlyOwner {
+  function _transferTori(uint256 _tokenId, string name) internal  {
     uint256[4] memory r1;
     uint32[2] memory r2;
     address owner;
@@ -91,7 +91,7 @@ contract ToriTransfer is Ownable, Destructible {
 
     uint256[2] memory parents = _getParents(_tokenId);
 
-    newToriToken.generateNewTori(r1[0],
+    newToriToken.transferOldTori(r1[0],
                                  r1[1],
                                  r2[0],
                                  r2[1],
@@ -101,6 +101,28 @@ contract ToriTransfer is Ownable, Destructible {
                                  owner,
                                  r1[2],
                                  r1[3]);
+  }
+
+  function transferTori(uint256 _tokenId, string name) external onlyOwner {
+    _transferTori(_tokenId, name);
+  }
+
+  // Batch of 6
+  function batchTransfer(
+    uint256[] _tokenIds,
+    uint256 _numFull,
+    string _n0,
+    string _n1,
+    string _n2,
+    string _n3,
+    string _n4,
+    string _n5) external onlyOwner {
+    if (_numFull >= 1) { _transferTori(_tokenIds[0], _n0); }
+    if (_numFull >= 2) { _transferTori(_tokenIds[1], _n1); }
+    if (_numFull >= 3) { _transferTori(_tokenIds[2], _n2); }
+    if (_numFull >= 4) { _transferTori(_tokenIds[3], _n3); }
+    if (_numFull >= 5) { _transferTori(_tokenIds[4], _n4); }
+    if (_numFull >= 6) { _transferTori(_tokenIds[5], _n5); }
   }
 
   function getOldCount() public view returns (uint result) {

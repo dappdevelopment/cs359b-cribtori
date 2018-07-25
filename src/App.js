@@ -554,7 +554,7 @@ class App extends Component {
               <Route exact path='/market' component={Market} />
               <Route exact path='/confirmation' component={Confirmation} />
               <Route exact path='/signup' component={Register} />
-              { false && (
+              { true && (
                   <Route exact path='/admin' component={Admin} />
               )}
             </Switch>
