@@ -9,6 +9,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
 import Avatar from '@material-ui/core/Avatar';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import FormatPaintIcon from '@material-ui/icons/FormatPaint';
 import RestaurantIcon from '@material-ui/icons/Restaurant';
@@ -81,6 +82,15 @@ const styles = theme => ({
 });
 
 class IsometricRoom extends Component {
+
+  static contextTypes = {
+    web3: PropTypes.object,
+    toriToken: PropTypes.object,
+    accContracts: PropTypes.array,
+    userAccount: PropTypes.string,
+    onMessage: PropTypes.func,
+  }
+
   constructor(props, context) {
     super(props);
     this.context = context;
@@ -96,6 +106,16 @@ class IsometricRoom extends Component {
     this.onMouseOver = this.onMouseOver.bind(this);
     this.handleFeed = this.handleFeed.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
+  }
+
+  componentDidMount() {
+    util.getRoomLimit(this.context.toriToken, this.context.userAccount)
+    .then((result) => {
+      this.setState({
+        maxCapacity: result.toNumber()
+      });
+    })
+    .catch(console.log);
   }
 
   handleFeed() {
@@ -250,9 +270,13 @@ class IsometricRoom extends Component {
               <Typography variant="caption" color="inherit" align="center">
                 Room Limit
               </Typography>
-              <Chip avatar={<Avatar src={ToriIcon} />}
-                    label={`${this.props.toris.length} / ${util.getRoomLimit(this.props.size)}`}
-                    className={this.props.classes.chip}/>
+              { this.state.maxCapacity ? (
+                <Chip avatar={<Avatar src={ToriIcon} />}
+                      label={`${this.props.toris.length} / ${this.state.maxCapacity}`}
+                      className={this.props.classes.chip}/>
+              ) : (
+                <CircularProgress />
+              )}
             </Grid>
             <Grid item xs={4}>
               <Button disabled // TODO

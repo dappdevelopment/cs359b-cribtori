@@ -1,22 +1,21 @@
-module.exports = function(devServer, session) {
+module.exports = function(devServer) {
   this.devServer = devServer;
-  this.session = session;
-  this.sessionConfig = require('../config/session.js');
-  this.ethUtil = require('ethereumjs-util');
+  var session = require('express-session')
+  var sessionConfig = require('../config/session.js');
+  var ethUtil = require('ethereumjs-util');
 
   var ONE_HOUR = 60 * 60 * 1000;
-  var NONCE_DIGIT = this.sessionConfig.nonceDigit;
-
+  var NONCE_DIGIT = sessionConfig.sess.nonceDigit;
 
   // Set up the session.
   this.devServer.use(
     session({
-      secret: this.sessionConfig.secret,
+      secret: sessionConfig.sess.secret,
       // Set the expiration for a day
       cookie: {
-        maxAge: 24 * ONE_HOUR;
+        maxAge: 24 * ONE_HOUR,
       }
-    });
+    })
   );
 
   function restrict(req, res, next) {
@@ -138,11 +137,11 @@ module.exports = function(devServer, session) {
 
           var message = 'Signing one-time nonce: ' + nonce;
 
-          const messageBuffer = this.ethUtil.toBuffer(message);
-          const messageHash = this.ethUtil.hashPersonalMessage(messageBuffer);
-          const signatureBuffer = this.ethUtil.toBuffer(signature);
-          const signatureParams = this.ethUtil.fromRpcSig(signatureBuffer);
-          const publicKey = this.ethUtil.ecrecover(
+          const messageBuffer = ethUtil.toBuffer(message);
+          const messageHash = ethUtil.hashPersonalMessage(messageBuffer);
+          const signatureBuffer = ethUtil.toBuffer(signature);
+          const signatureParams = ethUtil.fromRpcSig(signatureBuffer);
+          const publicKey = ethUtil.ecrecover(
             messageHash,
             signatureParams.v,
             signatureParams.r,

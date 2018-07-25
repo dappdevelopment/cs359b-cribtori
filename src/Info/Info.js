@@ -80,14 +80,16 @@ class Info extends Component {
                           justify={'center'}>
             <Grid item sm={12}>
               <img src={assets.logoWhite} alt={"Cribtori"} className={this.props.classes.bannerImage} />
-              <div className={this.props.classes.promo}>
-                <Button variant="raised"
-                        color="primary"
-                        component={Link}
-                        to={'/promo'}>
-                  First-time user? Get your Promo On!
-                </Button>
-              </div>
+              { false && (
+                <div className={this.props.classes.promo}>
+                  <Button variant="raised"
+                          color="primary"
+                          component={Link}
+                          to={'/promo'}>
+                    First-time user? Get your Promo On!
+                  </Button>
+                </div>
+              )}
             </Grid>
           </Grid>
         </Grid>

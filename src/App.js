@@ -486,6 +486,7 @@ class App extends Component {
     // TODO:
     // <Tab disabled={disabled} label="Inventory" component={Link} to={'/inventory'} />
     // <Route exact path='/inventory' component={Inventory} />
+    // <Route exact path='/promo' component={Promo} />
     return (
       <div className="App">
         <AppBar position="static">
@@ -530,7 +531,6 @@ class App extends Component {
               <Route exact path='/explore/:id' component={ToriDetails} />
               <Route exact path='/market' component={Market} />
               <Route exact path='/confirmation' component={Confirmation} />
-              <Route exact path='/promo' component={Promo} />
               <Route exact path='/signup' component={Register} />
               { false && (
                   <Route exact path='/admin' component={Admin} />

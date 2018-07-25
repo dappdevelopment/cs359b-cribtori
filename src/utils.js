@@ -50,10 +50,8 @@ export function getRoomSize(maxLevel) {
   }
 }
 
-export function getRoomLimit(size) {
-  if (size === 2) return 6;
-  if (size === 3) return 16;
-  if (size === 4) return 28;
+export function getRoomLimit(contract, addr) {
+  return contract.getMaxCapacity.call(addr, {from: addr});
 }
 
 
