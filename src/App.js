@@ -83,9 +83,10 @@ const styles = theme => ({
     height: '30px'
   },
   tab: {
-    position: 'absolute',
-    right: 0,
-    marginRight: 20,
+    marginLeft: 20,
+  },
+  tabItem: {
+    minWidth: 100
   },
   banner: {
     backgroundColor: theme.palette.secondary.dark,
@@ -126,7 +127,9 @@ const styles = theme => ({
     },
   },
   user: {
-    marginLeft: 30,
+    position: 'absolute',
+    right: 0,
+    marginRight: 30,
     padding: 10,
     border: '1px solid',
     borderColor: theme.palette.secondary.main,
@@ -496,6 +499,34 @@ class App extends Component {
                    alt={"Cribtori"}
                    className={this.props.classes.logo} />
             </Link>
+            <Tabs value={this.state.mode}
+                  onChange={this.switchDisplay}
+                  className={this.props.classes.tab}>
+              <Tab disabled={disabled}
+                   label="My Room"
+                   component={Link}
+                   to={'/mytoris'}
+                   className={this.props.classes.tabItem}/>
+              <Tab disabled={disabled}
+                   label="Nursery"
+                   component={Link}
+                   to={'/nursery'}
+                   className={this.props.classes.tabItem}/>
+              <Tab disabled={disabled}
+                   label="Explore"
+                   component={Link}
+                   to={'/explore'}
+                   className={this.props.classes.tabItem}/>
+              <Tab disabled={disabled}
+                   label="Marketplace"
+                   component={Link}
+                   to={'/market'}
+                   className={this.props.classes.tabItem}/>
+              <Tab label="Info"
+                   component={Link}
+                   to={'/'}
+                   className={this.props.classes.tabItem}/>
+            </Tabs>
             { this.state.username && (
               <Typography className={this.props.classes.user}
                           variant="caption"
@@ -504,15 +535,6 @@ class App extends Component {
                 <AccountCircle /> { this.state.username }
               </Typography>
             )}
-            <Tabs value={this.state.mode}
-                  onChange={this.switchDisplay}
-                  className={this.props.classes.tab}>
-              <Tab disabled={disabled} label="My Room" component={Link} to={'/mytoris'} />
-              <Tab disabled={disabled} label="Nursery" component={Link} to={'/nursery'} />
-              <Tab disabled={disabled} label="Explore" component={Link} to={'/explore'} />
-              <Tab disabled={disabled} label="Marketplace" component={Link} to={'/market'} />
-              <Tab label="Info" component={Link} to={'/'} />
-            </Tabs>
           </Toolbar>
         </AppBar>
         <div className={this.props.classes.banner}>
