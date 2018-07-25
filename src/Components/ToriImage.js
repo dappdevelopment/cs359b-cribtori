@@ -4,6 +4,23 @@ import { assets } from '../assets.js';
 
 class ToriImage extends Component {
 
+  constructor(props) {
+    super(props);
+
+    // Generate random offset if index is defined.
+    let baseIndex = 0;
+    let randomOffset = 0;
+    if (this.props.index !== undefined) {
+      baseIndex = 10 * this.props.index;
+      randomOffset = Math.random();
+    }
+
+    this.state = {
+      baseIndex: baseIndex,
+      randomOffset: randomOffset
+    }
+  }
+
   render() {
     let dna = this.props.dna;
     let size = this.props.size;
@@ -109,10 +126,11 @@ class ToriImage extends Component {
           style={{
             position: 'absolute',
             left: 0,
-            zIndex: 50,
+            zIndex: this.state.baseIndex + 1,
             width: `100%`,
             filter: `hue-rotate(${baseHue}deg) saturate(${baseSaturate}%) sepia(${baseSephia})`,
             animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
+            animationDelay: `${this.state.randomOffset}s`,
           }} />
         <img
           src={cheek}
@@ -120,9 +138,10 @@ class ToriImage extends Component {
           style={{
             position: 'absolute',
             left: 0,
-            zIndex: 200,
+            zIndex: this.state.baseIndex + 4,
             width: `100%`,
             animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
+            animationDelay: `${this.state.randomOffset}s`,
           }} />
         <img
           src={shadow}
@@ -130,7 +149,7 @@ class ToriImage extends Component {
           style={{
             position: 'absolute',
             left: 0,
-            zIndex: 50,
+            zIndex: this.state.baseIndex + 1,
             width: `100%`,
           }} />
         <img
@@ -139,10 +158,11 @@ class ToriImage extends Component {
           style={{
             position: 'absolute',
             left: 0,
-            zIndex: 150,
+            zIndex: this.state.baseIndex + 3,
             width: `100%`,
             filter: `hue-rotate(${baseHue}deg) saturate(${baseSaturate}%) sepia(${baseSephia})`,
             animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
+            animationDelay: `${this.state.randomOffset}s`,
           }} />
         <img
           src={eyes}
@@ -150,9 +170,10 @@ class ToriImage extends Component {
           style={{
             position: 'absolute',
             left: 0,
-            zIndex: 200,
+            zIndex: this.state.baseIndex + 4,
             width: `100%`,
             animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
+            animationDelay: `${this.state.randomOffset}s`,
           }} />
         <img
           src={mouth}
@@ -160,9 +181,10 @@ class ToriImage extends Component {
           style={{
             position: 'absolute',
             left: 0,
-            zIndex: 200,
+            zIndex: this.state.baseIndex + 4,
             width: `100%`,
             animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
+            animationDelay: `${this.state.randomOffset}s`,
           }} />
         <img
           src={hand}
@@ -170,10 +192,11 @@ class ToriImage extends Component {
           style={{
             position: 'absolute',
             left: 0,
-            zIndex: 200,
+            zIndex: this.state.baseIndex + 4,
             width: `100%`,
             filter: `hue-rotate(${secHue}deg) saturate(${secSaturate}%) sepia(${secSephia})`,
             animation: shouldAnimate ? `animatedTori ${secTime}s infinite alternate` : '',
+            animationDelay: `${this.state.randomOffset}s`,
           }} />
         <img
           src={feet}
@@ -181,7 +204,7 @@ class ToriImage extends Component {
           style={{
             position: 'absolute',
             left: 0,
-            zIndex: 100,
+            zIndex: this.state.baseIndex + 2,
             width: `100%`,
           }} />
         { isSpecial &&
@@ -191,10 +214,11 @@ class ToriImage extends Component {
             style={{
               position: 'absolute',
               left: 0,
-              zIndex: 200,
+              zIndex: this.state.baseIndex + 4,
               width: `100%`,
               filter: `hue-rotate(${decorHue}deg) saturate(${decorSaturate}%) sepia(${decorSephia})`,
               animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
+              animationDelay: `${this.state.randomOffset}s`,
             }} />
         }
         { special !== 0 &&
@@ -204,9 +228,10 @@ class ToriImage extends Component {
             style={{
               position: 'absolute',
               left: 0,
-              zIndex: 250,
+              zIndex: this.state.baseIndex + 5,
               width: `100%`,
-              animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : ''
+              animation: shouldAnimate ? `animatedTori ${baseTime}s infinite alternate` : '',
+              animationDelay: `${this.state.randomOffset}s`,
             }} />
         }
         { this.props.bubble !== undefined &&
@@ -217,7 +242,7 @@ class ToriImage extends Component {
               style={{
                 position: 'absolute',
                 left: 0,
-                zIndex: 300,
+                zIndex: this.state.baseIndex + 6,
                 width: `100%`,
               }} />
             <img
@@ -226,7 +251,7 @@ class ToriImage extends Component {
               style={{
                 position: 'absolute',
                 left: 0,
-                zIndex: 320,
+                zIndex: this.state.baseIndex + 7,
                 width: `100%`,
               }} />
           </div>

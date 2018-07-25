@@ -20,7 +20,6 @@ const styles = theme => ({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    zIndex: 1000,
     '&:hover': {
       cursor: 'pointer'
     },
@@ -104,7 +103,8 @@ class IsometricToriCell extends Component {
                      generation={this.state.info.generation}
                      dna={this.state.info.dna}
                      size={this.props.size}
-                     bubble={this.state.bubble}/>
+                     bubble={this.state.bubble}
+                     index={this.props.index} />
         </div>
         <div className={this.props.classes.center}
              onClick={this.onClick}
@@ -114,11 +114,15 @@ class IsometricToriCell extends Component {
                width: this.props.size / 3,
                height: this.props.size / 3,
                marginLeft: - this.props.size / 6,
+               zIndex: 1000 ,
              }}>
         </div>
         {this.state.showChip && (
           <Chip label={`${this.state.info.name} (Lvl. ${this.state.info.level})`}
-                className={this.props.classes.chip} />
+                className={this.props.classes.chip}
+                style={{
+                  zIndex: 10 * this.props.index + 1,
+                }}/>
         )}
       </div>
     );

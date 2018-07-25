@@ -246,7 +246,6 @@ class IsometricRoom extends Component {
       return a[1] - b[1];
     });
 
-    // TODO: for now, the room will cap at 16
     return coordinates.map((coor, i) => {
       return (
         <IsometricToriCell key={`tori_${i}`}
