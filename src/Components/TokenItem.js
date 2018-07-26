@@ -115,24 +115,47 @@ class TokenItem extends Component {
       disabled = amount === 0;
     }
 
-    return (
-      <MenuItem className={this.props.selected ? this.props.classes.selected : ''}
-                key={key}
-                disabled={disabled}
-                onClick={(e) => this.props.onItemSelected(this.state.info, e) }>
-        { !this.state.mode ? (
-          <ToriImage special={this.state.info.special}
-                     generation={this.state.info.generation}
-                     dna={this.state.info.dna}
-                     size={80}
-                     still={true} />
-        ) : (
-          <Avatar alt={this.state.info.name} src={assets.accessories[this.state.info.symbol]} />
-        )}
-        <ListItemText primary={ this.state.mode ? `x ${amount}` : this.state.info.name }
-                      secondary={this.props.showLevel ? `Level: ${this.state.info.level}` : `Size: ${space}`} />
-      </MenuItem>
-    );
+    if (this.props.onItemSelected === undefined) {
+      return (
+        <MenuItem className={this.props.selected ? this.props.classes.selected : ''}
+                  key={key}
+                  style={{
+                    cursor: 'default',
+                    transition: '',
+                  }}>
+          { !this.state.mode ? (
+            <ToriImage special={this.state.info.special}
+                       generation={this.state.info.generation}
+                       dna={this.state.info.dna}
+                       size={80}
+                       still={true} />
+          ) : (
+            <Avatar alt={this.state.info.name} src={assets.accessories[this.state.info.symbol]} />
+          )}
+          <ListItemText primary={ this.state.mode ? `x ${amount}` : this.state.info.name }
+                        secondary={this.props.showLevel ? `Level: ${this.state.info.level}` : `Size: ${space}`} />
+        </MenuItem>
+      );
+    } else {
+      return (
+        <MenuItem className={this.props.selected ? this.props.classes.selected : ''}
+                  key={key}
+                  disabled={disabled}
+                  onClick={(e) => this.props.onItemSelected(this.state.info, e) }>
+          { !this.state.mode ? (
+            <ToriImage special={this.state.info.special}
+                       generation={this.state.info.generation}
+                       dna={this.state.info.dna}
+                       size={80}
+                       still={true} />
+          ) : (
+            <Avatar alt={this.state.info.name} src={assets.accessories[this.state.info.symbol]} />
+          )}
+          <ListItemText primary={ this.state.mode ? `x ${amount}` : this.state.info.name }
+                        secondary={this.props.showLevel ? `Level: ${this.state.info.level}` : `Size: ${space}`} />
+        </MenuItem>
+      );
+    }
   }
 
   render() {

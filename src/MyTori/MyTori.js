@@ -83,18 +83,22 @@ class MyTori extends Component {
   }
 
   componentDidMount() {
-    util.retrieveTokenIndexesWithMaxLevel(this.context.toriToken, this.state.userAccount)
+    // Get the tori indexes and room size.
+    Promise.all([
+      util.retrieveTokenIndexes(this.context.toriToken, this.state.userAccount),
+      util.getRoomLimit(this.context.toriToken, this.state.userAccount)
+    ])
     .then((results) => {
       let toriIds = results[0];
-      let maxLevel = results[1];
+      let roomLimit = results[1].toNumber();
 
       toriIds = toriIds.map((id) => { return id.toNumber() });
-      maxLevel = maxLevel.toNumber();
 
       this.setState({
         loaded: true,
         toriIds: toriIds,
-        size: util.getRoomSize(maxLevel),
+        size: util.getRoomSize(roomLimit),
+        limit: roomLimit,
       }, this.retrieveLayout);
     })
     .catch(console.error);
@@ -312,7 +316,8 @@ class MyTori extends Component {
         <Grid item sm={12} className={actionCursor}>
           <div className={this.props.classes.roomWrapper}>
             <IsometricRoom toris={this.state.toriIds}
-                           size={this.state.size} />
+                           size={this.state.size}
+                           limit={this.state.limit}/>
           </div>
         </Grid>
       </Grid>
@@ -329,7 +334,7 @@ class MyTori extends Component {
             padding: 20,
           }}>
             <Typography variant="title" color="inherit" component="h3" align="center">
-              "Oh.. You don't have any Tori :( *sad*"
+              "Oh.. You don't have any Tori yet :("
             </Typography>
           </Paper>
         );

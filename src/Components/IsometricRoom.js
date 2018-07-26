@@ -16,6 +16,7 @@ import RestaurantIcon from '@material-ui/icons/Restaurant';
 
 import ToriImage from './ToriImage.js';
 import IsometricToriCell from './IsometricToriCell.js';
+import Activation from './Activation.js';
 
 import Tile from '../img/background/isometric_floor.png';
 import ToriIcon from '../img/toriIcon_secondary.png';
@@ -62,7 +63,7 @@ const styles = theme => ({
     position: 'relative'
   },
   menuList: {
-    zIndex: 2000,
+    zIndex: 1100,
     display: 'block'
   },
   menuItem: {
@@ -98,6 +99,7 @@ class IsometricRoom extends Component {
     this.state = {
       roomWidth: tileWidth * this.props.size,
       roomHeight: tileHeight * this.props.size,
+      maxCapacity: this.props.limit,
     }
 
     this.renderFloor = this.renderFloor.bind(this);
@@ -106,16 +108,41 @@ class IsometricRoom extends Component {
     this.onMouseOver = this.onMouseOver.bind(this);
     this.handleFeed = this.handleFeed.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
+    this.refreshToris = this.refreshToris.bind(this);
   }
 
   componentDidMount() {
-    util.getRoomLimit(this.context.toriToken, this.context.userAccount)
-    .then((result) => {
-      this.setState({
-        maxCapacity: result.toNumber()
-      });
+    this.refreshToris();
+  }
+
+  refreshToris() {
+    // Check if toris are active.
+    Promise.all(this.props.toris.map((id) => {
+      return fetch(`/cribtori/api/hearts?id=${id}`)
+    }))
+    .then((responses) => {
+      return Promise.all(responses.map((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw res;
+      }))
     })
-    .catch(console.log);
+    .then((results) => {
+      console.log(results)
+      let activeToris = this.props.toris.filter((id, i) => {
+        return (results[i].id !== undefined) && (results[i].owner === this.context.userAccount) ;
+      });
+      let nonactiveToris = this.props.toris.filter((id, i) => {
+        return (results[i].id === undefined) || (results[i].owner !== this.context.userAccount);
+      });
+
+      this.setState({
+        activeToris: activeToris,
+        nonactiveToris: nonactiveToris
+      })
+    })
+    .catch(console.error);
   }
 
   handleFeed() {
@@ -220,6 +247,9 @@ class IsometricRoom extends Component {
   }
 
   renderToris() {
+    if (this.state.activeToris === undefined) {
+      return (<CircularProgress />);
+    }
     let coordinates = [];
     for (let i = 0; i < this.props.size; i++) {
       for (let j = 0; j < this.props.size; j++) {
@@ -239,7 +269,7 @@ class IsometricRoom extends Component {
     // Shuffle the coordinates array.
     coordinates = util.shuffle(coordinates);
     // Slice by the number of toris.
-    coordinates = coordinates.slice(0, this.props.toris.length);
+    coordinates = coordinates.slice(0, this.state.activeToris.length);
 
     // Sort the coordinates by y.
     coordinates.sort((a, b) => {
@@ -250,7 +280,7 @@ class IsometricRoom extends Component {
       return (
         <IsometricToriCell key={`tori_${i}`}
                            index={i}
-                           id={this.props.toris[i]}
+                           id={this.state.activeToris[i]}
                            size={165}
                            coor={coor} />
       )
@@ -277,7 +307,7 @@ class IsometricRoom extends Component {
                 <CircularProgress />
               )}
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <Button disabled // TODO
                       variant="contained"
                       color="secondary"
@@ -292,7 +322,7 @@ class IsometricRoom extends Component {
               </Button>
             </Grid>
             { false && (
-              <Grid item xs={4}>
+              <Grid item xs={3}>
                 <Button disabled // TODO
                         variant="contained"
                         color="secondary"
@@ -307,6 +337,14 @@ class IsometricRoom extends Component {
                 </Button>
               </Grid>
             )}
+            <Grid item xs={3}>
+              { this.state.nonactiveToris === undefined ? (
+                <CircularProgress />
+              ) : (
+                <Activation nonactiveToris={this.state.nonactiveToris}
+                            refreshToris={this.refreshToris}/>
+              )}
+            </Grid>
             <Grid item xs={12} className={this.props.classes.menuBorder}>
             </Grid>
           </Grid>

@@ -30,7 +30,7 @@ module.exports = function(devServer) {
     this.createTestEndpoints();
     this.createUserEndpoints(mysql, connection);
     //this.createActivityEndpoints(mysql, connection);
-    //this.createHeartsEndpoints(mysql, connection);
+    this.createHeartsEndpoints(mysql, connection);
     //this.createVisitEndpoints(mysql, connection);
     this.createGreetingsEndpoints(mysql, connection);
   }
@@ -300,164 +300,100 @@ module.exports = function(devServer) {
 
   // HEARTS
   this.createHeartsEndpoints = function(mysql, connection) {
-    let calculateHearts = function(hearts, type, personality, lastUpdate, currentTime) {
-      // Check how much we should decrement the hearts.
-      // For every 4 HOURS (TODO: ?)
-      // Optimistic:   +1    -0.5
-      // Irritable:    +0.5  -1
-      // Melancholic:  +1    -1
-      // Placid:       +0.5  -0.5
-      let increment = [1, 0.5, 1, 0.5];
-      let decrement = [0.5, 1, 1, 0.5];
+    const MIN_HEARTS = -1;
+    const NEUTRAL_HEARTS = 0;
+    const MAX_HEARTS = 1;
+    const HOUR_DURATION = 3;
+    const FEED_INCREMENT = 1;
 
-      let denom = (type === 'feed') ? 2 : 1;
-      let plus = (type === -1) ? 0 : (increment[personality] / denom);
+    let calculateHearts = function(hearts, lastUpdate) {
+      let currentTime = new Date();
       let hourPassed = (currentTime - lastUpdate) / ONE_HOUR;
 
-      hearts = Math.max(0, hearts - decrement[personality] * (hourPassed / 4));
-      hearts = hearts + plus;
-      hearts = Math.max(0, Math.min(5, hearts));
-
+      // TODO: enable personality effect.
+      // -1 for every 3 hours.
+      let decrement = hourPassed / HOUR_DURATION;
+      let currentHearts = Math.max(hearts - decrement, MIN_HEARTS);
       return hearts;
-    }
-
-    // TODO: what if this failed?
-    let updateHearts = function(req, res) {
-      let info = req.body.info;
-      let personality = info.personality;
-      let actTime = req.body.actTime;
-
-      var query = 'SELECT * from hearts where tori_id = ?';
-      var inserts = [req.body.id]
-      query = mysql.format(query, inserts);
-      connection.query(query, function (err, rows, fields) {
-        if (err) {
-          return connection.rollback(function() {
-            throw err;
-          });
-        }
-
-        if (rows.length === 0) {
-          // Insert the new Tori.
-          let hearts = calculateHearts(2.6, req.activity_type, req.body.info.personality, actTime, actTime);
-
-          query = 'INSERT IGNORE INTO hearts (tori_id, hearts, personality, last_update, active) VALUES (?, ?, ?, ?, ?)';
-          inserts = [req.body.id, hearts, req.body.info.personality, actTime, 1];
-          query = mysql.format(query, inserts);
-          connection.query(query, function (err, rows, fields) {
-            if (err) {
-              return connection.rollback(function() {
-                throw err;
-              });
-            }
-            connection.commit(function(err) {
-              if (err) {
-                return connection.rollback(function() {
-                  throw err;
-                });
-              }
-              res.status(200).end();
-            });
-          });
-        } else {
-          // TODO: assuming there's already an entry.
-          let hearts = rows[0].hearts;
-          let lastUpdate = rows[0].last_update;
-
-          hearts = calculateHearts(hearts, req.activity_type, personality, lastUpdate, actTime);
-
-          // We're updating the hearts!
-          query = 'UPDATE hearts SET hearts = ?, last_update = ? WHERE tori_id = ?';
-          inserts = [hearts, actTime, req.body.id];
-
-          query = mysql.format(query, inserts);
-          connection.query(query, function (err, rows, fields) {
-            if (err) {
-              return connection.rollback(function() {
-                throw err;
-              });
-            }
-            connection.commit(function(err) {
-              if (err) {
-                return connection.rollback(function() {
-                  throw err;
-                });
-              }
-              res.status(200).end();
-            });
-          });
-        }
-      });
     }
 
     // Retrieving hearts.
     this.devServer.get('/cribtori/api/hearts', function(req, res) {
-      // Check if there's extra query.
-      let limit = req.query.limit;
-      let active = req.query.active;
+      let id = req.query.id;
 
-      var query = 'SELECT * from hearts';
-      var inserts = [];
-      if (active !== undefined) {
-        query += ' WHERE active = ?';
-        inserts.push(active);
-      }
-      if (limit !== undefined) {
-        query += ' ORDER BY tori_id LIMIT ?';
-        inserts.push(parseInt(limit, 10));
-      }
-
-      query = mysql.format(query, inserts);
-      connection.query(query, function (err, rows, fields) {
-        if (err) return res.status(400).send({ message: 'failed in retrieving hearts, Error: ' + err });
-        let now = new Date();
-        rows = rows.map((r) => {
-          let rCopy = r;
-          rCopy.hearts = calculateHearts(r.hearts, -1, r.personality, r.last_update, now);
-          return rCopy;
-        });
-
-        return res.status(200).send(rows);
-      })
-    });
-
-    this.devServer.get('/cribtori/api/hearts/:id', function(req, res) {
-      var id = req.params.id;
-      var query = 'SELECT * from hearts where tori_id = ?';
+      var query = 'SELECT * FROM hearts WHERE tori_id = ?';
       var inserts = [id];
       query = mysql.format(query, inserts);
       connection.query(query, function (err, rows, fields) {
-        if (err) return res.status(400).send({ message: 'invalid tori ID' });
+        if (err) return res.status(400).send({ message: 'failed in retrieving hearts, Error: ' + err });
 
+        let data = {}
         if (rows.length > 0) {
-          let now = new Date();
-          let hearts = calculateHearts(rows[0].hearts, -1, rows[0].personality, rows[0].last_update, now);
-
-          var data = {
-            tori_id: rows[0].tori_id,
-            hearts: hearts,
-          }
-          return res.status(200).send(data);
+          data.id = rows[0].tori_id;
+          data.hearts = calculateHearts(rows[0].hearts, rows[0].last_update);
+          data.personality = rows[0].personality;
+          data.last_update = rows[0].last_update;
+          data.owner = rows[0].owner;
         }
-        return res.status(200).send({});
-      })
+
+        return res.status(200).send(data);
+      });
+    });
+
+    // Update hearts (+1).
+    this.devServer.post('/cribtori/api/hearts/feed', function(req, res) {
+      let id = req.body.id;
+      // TODO: check if pk match.
+
+      var query = 'SELECT * FROM hearts WHERE tori_id = ?';
+      var inserts = [id];
+      query = mysql.format(query, inserts);
+      connection.query(query, function (err, rows, fields) {
+        if (err) return res.status(400).send({ message: 'failed in updating hearts, Error: ' + err });
+
+        if (rows.length === 0) {
+          return res.status(400).send({ message: 'failed in updating hearts. Invalid Tori, Error: ' + err });
+        }
+
+        let hearts = calculateHearts(rows[0].hearts, rows[0].last_update) + FEED_INCREMENT;
+
+        query = 'UPDATE hearts SET hearts = ? WHERE tori_id = ?';
+        inserts = [hearts, id];
+        query = mysql.format(query, inserts);
+        connection.query(query, function (err, rows, fields) {
+          if (err) return res.status(400).send({ message: 'failed in updating hearts, Error: ' + err });
+
+          return res.status(200).send(hearts);
+        });
+      });
     });
 
     // Only for activating and deactivating Toris + saving initial hearts.
-    this.devServer.post('/cribtori/api/hearts', function(req, res) {
-      // If user is deactivating tori, we want to freeze the heart.
-      // When the user is activating the tori, we want to start the counter from now --> so update the last_update.
-      // User can only update the hearts for active tori.
-      let now = new Date();
-      // Check if we're activating or deactivating.
-      // We're activating or deactivating. So no need to update the hearts.
-      // When we're activating, we want to reset the last update to now.
-      var query = 'INSERT IGNORE INTO hearts (tori_id, hearts, personality, last_update, active) VALUES (?, ?, ?, ?, ?)';
-      var inserts = [req.body.id, 2.6, req.body.personality, now, req.body.active];
+    this.devServer.post('/cribtori/api/hearts/activate', function(req, res) {
+      let id = req.body.id;
+      let owner = req.body.owner;
+      let personality = req.body.personality;
+
+      var query = 'SELECT * FROM hearts WHERE tori_id = ?';
+      var inserts = [id];
       query = mysql.format(query, inserts);
       connection.query(query, function (err, rows, fields) {
-        if (err) res.status(400).send({ message: 'hearts activation failed, Error: ' + err });
-        res.status(200).end();
+        if (err) return res.status(400).send({ message: 'failed in activating tori, Error: ' + err });
+
+        if ((rows.length !== 0) && (rows[0].owner === owner)) {
+          // Existing tori. Already activated.
+          return res.status(400).send({ message: 'failed in activating tori. Tori is already activated.'});
+        }
+
+        let now = new Date();
+        query = 'INSERT INTO hearts (tori_id, owner, hearts, personality, last_update) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE owner = ?, hearts = ?, last_update = ?';
+        inserts = [id, owner, NEUTRAL_HEARTS, personality, now, owner, NEUTRAL_HEARTS, now];
+        query = mysql.format(query, inserts);
+        connection.query(query, function (err, rows, fields) {
+          if (err) return res.status(400).send({ message: 'failed in activating tori, Error: ' + err });
+
+          return res.status(200).end();
+        });
       });
     });
   };

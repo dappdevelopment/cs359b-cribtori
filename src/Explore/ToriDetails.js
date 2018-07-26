@@ -445,6 +445,7 @@ class ToriDetails extends Component {
   }
 
   render() {
+    // <LevelStepper level={this.state.info ? this.state.info.level : 1} />
     return (
       <Grid container className={this.props.classes.grid}
                       spacing={8}
@@ -478,7 +479,6 @@ class ToriDetails extends Component {
             <Typography variant="body2" color="inherit" component="h3" align="center">
               Abilities unlocked by level:
             </Typography>
-            <LevelStepper level={this.state.info ? this.state.info.level : 1} />
           </Grid>
           <TradeDialog open={this.state.dialogOpen}
                        amountNeeded={false}
