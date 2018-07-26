@@ -69,7 +69,7 @@ class TokenItem extends Component {
           });
 
           // Init tori if necessary
-          this.initTori(info);
+          //this.initTori(info);
         });
       })
       .catch(console.error);

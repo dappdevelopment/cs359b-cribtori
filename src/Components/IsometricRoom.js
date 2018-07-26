@@ -291,20 +291,22 @@ class IsometricRoom extends Component {
                 </Typography>
               </Button>
             </Grid>
-            <Grid item xs={4}>
-              <Button disabled // TODO
-                      variant="contained"
-                      color="secondary"
-                      onClick={this.handleEdit}
-                      className={this.props.classes.menuItem}>
-                <Typography variant="caption" color="inherit" align="center">
-                  <FormatPaintIcon />
-                </Typography>
-                <Typography variant="caption" color="inherit" align="center">
-                  Edit Room
-                </Typography>
-              </Button>
-            </Grid>
+            { false && (
+              <Grid item xs={4}>
+                <Button disabled // TODO
+                        variant="contained"
+                        color="secondary"
+                        onClick={this.handleEdit}
+                        className={this.props.classes.menuItem}>
+                  <Typography variant="caption" color="inherit" align="center">
+                    <FormatPaintIcon />
+                  </Typography>
+                  <Typography variant="caption" color="inherit" align="center">
+                    Edit Room
+                  </Typography>
+                </Button>
+              </Grid>
+            )}
             <Grid item xs={12} className={this.props.classes.menuBorder}>
             </Grid>
           </Grid>

@@ -102,7 +102,7 @@ class Admin extends Component {
           currId.push(id);
           currCount += 1;
         })
-        console.log(dct)
+
         batchDna.push(currDna);
         batchName.push(currName);
         batchId.push(currId);

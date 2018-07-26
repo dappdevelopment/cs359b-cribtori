@@ -84,6 +84,19 @@ import SMILE from './img/reactions/smile.png';
 import SURPRISED from './img/reactions/surprised.png';
 import WATER from './img/reactions/water.png';
 
+// Eggs
+import EGG_0 from './img/egg/egg_0.png';
+import EGG_1 from './img/egg/egg_1.png';
+import EGG_2 from './img/egg/egg_2.png';
+import EGG_3 from './img/egg/egg_3.png';
+import BUD_0 from './img/egg/bud_0.png';
+import BUD_1 from './img/egg/bud_1.png';
+import BUD_2 from './img/egg/bud_2.png';
+import EGG_BUD_0 from './img/egg/egg_bud_0.png';
+import EGG_BUD_1 from './img/egg/egg_bud_1.png';
+import EGG_BUD_2 from './img/egg/egg_bud_2.png';
+import EGG_BUD_3 from './img/egg/egg_bud_3.png';
+
 export const assets = {
   background: {
     floor: [
@@ -148,5 +161,8 @@ export const assets = {
     'smile': SMILE,
     'surprised': SURPRISED,
     'water': WATER,
-  }
+  },
+  eggs: [
+    EGG_BUD_0, EGG_BUD_1, EGG_BUD_2, EGG_BUD_3
+  ]
 };

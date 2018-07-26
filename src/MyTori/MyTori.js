@@ -153,6 +153,7 @@ class MyTori extends Component {
   }
 
   postActivity(id, type) {
+    /*
     // Construct the POST body.
     util.retrieveTokenInfo(this.context.toriToken, id, this.context.userAccount)
     .then((result) => {
@@ -214,6 +215,7 @@ class MyTori extends Component {
       .catch(console.error);
     })
     .catch(console.error);
+    */
   }
 
   feedTori(info, status) {

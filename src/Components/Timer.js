@@ -5,6 +5,12 @@ import { withStyles } from '@material-ui/core/styles';
 const styles = theme => ({
   countdown: {
     display: 'inline-block',
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.secondary.main,
+    padding: 10,
+    border: '1px solid',
+    borderColor: theme.palette.secondary.main,
+    borderRadius: '10%',
   }
 });
 

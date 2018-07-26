@@ -10,11 +10,15 @@ import TextField from '@material-ui/core/TextField';
 
 import TokenItem from './TokenItem.js';
 import Timer from './Timer.js';
+import EggImage from './EggImage.js';
+
+import ArrowForward from '@material-ui/icons/ArrowForward';
+import AddBox from '@material-ui/icons/AddBox';
 
 import * as util from '../utils.js';
+import { assets } from '../assets.js';
 
 const styles = theme => ({
-
 });
 
 class TicketItem extends Component {
@@ -53,10 +57,20 @@ class TicketItem extends Component {
       let myId = info.toriId;
       let otherId = info.otherId;
       let dueTime = info.dueTime;
+      let submitTime = info.submitTime;
+
+      // Calculate egg state.
+      let totalTime = dueTime - submitTime;
+      let currentTime = (new Date().getTime() / 1000) - submitTime;
+      let percentageTime = Math.min((currentTime / totalTime) * 100, 100);
+      let eggState = Math.floor(percentageTime / 25) - 1;
+
       this.setState({
         id: myId,
         otherId: otherId,
         dueTime: dueTime,
+        submitTime: submitTime,
+        eggState: eggState
       })
     })
     .catch(console.error);
@@ -119,7 +133,9 @@ class TicketItem extends Component {
   renderAction() {
     if (this.state.dueTime - new Date().getTime() / 1000 > 0) {
       return (
-        <Timer dueTime={this.state.dueTime} timerCallback={this.onTimerDone}/>
+        <Timer dueTime={this.state.dueTime}
+               timerCallback={this.onTimerDone}
+               className={this.props.classes.timer} />
       );
     } else {
       return (
@@ -147,16 +163,19 @@ class TicketItem extends Component {
     if (this.state.id === undefined) return (<CircularProgress  color="secondary" />);
     return (
       <Grid item sm={12}>
-        <Grid container spacing={16}
+        <Grid container spacing={8}
                         alignItems={'center'}
                         direction={'row'}
                         justify={'center'}>
           <TokenItem id={this.state.id}
                      onItemSelected={() => this.onToriSelected(this.state.id)}
                      showLevel={true} />
+          <AddBox />
           <TokenItem id={this.state.otherId}
                      onItemSelected={() => this.onToriSelected(this.state.otherId)}
                      showLevel={true} />
+          <ArrowForward />
+          <EggImage state={this.state.eggState}/>
           { this.renderAction() }
         </Grid>
       </Grid>
