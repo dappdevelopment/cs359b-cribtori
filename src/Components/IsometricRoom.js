@@ -22,6 +22,7 @@ import Tile from '../img/background/isometric_floor.png';
 import ToriIcon from '../img/toriIcon_secondary.png';
 
 import * as util from '../utils.js';
+import { assets } from '../assets.js';
 
 const DISTANCE_MARGIN = 50;
 
@@ -79,6 +80,9 @@ const styles = theme => ({
     color: theme.palette.secondary.main,
     fontSize: 18,
     padding: 10
+  },
+  feed: {
+    cursor: `url(${assets.food}), auto`,
   }
 });
 
@@ -129,15 +133,20 @@ class IsometricRoom extends Component {
       }))
     })
     .then((results) => {
-      console.log(results)
+      let activateFeed = false;
       let activeToris = this.props.toris.filter((id, i) => {
-        return (results[i].id !== undefined) && (results[i].owner === this.context.userAccount) ;
+        let isActive = (results[i].id !== undefined) && (results[i].owner === this.context.userAccount);
+        if (isActive) {
+          activateFeed = activateFeed || results[i].is_hungry;
+        }
+        return isActive;
       });
       let nonactiveToris = this.props.toris.filter((id, i) => {
         return (results[i].id === undefined) || (results[i].owner !== this.context.userAccount);
       });
 
       this.setState({
+        activateFeed: activateFeed,
         activeToris: activeToris,
         nonactiveToris: nonactiveToris
       })
@@ -146,7 +155,10 @@ class IsometricRoom extends Component {
   }
 
   handleFeed() {
-
+    console.log(this.state.isFeeding)
+    this.setState({
+      isFeeding: !this.state.isFeeding
+    });
   }
 
   handleEdit() {
@@ -288,6 +300,11 @@ class IsometricRoom extends Component {
   }
 
   render() {
+    let actionCursor = (
+      this.state.feeding ?
+        this.props.classes.feed
+      : '');
+
     return (
       <div className={this.props.classes.room}>
         <MenuList className={this.props.classes.menuList}>
@@ -308,7 +325,7 @@ class IsometricRoom extends Component {
               )}
             </Grid>
             <Grid item xs={3}>
-              <Button disabled // TODO
+              <Button disabled={!this.state.activateFeed}
                       variant="contained"
                       color="secondary"
                       onClick={this.handleFeed}
@@ -349,7 +366,7 @@ class IsometricRoom extends Component {
             </Grid>
           </Grid>
         </MenuList>
-        <div className={this.props.classes.roomWrapper}
+        <div className={`${this.props.classes.roomWrapper} ${actionCursor}`}
              style={{
                height: this.state.roomHeight,
                width: this.state.roomWidth

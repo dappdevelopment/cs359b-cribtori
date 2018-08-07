@@ -61,17 +61,37 @@ class IsometricToriCell extends Component {
     util.retrieveTokenInfo(this.context.toriToken, this.props.id, this.context.userAccount)
     .then((result) => {
       let info = util.parseToriResult(result);
-      this.setState({
-        loaded: true,
-        info: info,
+
+      fetch(`/cribtori/api/hearts?id=${this.props.id}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw response;
+        }
+        return response.json();
       })
+      .then((result) => {
+        this.setState({
+          loaded: true,
+          info: info,
+          hearts: result.hearts
+        })
+      })
+      .catch(console.error);
     })
     .catch(console.error);
   }
 
   onMouseOver(e) {
+    let bubble;
+    if (this.state.hearts < 0) {
+      bubble = assets.reactions.sad;
+    } else if (this.state.hearts > 0.75) {
+      bubble = assets.reactions.hearts;
+    } else {
+      bubble = assets.reactions.smile;
+    }
     this.setState({
-      bubble: assets.reactions.hearts,
+      bubble: bubble,
       showChip: true,
     })
   }

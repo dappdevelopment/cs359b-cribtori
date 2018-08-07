@@ -314,7 +314,7 @@ module.exports = function(devServer) {
       // -1 for every 3 hours.
       let decrement = hourPassed / HOUR_DURATION;
       let currentHearts = Math.max(hearts - decrement, MIN_HEARTS);
-      return hearts;
+      return currentHearts;
     }
 
     // Retrieving hearts.
@@ -329,10 +329,13 @@ module.exports = function(devServer) {
 
         let data = {}
         if (rows.length > 0) {
+
           data.id = rows[0].tori_id;
+          data.saved = rows[0].hearts;
           data.hearts = calculateHearts(rows[0].hearts, rows[0].last_update);
           data.personality = rows[0].personality;
           data.last_update = rows[0].last_update;
+          data.is_hungry = (new Date() - rows[0].last_update > (HOUR_DURATION * ONE_HOUR))
           data.owner = rows[0].owner;
         }
 
