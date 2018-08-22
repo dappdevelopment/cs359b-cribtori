@@ -347,7 +347,7 @@ module.exports = function(devServer) {
     this.devServer.post('/cribtori/api/hearts/feed', function(req, res) {
       let id = req.body.id;
       // TODO: check if pk match.
-
+      // TODO: enable feeding limit.
       var query = 'SELECT * FROM hearts WHERE tori_id = ?';
       var inserts = [id];
       query = mysql.format(query, inserts);
@@ -366,7 +366,11 @@ module.exports = function(devServer) {
         connection.query(query, function (err, rows, fields) {
           if (err) return res.status(400).send({ message: 'failed in updating hearts, Error: ' + err });
 
-          return res.status(200).send(hearts);
+          let result = {
+            hearts: hearts
+          }
+
+          return res.status(200).send(result);
         });
       });
     });

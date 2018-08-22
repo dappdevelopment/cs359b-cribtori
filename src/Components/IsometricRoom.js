@@ -104,6 +104,7 @@ class IsometricRoom extends Component {
       roomWidth: tileWidth * this.props.size,
       roomHeight: tileHeight * this.props.size,
       maxCapacity: this.props.limit,
+      isFeeding: false,
     }
 
     this.renderFloor = this.renderFloor.bind(this);
@@ -113,10 +114,40 @@ class IsometricRoom extends Component {
     this.handleFeed = this.handleFeed.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
     this.refreshToris = this.refreshToris.bind(this);
+    this.initCoordinates = this.initCoordinates.bind(this);
+    this.feedHandler = this.feedHandler.bind(this);
   }
 
   componentDidMount() {
     this.refreshToris();
+  }
+
+  initCoordinates() {
+    let coordinates = [];
+    for (let i = 0; i < this.props.size; i++) {
+      for (let j = 0; j < this.props.size; j++) {
+        // Only TWO toris can occupy the same tile.
+        // So, when we get the random coordinates for each tile,
+        // we need to make sure that they are appart by a certain margin.
+        let coor1 = this.getRandomCoordinates(i, j);
+        let coor2 = this.getRandomCoordinates(i, j);
+        while (this.eucledianDistance(coor1, coor2) < DISTANCE_MARGIN) {
+          coor1 = this.getRandomCoordinates(i, j);
+          coor2 = this.getRandomCoordinates(i, j);
+        }
+        coordinates.push(coor1);
+        coordinates.push(coor2);
+      }
+    }
+    // Shuffle the coordinates array.
+    coordinates = util.shuffle(coordinates);
+
+    // Sort the coordinates by y.
+    coordinates.sort((a, b) => {
+      return a[1] - b[1];
+    });
+
+    return coordinates;
   }
 
   refreshToris() {
@@ -145,20 +176,29 @@ class IsometricRoom extends Component {
         return (results[i].id === undefined) || (results[i].owner !== this.context.userAccount);
       });
 
+      let coordinates = this.initCoordinates();
+
       this.setState({
         activateFeed: activateFeed,
         activeToris: activeToris,
-        nonactiveToris: nonactiveToris
+        nonactiveToris: nonactiveToris,
+        coordinates: coordinates
       })
     })
     .catch(console.error);
   }
 
   handleFeed() {
-    console.log(this.state.isFeeding)
     this.setState({
       isFeeding: !this.state.isFeeding
     });
+  }
+
+  feedHandler() {
+    // Turn off feeding.
+    this.setState({
+      isFeeding: false,
+    })
   }
 
   handleEdit() {
@@ -262,31 +302,9 @@ class IsometricRoom extends Component {
     if (this.state.activeToris === undefined) {
       return (<CircularProgress />);
     }
-    let coordinates = [];
-    for (let i = 0; i < this.props.size; i++) {
-      for (let j = 0; j < this.props.size; j++) {
-        // Only TWO toris can occupy the same tile.
-        // So, when we get the random coordinates for each tile,
-        // we need to make sure that they are appart by a certain margin.
-        let coor1 = this.getRandomCoordinates(i, j);
-        let coor2 = this.getRandomCoordinates(i, j);
-        while (this.eucledianDistance(coor1, coor2) < DISTANCE_MARGIN) {
-          coor1 = this.getRandomCoordinates(i, j);
-          coor2 = this.getRandomCoordinates(i, j);
-        }
-        coordinates.push(coor1);
-        coordinates.push(coor2);
-      }
-    }
-    // Shuffle the coordinates array.
-    coordinates = util.shuffle(coordinates);
-    // Slice by the number of toris.
-    coordinates = coordinates.slice(0, this.state.activeToris.length);
 
-    // Sort the coordinates by y.
-    coordinates.sort((a, b) => {
-      return a[1] - b[1];
-    });
+    // Slice by the number of toris.
+    let coordinates = this.state.coordinates.slice(0, this.state.activeToris.length);
 
     return coordinates.map((coor, i) => {
       return (
@@ -294,19 +312,21 @@ class IsometricRoom extends Component {
                            index={i}
                            id={this.state.activeToris[i]}
                            size={165}
-                           coor={coor} />
+                           coor={coor}
+                           isFeeding={this.state.isFeeding}
+                           feedHandler={this.feedHandler}/>
       )
     })
   }
 
   render() {
     let actionCursor = (
-      this.state.feeding ?
+      this.state.isFeeding ?
         this.props.classes.feed
       : '');
 
     return (
-      <div className={this.props.classes.room}>
+      <div className={`${this.props.classes.room} ${actionCursor}`}>
         <MenuList className={this.props.classes.menuList}>
           <Grid container spacing={8}
                           alignItems={'center'}
@@ -366,7 +386,7 @@ class IsometricRoom extends Component {
             </Grid>
           </Grid>
         </MenuList>
-        <div className={`${this.props.classes.roomWrapper} ${actionCursor}`}
+        <div className={this.props.classes.roomWrapper}
              style={{
                height: this.state.roomHeight,
                width: this.state.roomWidth

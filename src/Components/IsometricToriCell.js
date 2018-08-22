@@ -20,6 +20,8 @@ const styles = theme => ({
     position: 'absolute',
     top: '50%',
     left: '50%',
+  },
+  hover: {
     '&:hover': {
       cursor: 'pointer'
     },
@@ -40,7 +42,8 @@ class IsometricToriCell extends Component {
     web3: PropTypes.object,
     toriToken: PropTypes.object,
     accContracts: PropTypes.array,
-    userAccount: PropTypes.string
+    userAccount: PropTypes.string,
+    onMessage: PropTypes.func,
   }
 
   constructor(props) {
@@ -55,6 +58,7 @@ class IsometricToriCell extends Component {
     this.onMouseOver = this.onMouseOver.bind(this);
     this.onMouseOut = this.onMouseOut.bind(this);
     this.onClick = this.onClick.bind(this);
+    this.feedTori = this.feedTori.bind(this);
   }
 
   componentDidMount() {
@@ -81,7 +85,37 @@ class IsometricToriCell extends Component {
     .catch(console.error);
   }
 
+  feedTori() {
+    let data = {
+      id: this.props.id
+    }
+    fetch('/cribtori/api/hearts/feed', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data),
+    })
+    .then((response) => {
+      this.props.feedHandler();
+      if (response.ok) {
+        return response.json();
+      } else {
+        // TODO: show different error message for feeding / disable feeding if not valid.
+        this.context.onMessage(`${this.state.info.name} feeding failed.`);
+      }
+    })
+    .then((result) => {
+      this.setState({
+        hearts: result.hearts,
+      })
+      this.context.onMessage(`${this.state.info.name} eats happily.`);
+    })
+    .catch(console.error)
+  }
+
   onMouseOver(e) {
+    if (this.props.isFeeding) return;
     let bubble;
     if (this.state.hearts < 0) {
       bubble = assets.reactions.sad;
@@ -104,13 +138,18 @@ class IsometricToriCell extends Component {
   }
 
   onClick() {
-    // Redirect to details page.
-    this.props.history.push('/explore/' + this.props.id);
-    // TODO: handle feed.
+    if (this.props.isFeeding) {
+      this.feedTori();
+    } else {
+      // Redirect to details page.
+      this.props.history.push('/explore/' + this.props.id);
+    }
   }
 
   render() {
     if (!this.state.loaded) return (<CircularProgress  color="secondary" />);
+
+    let actionCursor = (this.props.isFeeding ? '' : this.props.classes.hover);
 
     return (
       <div className={this.props.classes.tori}
@@ -126,7 +165,7 @@ class IsometricToriCell extends Component {
                      bubble={this.state.bubble}
                      index={this.props.index} />
         </div>
-        <div className={this.props.classes.center}
+        <div className={`${this.props.classes.center} ${actionCursor}`}
              onClick={this.onClick}
              onMouseOver={this.onMouseOver}
              onMouseOut={this.onMouseOut}
