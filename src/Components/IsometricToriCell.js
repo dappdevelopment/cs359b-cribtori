@@ -59,6 +59,7 @@ class IsometricToriCell extends Component {
     this.onMouseOut = this.onMouseOut.bind(this);
     this.onClick = this.onClick.bind(this);
     this.feedTori = this.feedTori.bind(this);
+    this.isHungry = this.isHungry.bind(this);
   }
 
   componentDidMount() {
@@ -77,7 +78,9 @@ class IsometricToriCell extends Component {
         this.setState({
           loaded: true,
           info: info,
-          hearts: result.hearts
+          hearts: result.hearts,
+          lastUpdate: result.last_update,
+          feedLimit: result.feed_limit,
         })
       })
       .catch(console.error);
@@ -106,18 +109,35 @@ class IsometricToriCell extends Component {
       }
     })
     .then((result) => {
-      this.setState({
-        hearts: result.hearts,
-      })
-      this.context.onMessage(`${this.state.info.name} eats happily.`);
+      if (result.success) {
+        this.setState({
+          hearts: result.hearts,
+        })
+        this.context.onMessage(`${this.state.info.name} eats happily.`);
+      } else {
+        this.context.onMessage(`${this.state.info.name} is still full.`);
+      }
     })
     .catch(console.error)
   }
 
+  isHungry() {
+    let currentTime = new Date();
+    let hourPassed = (currentTime - this.state.last_update) / util.ONE_HOUR;
+
+    return (hourPassed > this.state.feedLimit);
+  }
+
   onMouseOver(e) {
-    if (this.props.isFeeding) return;
+    if (this.props.isFeeding) {
+      if (!this.isHungry()) {
+        bubble = assets.reactions.full;
+      } else {
+        return;
+      }
+    }
     let bubble;
-    if (this.state.hearts < 0) {
+    if (this.state.hearts < -0.001) {
       bubble = assets.reactions.sad;
     } else if (this.state.hearts > 0.75) {
       bubble = assets.reactions.hearts;

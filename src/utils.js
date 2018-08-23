@@ -1,3 +1,6 @@
+export const ONE_MINUTE = 60 * 1000;
+export const ONE_HOUR = 60 * 60 * 1000;
+
 export function retrieveTokenInfo(contract, id, addr) {
   return contract.getTokenInfo.call(id, {from: addr});
 }

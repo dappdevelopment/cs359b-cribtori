@@ -81,6 +81,8 @@ import FOOD from './img/reactions/food.png';
 import NOTE from './img/reactions/note.png';
 import SAD from './img/reactions/sad.png';
 import SMILE from './img/reactions/smile.png';
+import NEUTRAL from './img/reactions/neutral.png';
+import FULL from './img/reactions/full.png';
 import SURPRISED from './img/reactions/surprised.png';
 import WATER from './img/reactions/water.png';
 
@@ -159,6 +161,8 @@ export const assets = {
     'note': NOTE,
     'sad': SAD,
     'smile': SMILE,
+    'neutral': NEUTRAL,
+    'full': FULL,
     'surprised': SURPRISED,
     'water': WATER,
   },

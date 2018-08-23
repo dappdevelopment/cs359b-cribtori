@@ -176,22 +176,36 @@ class IsometricRoom extends Component {
         return (results[i].id === undefined) || (results[i].owner !== this.context.userAccount);
       });
 
+      // Get the next feeding time.
+      let feedingTime = results.map((res) => { return res.next_feed; });
+      let nextFeed = Math.max.apply(...feedingTime);
+      nextFeed = Math.max(0, nextFeed);
+
       let coordinates = this.initCoordinates();
 
       this.setState({
         activateFeed: activateFeed,
         activeToris: activeToris,
         nonactiveToris: nonactiveToris,
-        coordinates: coordinates
+        coordinates: coordinates,
+        nextFeed: nextFeed,
       })
     })
     .catch(console.error);
   }
 
   handleFeed() {
-    this.setState({
-      isFeeding: !this.state.isFeeding
-    });
+    if (this.state.activateFeed) {
+      this.setState({
+        isFeeding: !this.state.isFeeding
+      });
+    } else {
+      // Everyone is full.
+      let hour = Math.floor(this.state.nextFeed / util.ONE_HOUR);
+      let minute = Math.floor((this.state.nextFeed - hour * util.ONE_HOUR) / util.ONE_MINUTE);
+      this.context.onMessage(`Everyone is already full! Come back to feed again in ${hour} hours ${minute} minutes.`);
+    }
+
   }
 
   feedHandler() {
@@ -345,8 +359,7 @@ class IsometricRoom extends Component {
               )}
             </Grid>
             <Grid item xs={3}>
-              <Button disabled={!this.state.activateFeed}
-                      variant="contained"
+              <Button variant="contained"
                       color="secondary"
                       onClick={this.handleFeed}
                       className={this.props.classes.menuItem}>

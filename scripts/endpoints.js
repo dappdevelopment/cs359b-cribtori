@@ -304,6 +304,7 @@ module.exports = function(devServer) {
     const NEUTRAL_HEARTS = 0;
     const MAX_HEARTS = 1;
     const HOUR_DURATION = 3;
+    const FEED_LIMIT = 1.5;
     const FEED_INCREMENT = 1;
 
     let calculateHearts = function(hearts, lastUpdate) {
@@ -335,7 +336,9 @@ module.exports = function(devServer) {
           data.hearts = calculateHearts(rows[0].hearts, rows[0].last_update);
           data.personality = rows[0].personality;
           data.last_update = rows[0].last_update;
-          data.is_hungry = (new Date() - rows[0].last_update > (HOUR_DURATION * ONE_HOUR))
+          data.is_hungry = (new Date() - rows[0].last_update > (FEED_LIMIT * ONE_HOUR));
+          data.feed_limit = FEED_LIMIT;
+          data.next_feed = (FEED_LIMIT * ONE_HOUR) - (new Date() - rows[0].last_update);
           data.owner = rows[0].owner;
         }
 
@@ -358,16 +361,31 @@ module.exports = function(devServer) {
           return res.status(400).send({ message: 'failed in updating hearts. Invalid Tori, Error: ' + err });
         }
 
+        let currentTime = new Date();
+        let hourPassed = (currentTime - rows[0].last_update) / ONE_HOUR;
+        if (hourPassed < FEED_LIMIT) {
+          let result = {
+            success: false,
+            hearts: calculateHearts(rows[0].hearts, rows[0].last_update),
+            last_update: rows[0].last_update,
+            feed_limit: FEED_LIMIT,
+          }
+          return res.status(200).send(result);
+        }
+
         let hearts = calculateHearts(rows[0].hearts, rows[0].last_update) + FEED_INCREMENT;
 
-        query = 'UPDATE hearts SET hearts = ? WHERE tori_id = ?';
-        inserts = [hearts, id];
+        query = 'UPDATE hearts SET hearts = ?, last_update = ? WHERE tori_id = ?';
+        inserts = [hearts, currentTime, id];
         query = mysql.format(query, inserts);
         connection.query(query, function (err, rows, fields) {
           if (err) return res.status(400).send({ message: 'failed in updating hearts, Error: ' + err });
 
           let result = {
-            hearts: hearts
+            success: true,
+            hearts: hearts,
+            last_update: currentTime,
+            feed_limit: FEED_LIMIT,
           }
 
           return res.status(200).send(result);
