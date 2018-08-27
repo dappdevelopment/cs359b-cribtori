@@ -20,12 +20,16 @@ import Activation from './Activation.js';
 
 import Tile from '../img/background/isometric_floor_grass.png';
 import TileSide from '../img/background/isometric_side.png';
+import BackgroundBottom from '../img/background/bg_4.png';
 import ToriIcon from '../img/toriIcon_secondary.png';
 
 import * as util from '../utils.js';
 import { assets } from '../assets.js';
 
 const DISTANCE_MARGIN = 50;
+
+const marginTop = 50;
+const offsetTop = 175 - marginTop;
 
 const tileWidth = 280;
 const tileHeight = 140;
@@ -34,14 +38,14 @@ const tileSide = Math.sqrt(tileWidth * tileWidth / 4 + tileHeight * tileHeight /
 const styles = theme => ({
   room: {
     position: 'relative',
-    display: 'inline-block'
+    display: 'inline-block',
   },
   tile: {
     position: 'absolute',
     width: tileWidth,
     height: tileHeight,
     '&:hover': {
-      filter: 'sepia(1)'
+      filter: 'sepia(0.5)'
     }
   },
   tileSide: {
@@ -65,8 +69,11 @@ const styles = theme => ({
     }
   },
   roomWrapper: {
-    marginTop: 100,
-    position: 'relative'
+    marginTop: marginTop,
+    position: 'relative',
+    backgroundImage: `url(${BackgroundBottom})`,
+    backgroundSize: '100%',
+    backgroundRepeatY: 'no-repeat'
   },
   menuList: {
     zIndex: 1100,
@@ -238,7 +245,7 @@ class IsometricRoom extends Component {
     // First, build the top pyramid.
     for (let r = 0; r < this.props.size - 1; r++) {
       for (let c = 0; c <= r; c++) {
-        top = r * tileHeight / 2;
+        top = r * tileHeight / 2 + offsetTop;
         left = this.state.roomWidth / 2 - (r + 1) * tileWidth / 2 + c * tileWidth;
         floor.push(
           <img key={`floor_${count}`}
@@ -255,7 +262,7 @@ class IsometricRoom extends Component {
 
     // Second, build the mid.
     for (let c = 0; c < this.props.size; c++) {
-      top = (this.props.size - 1) * tileHeight / 2;
+      top = (this.props.size - 1) * tileHeight / 2 + offsetTop;
       left = c * tileWidth;
       floor.push(
         <img key={`floor_${count}`}
@@ -298,7 +305,7 @@ class IsometricRoom extends Component {
     // Third, build the bottom pyramid.
     for (let r = 0; r < this.props.size - 1; r++) {
       for (let c = 0; c < this.props.size - 1 - r; c++) {
-        top = this.props.size * tileHeight / 2 + r * tileHeight / 2;
+        top = this.props.size * tileHeight / 2 + r * tileHeight / 2 + offsetTop;
         left = this.state.roomWidth / 2 - (this.props.size - r - 1) * tileWidth / 2 + c * tileWidth;
         floor.push(
           <img key={`floor_${count}`}
@@ -402,12 +409,13 @@ class IsometricRoom extends Component {
     let coordinates = this.state.coordinates.slice(0, this.state.activeToris.length);
 
     return coordinates.map((coor, i) => {
+      let coorWithOffset = [coor[0], coor[1] + offsetTop]
       return (
         <IsometricToriCell key={`tori_${i}`}
                            index={i}
                            id={this.state.activeToris[i]}
                            size={165}
-                           coor={coor}
+                           coor={coorWithOffset}
                            isFeeding={this.state.isFeeding}
                            feedHandler={this.feedHandler}/>
       )
