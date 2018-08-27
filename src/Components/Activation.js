@@ -93,13 +93,17 @@ class Activation extends Component {
         });
       })
       .then(function(response) {
-        if (response.ok) {
-          // Refresh the inactive tori list.
-          this.props.refreshToris();
-          this.context.onMessage(`${name} has been succesffully activated.`);
-        } else {
-          this.context.onMessage(`${name} activation failed.`);
-        }
+        this.setState({
+          onActivate: false,
+        }, () => {
+          if (response.ok) {
+            // Refresh the inactive tori list.
+            this.props.refreshToris();
+            this.context.onMessage(`${name} has been succesffully activated.`);
+          } else {
+            this.context.onMessage(`${name} activation failed.`);
+          }
+        });
       }.bind(this))
       .catch(console.error)
     })
