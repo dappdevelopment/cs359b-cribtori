@@ -18,7 +18,8 @@ import ToriImage from './ToriImage.js';
 import IsometricToriCell from './IsometricToriCell.js';
 import Activation from './Activation.js';
 
-import Tile from '../img/background/isometric_floor.png';
+import Tile from '../img/background/isometric_floor_grass.png';
+import TileSide from '../img/background/isometric_side.png';
 import ToriIcon from '../img/toriIcon_secondary.png';
 
 import * as util from '../utils.js';
@@ -42,6 +43,10 @@ const styles = theme => ({
     '&:hover': {
       filter: 'sepia(1)'
     }
+  },
+  tileSide: {
+    position: 'absolute',
+    width: tileWidth / 2,
   },
   tori: {
     position: 'absolute',
@@ -102,7 +107,7 @@ class IsometricRoom extends Component {
 
     this.state = {
       roomWidth: tileWidth * this.props.size,
-      roomHeight: tileHeight * this.props.size,
+      roomHeight: tileHeight * (this.props.size + 2),
       maxCapacity: this.props.limit,
       isFeeding: false,
     }
@@ -225,6 +230,8 @@ class IsometricRoom extends Component {
 
   renderFloor() {
     let floor = [];
+    let leftSides = [];
+    let rightSides = [];
     let count = 0;
     let top;
     let left;
@@ -259,6 +266,32 @@ class IsometricRoom extends Component {
                left: left,
              }} />
       );
+
+      if (c === 0) {
+        leftSides.push(
+          <img key={`side_${count}`}
+               src={TileSide}
+               className={this.props.classes.tileSide}
+               style={{
+                 top: top + tileHeight / 2,
+                 left: left,
+               }} />
+        );
+      }
+
+      if (c === this.props.size - 1) {
+        rightSides.push(
+          <img key={`side_${count}`}
+               src={TileSide}
+               className={this.props.classes.tileSide}
+               style={{
+                 top: top + tileHeight / 2,
+                 left: left + tileWidth / 2,
+                 transform: 'scaleX(-1)',
+               }} />
+        );
+      }
+
       count += 1;
     }
 
@@ -276,10 +309,58 @@ class IsometricRoom extends Component {
                  left: left,
                }} />
         );
+
+        if (r !== this.props.size - 2) {
+          if (c === 0) {
+            leftSides.push(
+              <img key={`side_${count}`}
+                   src={TileSide}
+                   className={this.props.classes.tileSide}
+                   style={{
+                     top: top + tileHeight / 2,
+                     left: left,
+                   }} />
+            );
+          }
+
+          if (c === this.props.size - 1) {
+            rightSides.push(
+              <img key={`side_${count}`}
+                   src={TileSide}
+                   className={this.props.classes.tileSide}
+                   style={{
+                     top: top + tileHeight / 2,
+                     left: left + tileWidth / 2,
+                     transform: 'scaleX(-1)',
+                   }} />
+            );
+          }
+        } else {
+          leftSides.push(
+            <img key={`side_${count}`}
+                 src={TileSide}
+                 className={this.props.classes.tileSide}
+                 style={{
+                   top: top + tileHeight / 2,
+                   left: left,
+                 }} />
+          );
+          rightSides.push(
+            <img key={`side_${count}`}
+                 src={TileSide}
+                 className={this.props.classes.tileSide}
+                 style={{
+                   top: top + tileHeight / 2,
+                   left: left + tileWidth / 2,
+                   transform: 'scaleX(-1)',
+                 }} />
+          );
+        }
+
         count += 1;
       }
     }
-    return floor;
+    return [floor, leftSides, rightSides];
   }
 
   getRandomCoordinates(isoX, isoY) {
@@ -338,6 +419,11 @@ class IsometricRoom extends Component {
       this.state.isFeeding ?
         this.props.classes.feed
       : '');
+
+    let tiles = this.renderFloor();
+    let floors = tiles[0];
+    let leftSides = tiles[1];
+    let rightSides = tiles[2];
 
     return (
       <div className={`${this.props.classes.room} ${actionCursor}`}>
@@ -404,7 +490,9 @@ class IsometricRoom extends Component {
                height: this.state.roomHeight,
                width: this.state.roomWidth
              }}>
-          { this.renderFloor() }
+          { leftSides }
+          { rightSides }
+          { floors }
           { this.renderToris() }
         </div>
       </div>
