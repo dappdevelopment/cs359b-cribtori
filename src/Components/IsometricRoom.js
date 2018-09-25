@@ -190,7 +190,7 @@ class IsometricRoom extends Component {
 
       // Get the next feeding time.
       let feedingTime = results.map((res) => { return res.next_feed; });
-      let nextFeed = Math.max.apply(...feedingTime);
+      let nextFeed = Math.max.apply(null, feedingTime);
       nextFeed = Math.max(0, nextFeed);
 
       let coordinates = this.initCoordinates();

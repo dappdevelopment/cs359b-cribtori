@@ -137,7 +137,7 @@ class IsometricToriCell extends Component {
       }
     }
     let bubble;
-    if (this.state.hearts < -0.001) {
+    if (this.state.hearts < -0.25) {
       bubble = assets.reactions.sad;
     } else if (this.state.hearts > 0.75) {
       bubble = assets.reactions.hearts;
